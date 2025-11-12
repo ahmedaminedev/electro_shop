@@ -69,7 +69,12 @@ const App: React.FC = () => {
                     onPreview={handlePreviewProduct}
                 />;
             case 'packs':
-                return <PacksPage onNavigateHome={handleNavigateHome} />;
+                return <PacksPage
+                    onNavigateHome={handleNavigateHome}
+                    onNavigateToCategory={handleNavigateToCategory}
+                    isNavCollapsed={isNavCollapsed}
+                    onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
+                />;
             case 'blog':
                 return <BlogPage onNavigateHome={handleNavigateHome} onSelectPost={handleNavigateToBlogPost} />;
             case 'blogPost':

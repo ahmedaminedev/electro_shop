@@ -1,4 +1,3 @@
-
 export interface Product {
   id: number;
   name: string;
@@ -42,6 +41,7 @@ export interface Pack {
   oldPrice: number;
   imageUrl: string;
   includedItems: string[];
+  includedProductIds: number[];
 }
 
 export interface BlogPost {

@@ -9,7 +9,7 @@ interface Filters {
     materials: string[];
 }
 interface FiltersSidebarProps {
-    products: Product[];
+    products: { price: number; brand?: string; material?: string; }[];
     filters: Filters;
     onFilterChange: (newFilters: Filters) => void;
     maxPrice: number;
@@ -39,7 +39,9 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({ products, filter
     const brands = useMemo(() => {
         const brandCounts: { [key: string]: number } = {};
         products.forEach(p => {
-            brandCounts[p.brand] = (brandCounts[p.brand] || 0) + 1;
+            if (p.brand) {
+                brandCounts[p.brand] = (brandCounts[p.brand] || 0) + 1;
+            }
         });
         return Object.entries(brandCounts).map(([name, count]) => ({ name, count }));
     }, [products]);
@@ -91,24 +93,26 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({ products, filter
                     />
                 </FilterGroup>
 
-                <FilterGroup title="Marque">
-                    {brands.map(brand => (
-                        <div key={brand.name} className="flex items-center">
-                            <input
-                                id={`filter-brand-${brand.name}`}
-                                name="brand[]"
-                                defaultValue={brand.name}
-                                type="checkbox"
-                                checked={filters.brands.includes(brand.name)}
-                                onChange={() => handleBrandChange(brand.name)}
-                                className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                            />
-                            <label htmlFor={`filter-brand-${brand.name}`} className="ml-3 text-sm text-gray-600 dark:text-gray-300">
-                                {brand.name} ({brand.count})
-                            </label>
-                        </div>
-                    ))}
-                </FilterGroup>
+                {brands.length > 0 && (
+                    <FilterGroup title="Marque">
+                        {brands.map(brand => (
+                            <div key={brand.name} className="flex items-center">
+                                <input
+                                    id={`filter-brand-${brand.name}`}
+                                    name="brand[]"
+                                    defaultValue={brand.name}
+                                    type="checkbox"
+                                    checked={filters.brands.includes(brand.name)}
+                                    onChange={() => handleBrandChange(brand.name)}
+                                    className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                />
+                                <label htmlFor={`filter-brand-${brand.name}`} className="ml-3 text-sm text-gray-600 dark:text-gray-300">
+                                    {brand.name} ({brand.count})
+                                </label>
+                            </div>
+                        ))}
+                    </FilterGroup>
+                )}
 
                 {materials.length > 0 && (
                     <FilterGroup title="Plus de filtres">
