@@ -1,9 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { SearchIcon, UserIcon, CartIcon } from './IconComponents';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+    onNavigateToLogin: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onNavigateToLogin }) => {
     const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
@@ -18,7 +23,7 @@ export const Header: React.FC = () => {
         <header className={`bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-md sticky top-0 z-40 transition-all duration-300 ${isScrolled ? 'py-3' : 'py-5'}`}>
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
                 <div className="flex items-center">
-                    <a href="/">
+                    <a href="#" onClick={(e) => { e.preventDefault(); window.location.reload(); }}>
                         <Logo />
                     </a>
                 </div>
@@ -36,10 +41,10 @@ export const Header: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-6">
                     <ThemeToggle />
-                    <a href="#" className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
+                    <button onClick={onNavigateToLogin} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
                         <UserIcon className="w-6 h-6" />
                         <span className="hidden md:block">Compte</span>
-                    </a>
+                    </button>
                     <a href="#" className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
                         <CartIcon className="w-6 h-6" />
                         <span className="hidden md:block">Panier</span>

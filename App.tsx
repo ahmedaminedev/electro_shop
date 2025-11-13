@@ -14,6 +14,7 @@ import { PacksPage } from './components/PacksPage';
 import { BlogPage } from './components/BlogPage';
 import { BlogPostPage } from './components/BlogPostPage';
 import { ContactPage } from './components/ContactPage';
+import { LoginPage } from './components/LoginPage';
 import type { Product } from './types';
 
 type View =
@@ -22,7 +23,8 @@ type View =
   | { name: 'packs'; data: null }
   | { name: 'blog'; data: null }
   | { name: 'blogPost'; data: { slug: string } }
-  | { name: 'contact'; data: null };
+  | { name: 'contact'; data: null }
+  | { name: 'login'; data: null };
 
 
 const App: React.FC = () => {
@@ -41,6 +43,7 @@ const App: React.FC = () => {
     const handleNavigateToBlog = () => handleNavigate({ name: 'blog', data: null });
     const handleNavigateToBlogPost = (slug: string) => handleNavigate({ name: 'blogPost', data: { slug } });
     const handleNavigateToContact = () => handleNavigate({ name: 'contact', data: null });
+    const handleNavigateToLogin = () => handleNavigate({ name: 'login', data: null });
 
     const handlePreviewProduct = (product: Product) => {
         setPreviewProduct(product);
@@ -81,6 +84,8 @@ const App: React.FC = () => {
                 return <BlogPostPage slug={view.data.slug} onNavigateHome={handleNavigateHome} onNavigateToBlog={handleNavigateToBlog} />;
             case 'contact':
                 return <ContactPage onNavigateHome={handleNavigateHome} />;
+            case 'login':
+                return <LoginPage onNavigateHome={handleNavigateHome} />;
             default:
                 return <HomePage 
                     onNavigate={handleNavigateToCategory} 
@@ -90,12 +95,12 @@ const App: React.FC = () => {
                 />;
         }
     };
-
+    
     return (
         <ThemeProvider>
             <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
                 <TopBar />
-                <Header />
+                <Header onNavigateToLogin={handleNavigateToLogin} />
                 <NavBar 
                     onNavigateHome={handleNavigateHome}
                     onNavigateToPacks={handleNavigateToPacks}
