@@ -127,6 +127,8 @@ export interface MediumPromoAd {
   subtitle: string;
   buttonText: string;
   image: string;
+  linkType: 'category' | 'pack';
+  linkTarget: string; // Category name or Pack ID as a string
 }
 
 export interface ImagePromoAd {

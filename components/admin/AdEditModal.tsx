@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import type { HeroSlide, DestockageAd, ImagePromoAd, AudioPromoAd } from '../../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import type { HeroSlide, DestockageAd, ImagePromoAd, AudioPromoAd, MediumPromoAd, Category, Pack } from '../../types';
 import { XMarkIcon, PlusIcon, TrashIcon } from '../IconComponents';
 import type { AdSlot } from './ManageAdsPage';
 
@@ -8,6 +8,8 @@ interface AdEditModalProps {
     onClose: () => void;
     onSave: (updatedData: any) => void;
     slot: AdSlot;
+    allCategories?: Category[];
+    allPacks?: Pack[];
 }
 
 const FormField: React.FC<{ label: string; name: string; value: string | number; onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void; type?: string; as?: 'input' | 'textarea' }> = 
@@ -251,20 +253,57 @@ const ImagePromosForm: React.FC<{ data: ImagePromoAd[], onChange: (newData: Imag
     );
 };
 
-const GenericAdForm: React.FC<{data: any, onChange: (newData: any) => void, fields: {name: string, label: string}[]}> = ({ data, onChange, fields }) => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onChange({ ...data, [e.target.name]: e.target.value });
+const PromoBannerForm: React.FC<{data: MediumPromoAd, onChange: (newData: MediumPromoAd) => void, allCategories: Category[], allPacks: Pack[]}> = ({ data, onChange, allCategories, allPacks }) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        let { name, value } = e.target;
+        
+        if(name === 'linkType' && value === 'pack' && allPacks.length > 0) {
+            onChange({ ...data, linkType: 'pack', linkTarget: String(allPacks[0].id) });
+        } else if (name === 'linkType' && value === 'category' && allCategoryNames.length > 0) {
+             onChange({ ...data, linkType: 'category', linkTarget: allCategoryNames[0] });
+        } else {
+             onChange({ ...data, [name]: value });
+        }
     };
+    
+    const allCategoryNames = useMemo(() => {
+         const names = allCategories.flatMap(c => 
+            [...(c.subCategories || []), ...(c.megaMenu?.flatMap(m => m.items.map(i => i.name)) || [])]
+        );
+        return [...new Set(names)].sort();
+    }, [allCategories]);
+
     return (
         <div className="space-y-4">
-            {fields.map(field => (
-                <FormField key={field.name} label={field.label} name={field.name} value={data[field.name] || ''} onChange={handleChange} />
-            ))}
+            <FormField label="Titre" name="title" value={data.title} onChange={handleChange} />
+            <FormField label="Sous-titre" name="subtitle" value={data.subtitle} onChange={handleChange} />
+            <FormField label="Texte du bouton" name="buttonText" value={data.buttonText} onChange={handleChange} />
+            <FormField label="URL de l'image" name="image" value={data.image} onChange={handleChange} />
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-600">
+                 <div>
+                    <label htmlFor="linkType" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type de lien</label>
+                    <select id="linkType" name="linkType" value={data.linkType} onChange={handleChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+                        <option value="category">Catégorie</option>
+                        <option value="pack">Pack</option>
+                    </select>
+                </div>
+                 <div>
+                    <label htmlFor="linkTarget" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cible du lien</label>
+                    <select id="linkTarget" name="linkTarget" value={data.linkTarget} onChange={handleChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+                        {data.linkType === 'category' ? (
+                            allCategoryNames.map(cat => <option key={cat} value={cat}>{cat}</option>)
+                        ) : (
+                            allPacks.map(pack => <option key={pack.id} value={pack.id}>{pack.name}</option>)
+                        )}
+                    </select>
+                </div>
+            </div>
         </div>
     );
 };
 
-export const AdEditModal: React.FC<AdEditModalProps> = ({ isOpen, onClose, onSave, slot }) => {
+
+export const AdEditModal: React.FC<AdEditModalProps> = ({ isOpen, onClose, onSave, slot, allCategories, allPacks }) => {
     const [formData, setFormData] = useState<any>(null);
 
     useEffect(() => {
@@ -290,12 +329,7 @@ export const AdEditModal: React.FC<AdEditModalProps> = ({ isOpen, onClose, onSav
             case 'audioPromo':
                 return <AudioPromoForm data={formData} onChange={setFormData} />;
             case 'promoBanner':
-                 return <GenericAdForm data={formData} onChange={setFormData} fields={[
-                    { name: 'title', label: "Titre" },
-                    { name: 'subtitle', label: "Sous-titre" },
-                    { name: 'buttonText', label: "Texte du bouton" },
-                    { name: 'image', label: "URL de l'image" },
-                ]}/>;
+                 return <PromoBannerForm data={formData} onChange={setFormData} allCategories={allCategories!} allPacks={allPacks!} />;
             case 'smallPromoBanners':
                 return <ImagePromosForm data={formData} onChange={setFormData} />;
             default:

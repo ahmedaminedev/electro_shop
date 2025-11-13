@@ -62,6 +62,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                             onSave={props.setAdvertisementsData}
                             allProducts={props.productsData}
                             allPacks={props.packsData}
+                            allCategories={props.categoriesData}
                         />;
             default:
                 return <DashboardHomePage orders={props.ordersData} products={props.productsData} messages={props.messagesData}/>;

@@ -422,15 +422,19 @@ export const initialAdvertisements: Advertisements = {
             id: 1,
             title: "Climatiseurs",
             subtitle: "Restez au frais tout l'été",
-            buttonText: "Acheter",
+            buttonText: "Choisir un modèle",
             image: "https://picsum.photos/id/101/600/300",
+            linkType: 'category',
+            linkTarget: 'Climatiseur',
         },
         {
             id: 2,
-            title: "Smart TVs",
-            subtitle: "Qualité d'image incroyable",
-            buttonText: "Explorer",
-            image: "https://picsum.photos/id/103/600/300",
+            title: "Pack Buanderie",
+            subtitle: "Lavage et séchage performants",
+            buttonText: "Voir les produits",
+            image: "https://picsum.photos/seed/pack2/600/300",
+            linkType: 'pack',
+            linkTarget: '2', // Pack ID for 'Pack Buanderie Performant'
         }
     ],
     smallPromoBanners: [

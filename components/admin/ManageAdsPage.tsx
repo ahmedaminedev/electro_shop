@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import type { Advertisements, Product, Pack } from '../../types';
+import type { Advertisements, Product, Pack, Category } from '../../types';
 
 import { HeroSection } from '../HeroSection';
 import { TrustBadges } from '../TrustBadges';
@@ -17,6 +17,7 @@ interface ManageAdsPageProps {
     onSave: (newAds: Advertisements) => void;
     allProducts: Product[];
     allPacks: Pack[];
+    allCategories: Category[];
 }
 
 export type AdSlot = {
@@ -26,7 +27,7 @@ export type AdSlot = {
     index?: number; // Used for individual banners
 };
 
-export const ManageAdsPage: React.FC<ManageAdsPageProps> = ({ initialAds, onSave, allProducts, allPacks }) => {
+export const ManageAdsPage: React.FC<ManageAdsPageProps> = ({ initialAds, onSave, allProducts, allPacks, allCategories }) => {
     const [currentAds, setCurrentAds] = useState(initialAds);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSlot, setEditingSlot] = useState<AdSlot | null>(null);
@@ -101,10 +102,10 @@ export const ManageAdsPage: React.FC<ManageAdsPageProps> = ({ initialAds, onSave
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <EditableAdWrapper slotName="Bannière Moyenne 1" onEdit={() => handleOpenModal({ name: `Bannière Moyenne 1`, type: 'promoBanner', data: currentAds.promoBanners[0], index: 0 })}>
-                            <MediumPromoBanner banner={currentAds.promoBanners[0]} isPreview />
+                            <MediumPromoBanner banner={currentAds.promoBanners[0]} isPreview allProducts={allProducts} allPacks={allPacks} onPreview={() => {}}/>
                         </EditableAdWrapper>
                         <EditableAdWrapper slotName="Bannière Moyenne 2" onEdit={() => handleOpenModal({ name: `Bannière Moyenne 2`, type: 'promoBanner', data: currentAds.promoBanners[1], index: 1 })}>
-                            <MediumPromoBanner banner={currentAds.promoBanners[1]} isPreview />
+                            <MediumPromoBanner banner={currentAds.promoBanners[1]} isPreview allProducts={allProducts} allPacks={allPacks} onPreview={() => {}}/>
                         </EditableAdWrapper>
                     </div>
                     
@@ -122,6 +123,8 @@ export const ManageAdsPage: React.FC<ManageAdsPageProps> = ({ initialAds, onSave
                     onClose={handleCloseModal}
                     onSave={handleSaveFromModal}
                     slot={editingSlot}
+                    allCategories={allCategories}
+                    allPacks={allPacks}
                 />
             )}
         </div>

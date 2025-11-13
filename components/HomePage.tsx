@@ -48,7 +48,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, 
                     <DestockageCarousel ads={advertisements.destockage} />
                     <ProductCarousel title="Nouvelles Arrivées" products={newArrivalProducts} onPreview={onPreview} />
                     <AudioPromoBanner ads={advertisements.audioPromo} />
-                    <PromoBanners banners={advertisements.promoBanners} />
+                    <PromoBanners 
+                        banners={advertisements.promoBanners}
+                        allProducts={products}
+                        allPacks={packs}
+                        onPreview={onPreview}
+                    />
                     <SmallPromoBanners ads={advertisements.smallPromoBanners} />
                     <ProductCarousel title="Sélection d'été" products={summerSelectionProducts} onPreview={onPreview} />
                     <ProductGridSection allProducts={products} onPreview={onPreview} />
