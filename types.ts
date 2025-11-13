@@ -10,6 +10,7 @@ export interface Product {
   promo?: boolean;
   material?: string;
   description?: string;
+  quantity: number;
 }
 
 export interface SubCategoryItem {

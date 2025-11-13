@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Product } from '../types';
-import { allProducts } from '../constants';
 import { Breadcrumb } from './Breadcrumb';
 import { ProductCard } from './ProductCard';
 import { Squares2X2Icon, Bars3Icon, ChevronDownIcon, CartIcon } from './IconComponents';
@@ -12,6 +10,7 @@ interface PromotionsPageProps {
     onNavigateHome: () => void;
     onNavigateToCategory: (categoryName: string) => void;
     onPreview: (product: Product) => void;
+    products: Product[];
 }
 
 const CountdownTimer: React.FC = () => {
@@ -103,8 +102,8 @@ const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) =
 };
 
 
-export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, onPreview }) => {
-    const promotionProducts = useMemo(() => allProducts.filter(p => p.promo || p.discount), []);
+export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, onPreview, products: allProducts }) => {
+    const promotionProducts = useMemo(() => allProducts.filter(p => p.promo || p.discount), [allProducts]);
     const [sortOrder, setSortOrder] = useState('discount-desc');
     const [viewMode, setViewMode] = useState('grid');
     
@@ -141,7 +140,7 @@ export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, 
 
     const dealOfTheDayProduct = useMemo(() => {
         return [...promotionProducts].sort((a, b) => (b.discount || 0) - (a.discount || 0))[0] || allProducts[0];
-    }, [promotionProducts]);
+    }, [promotionProducts, allProducts]);
 
     return (
         <div className="bg-gray-100 dark:bg-gray-950">

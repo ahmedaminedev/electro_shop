@@ -14,10 +14,11 @@ const AdminProductCard: React.FC<{
     onEdit: () => void;
     onDelete: () => void;
 }> = ({ product, onEdit, onDelete }) => {
+    const isOutOfStock = product.quantity === 0;
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1">
             <div className="relative">
-                <img src={product.imageUrl} alt={product.name} className="w-full h-40 object-cover" />
+                <img src={product.imageUrl} alt={product.name} className={`w-full h-40 object-cover ${isOutOfStock ? 'filter grayscale' : ''}`} />
                 <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button onClick={onEdit} className="bg-white/80 dark:bg-gray-900/80 p-2 rounded-full text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 shadow-md" aria-label={`Modifier ${product.name}`}>
                         <PencilIcon className="w-5 h-5" />
@@ -26,11 +27,17 @@ const AdminProductCard: React.FC<{
                         <TrashIcon className="w-5 h-5" />
                     </button>
                 </div>
+                {isOutOfStock && (
+                     <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">ÉPUISÉ</div>
+                )}
             </div>
             <div className="p-4 flex flex-col flex-grow">
                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 flex-grow">{product.name}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{product.category}</p>
-                <p className="text-lg font-bold text-red-600 dark:text-red-500 mt-2">{product.price.toFixed(3).replace('.', ',')} DT</p>
+                <div className="flex justify-between items-end mt-2">
+                    <p className="text-lg font-bold text-red-600 dark:text-red-500">{product.price.toFixed(3).replace('.', ',')} DT</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Stock: <span className="font-bold">{product.quantity}</span></p>
+                </div>
             </div>
         </div>
     );

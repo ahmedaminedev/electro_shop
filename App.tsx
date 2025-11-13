@@ -16,7 +16,7 @@ import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
 import { PromotionsPage } from './components/PromotionsPage';
 import { CheckoutPage } from './components/CheckoutPage';
-import type { Product, Pack, Category, Brand, Order, ContactMessage } from './types';
+import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem } from './types';
 import { CartProvider } from './components/CartContext';
 import { CartSidebar } from './components/CartSidebar';
 import { AdminPage } from './components/admin/AdminPage';
@@ -83,6 +83,63 @@ const App: React.FC = () => {
         setPreviewProduct(null);
     };
 
+    const handleOrderComplete = (cartItems: CartItem[]) => {
+        setProducts(currentProducts => {
+            const newProducts = [...currentProducts];
+            const productQuantityUpdates: { [id: number]: number } = {};
+
+            const getProductIdsFromPack = (pack: Pack): number[] => {
+                let ids = [...pack.includedProductIds];
+                if (pack.includedPackIds) {
+                    pack.includedPackIds.forEach(subPackId => {
+                        const subPack = packs.find(p => p.id === subPackId);
+                        if (subPack) {
+                            ids = [...ids, ...getProductIdsFromPack(subPack)];
+                        }
+                    });
+                }
+                return ids;
+            }
+
+            for (const item of cartItems) {
+                if (item.id.startsWith('product-')) {
+                    const productId = parseInt(item.id.split('-')[1]);
+                    productQuantityUpdates[productId] = (productQuantityUpdates[productId] || 0) + item.quantity;
+                } else if (item.id.startsWith('pack-')) {
+                    const pack = item.originalItem as Pack;
+                    const productIdsInPack = getProductIdsFromPack(pack);
+                    for (const productId of productIdsInPack) {
+                        productQuantityUpdates[productId] = (productQuantityUpdates[productId] || 0) + item.quantity;
+                    }
+                }
+            }
+
+            return newProducts.map(product => {
+                if (productQuantityUpdates[product.id]) {
+                    return {
+                        ...product,
+                        quantity: Math.max(0, product.quantity - productQuantityUpdates[product.id])
+                    };
+                }
+                return product;
+            });
+        });
+
+        // Optionally, add a new order to the list
+        const newOrder: Order = {
+            id: `ES-${1025 + orders.length}`,
+            customerName: "Nouveau Client",
+            date: new Date().toISOString().split('T')[0],
+            total: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+            status: 'En attente',
+            itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0)
+        };
+        setOrders(prev => [newOrder, ...prev]);
+
+        alert("Merci pour votre commande ! Votre stock a été mis à jour.");
+        handleNavigateHome();
+    };
+
     const renderContent = () => {
         switch (view.name) {
             case 'home':
@@ -92,6 +149,8 @@ const App: React.FC = () => {
                     onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
                     onPreview={handlePreviewProduct}
                     onNavigateToPacks={handleNavigateToPacks}
+                    products={products}
+                    packs={packs}
                 />;
             case 'productList':
                 return <ProductListPage 
@@ -102,6 +161,7 @@ const App: React.FC = () => {
                     onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
                     onPreview={handlePreviewProduct}
                     onNavigateToPacks={handleNavigateToPacks}
+                    products={products}
                 />;
             case 'packs':
                 return <PacksPage
@@ -119,6 +179,7 @@ const App: React.FC = () => {
                     onNavigateHome={handleNavigateHome}
                     onNavigateToCategory={handleNavigateToCategory}
                     onPreview={handlePreviewProduct}
+                    products={products}
                 />;
             case 'blog':
                 return <BlogPage onNavigateHome={handleNavigateHome} onSelectPost={handleNavigateToBlogPost} />;
@@ -129,7 +190,7 @@ const App: React.FC = () => {
             case 'login':
                 return <LoginPage onNavigateHome={handleNavigateHome} onLoginSuccess={handleLoginSuccess} />;
             case 'checkout':
-                return <CheckoutPage onNavigateHome={handleNavigateHome} />;
+                return <CheckoutPage onNavigateHome={handleNavigateHome} onOrderComplete={handleOrderComplete} />;
             case 'admin':
                 return <AdminPage 
                             onNavigateHome={handleNavigateHome}
@@ -151,6 +212,8 @@ const App: React.FC = () => {
                     onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
                     onPreview={handlePreviewProduct}
                     onNavigateToPacks={handleNavigateToPacks}
+                    products={products}
+                    packs={packs}
                 />;
         }
     };

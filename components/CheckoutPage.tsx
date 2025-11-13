@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCart } from './CartContext';
 import { 
@@ -13,9 +12,11 @@ import {
     ChevronUpIcon,
     HomeIcon
 } from './IconComponents';
+import type { CartItem } from '../types';
 
 interface CheckoutPageProps {
     onNavigateHome: () => void;
+    onOrderComplete: (cartItems: CartItem[]) => void;
 }
 
 // Sub-components for better structure and styling
@@ -162,8 +163,18 @@ const ShippingMethodSelector: React.FC<{
 };
 
 
-export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome }) => {
+export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOrderComplete }) => {
     const [shippingMethod, setShippingMethod] = useState<'ship' | 'pickup'>('ship');
+    const { cartItems, clearCart } = useCart();
+
+    const handleConfirmOrder = () => {
+        if (cartItems.length === 0) {
+            alert("Votre panier est vide.");
+            return;
+        }
+        onOrderComplete(cartItems);
+        clearCart();
+    };
 
     return (
         <div className="bg-gray-50 dark:bg-gray-950 min-h-screen">
@@ -229,7 +240,10 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome }) =>
                         </CheckoutSection>
 
                         <div className="flex justify-end pt-4">
-                            <button className="w-full sm:w-auto bg-red-600 text-white font-bold py-4 px-10 rounded-lg text-lg hover:bg-red-700 transition-all duration-300 shadow-lg shadow-red-500/30 flex items-center justify-center gap-3 transform hover:scale-105 active:scale-95">
+                            <button 
+                                onClick={handleConfirmOrder}
+                                className="w-full sm:w-auto bg-red-600 text-white font-bold py-4 px-10 rounded-lg text-lg hover:bg-red-700 transition-all duration-300 shadow-lg shadow-red-500/30 flex items-center justify-center gap-3 transform hover:scale-105 active:scale-95"
+                            >
                                 <LockIcon className="w-5 h-5" />
                                 Valider ma commande
                             </button>

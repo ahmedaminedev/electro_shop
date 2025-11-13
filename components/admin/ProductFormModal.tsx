@@ -21,6 +21,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
         category: '',
         description: '',
         promo: false,
+        quantity: 0,
     });
     
     useEffect(() => {
@@ -35,12 +36,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
                 category: product.category,
                 description: product.description || '',
                 promo: product.promo || false,
+                quantity: product.quantity,
             });
         } else {
             // Reset for new product
              setFormData({
                 name: '', brand: '', price: 0, oldPrice: 0, imageUrl: '', discount: 0,
-                category: categories[0]?.name || '', description: '', promo: false,
+                category: categories[0]?.name || '', description: '', promo: false, quantity: 0,
             });
         }
     }, [product, categories]);
@@ -83,10 +85,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
                         <InputField name="brand" label="Marque" value={formData.brand} onChange={handleChange} required />
                         <InputField name="category" label="Catégorie" value={formData.category} onChange={handleChange} as="select" options={uniqueCategoryNames} required />
                     </div>
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <InputField name="price" label="Prix (DT)" type="number" value={formData.price} onChange={handleChange} required />
                         <InputField name="oldPrice" label="Ancien Prix (DT)" type="number" value={formData.oldPrice} onChange={handleChange} />
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <InputField name="discount" label="Remise (%)" type="number" value={formData.discount} onChange={handleChange} />
+                        <InputField name="quantity" label="Quantité en stock" type="number" value={formData.quantity} onChange={handleChange} required />
                     </div>
                     <InputField name="imageUrl" label="URL de l'image" value={formData.imageUrl} onChange={handleChange} required />
                     <InputField name="description" label="Description" value={formData.description} onChange={handleChange} as="textarea" />

@@ -18,11 +18,32 @@ interface PacksPageProps {
     onNavigateToPacks: () => void;
 }
 
+// Helper function to check pack availability recursively
+const isPackAvailable = (pack: Pack, allProducts: Product[], allPacks: Pack[]): boolean => {
+    for (const productId of pack.includedProductIds) {
+        const product = allProducts.find(p => p.id === productId);
+        if (!product || product.quantity === 0) {
+            return false;
+        }
+    }
+    if (pack.includedPackIds) {
+        for (const subPackId of pack.includedPackIds) {
+            const subPack = allPacks.find(p => p.id === subPackId);
+            if (!subPack || !isPackAvailable(subPack, allProducts, allPacks)) {
+                return false;
+            }
+        }
+    }
+    return true;
+};
+
 const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[]; }> = ({ pack, allProducts, allPacks }) => {
     const { addToCart, openCart } = useCart();
     const savings = pack.oldPrice - pack.price;
+    const isAvailable = useMemo(() => isPackAvailable(pack, allProducts, allPacks), [pack, allProducts, allPacks]);
 
     const handleAddToCart = () => {
+        if (!isAvailable) return;
         addToCart(pack);
         openCart();
     };
@@ -36,11 +57,16 @@ const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[];
                 <img 
                     src={pack.imageUrl} 
                     alt={pack.name} 
-                    className="w-full h-56 object-cover" 
+                    className={`w-full h-56 object-cover ${!isAvailable ? 'filter grayscale' : ''}`}
                 />
                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col justify-end p-4">
                     <h3 className="text-2xl font-bold text-white tracking-tight leading-tight">{pack.name}</h3>
                 </div>
+                 {!isAvailable && (
+                    <span className="absolute top-3 right-3 bg-gray-700 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md z-10">
+                        INDISPONIBLE
+                    </span>
+                )}
             </div>
 
             <div className="p-4 flex flex-col flex-grow">
@@ -57,8 +83,8 @@ const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[];
                         ))}
                         {includedProducts.map((item, index) => (
                             <li key={`product-${index}`} className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                                <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-3 shrink-0"></span>
-                                {item.name}
+                                <span className={`w-1.5 h-1.5 rounded-full mr-3 shrink-0 ${item.quantity > 0 ? 'bg-red-500' : 'bg-gray-400'}`}></span>
+                                {item.name} {item.quantity === 0 && <span className="text-xs text-red-500 ml-2">(Épuisé)</span>}
                             </li>
                         ))}
                     </ul>
@@ -77,10 +103,11 @@ const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[];
 
                     <button 
                         onClick={handleAddToCart}
-                        className="w-full bg-red-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
+                        disabled={!isAvailable}
+                        className="w-full font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:text-gray-500 bg-red-600 text-white hover:bg-red-700 focus:ring-red-300"
                     >
                         <CartIcon className="w-5 h-5" />
-                        <span>Ajouter le pack au panier</span>
+                        <span>{isAvailable ? 'Ajouter le pack au panier' : 'Indisponible'}</span>
                     </button>
                 </div>
             </div>
@@ -90,8 +117,10 @@ const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[];
 
 const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[]; }> = ({ pack, allProducts, allPacks }) => {
     const { addToCart, openCart } = useCart();
+    const isAvailable = useMemo(() => isPackAvailable(pack, allProducts, allPacks), [pack, allProducts, allPacks]);
 
     const handleAddToCart = () => {
+        if (!isAvailable) return;
         addToCart(pack);
         openCart();
     };
@@ -105,7 +134,7 @@ const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pac
                 <img
                     src={pack.imageUrl}
                     alt={pack.name}
-                    className="w-full h-auto object-contain rounded-lg"
+                    className={`w-full h-auto object-contain rounded-lg ${!isAvailable ? 'filter grayscale' : ''}`}
                 />
             </div>
 
@@ -123,8 +152,8 @@ const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pac
                         ))}
                         {includedProducts.map((item, index) => (
                             <li key={`product-${index}`} className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                                <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
-                                {item.name}
+                                <span className={`w-1.5 h-1.5 rounded-full mr-2 ${item.quantity > 0 ? 'bg-red-500' : 'bg-gray-400'}`}></span>
+                                {item.name} {item.quantity === 0 && <span className="text-xs text-red-500 ml-1">(Épuisé)</span>}
                             </li>
                         ))}
                     </ul>
@@ -141,10 +170,11 @@ const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pac
                 </div>
                 <button 
                     onClick={handleAddToCart}
-                    className="w-full md:w-auto bg-red-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center space-x-2 hover:bg-red-700 transition-colors duration-200 shadow-sm"
+                    disabled={!isAvailable}
+                    className="w-full md:w-auto font-semibold py-3 px-6 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 shadow-sm disabled:cursor-not-allowed disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:text-gray-500 bg-red-600 text-white hover:bg-red-700"
                 >
                     <CartIcon className="w-5 h-5" />
-                    <span>Ajouter le pack</span>
+                    <span>{isAvailable ? 'Ajouter le pack' : 'Indisponible'}</span>
                 </button>
             </div>
         </div>

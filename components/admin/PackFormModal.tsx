@@ -129,7 +129,8 @@ export const PackFormModal: React.FC<PackFormModalProps> = ({ isOpen, onClose, o
         if (!selectedSubCategory) return [];
         return allProducts.filter(p => 
             p.category === selectedSubCategory && 
-            p.name.toLowerCase().includes(productSearchTerm.toLowerCase())
+            p.name.toLowerCase().includes(productSearchTerm.toLowerCase()) &&
+            p.quantity > 0 // Only show products in stock
         );
     }, [allProducts, selectedSubCategory, productSearchTerm]);
     

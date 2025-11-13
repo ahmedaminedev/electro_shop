@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Pack, Product, Category } from '../../types';
 import { PencilIcon, TrashIcon, PlusIcon } from '../IconComponents';
 import { PackFormModal } from './PackFormModal';
@@ -9,6 +9,26 @@ interface ManagePacksPageProps {
     allProducts: Product[];
     allCategories: Category[];
 }
+
+// Helper function to check pack availability recursively
+const isPackAvailable = (pack: Pack, allProducts: Product[], allPacks: Pack[]): boolean => {
+    for (const productId of pack.includedProductIds) {
+        const product = allProducts.find(p => p.id === productId);
+        if (!product || product.quantity === 0) {
+            return false;
+        }
+    }
+    if (pack.includedPackIds) {
+        for (const subPackId of pack.includedPackIds) {
+            const subPack = allPacks.find(p => p.id === subPackId);
+            if (!subPack || !isPackAvailable(subPack, allProducts, allPacks)) {
+                return false;
+            }
+        }
+    }
+    return true;
+};
+
 
 export const ManagePacksPage: React.FC<ManagePacksPageProps> = ({ packs, setPacks, allProducts, allCategories }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,11 +85,14 @@ export const ManagePacksPage: React.FC<ManagePacksPageProps> = ({ packs, setPack
                                 <th scope="col" className="px-6 py-3">Nom</th>
                                 <th scope="col" className="px-6 py-3">Prix</th>
                                 <th scope="col" className="px-6 py-3">Contenu</th>
+                                <th scope="col" className="px-6 py-3">Statut</th>
                                 <th scope="col" className="px-6 py-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {packs.map(pack => (
+                            {packs.map(pack => {
+                                const isAvailable = isPackAvailable(pack, allProducts, packs);
+                                return (
                                 <tr key={pack.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                     <td className="px-6 py-4">
                                         <img src={pack.imageUrl} alt={pack.name} className="w-12 h-12 object-cover rounded-md" />
@@ -80,6 +103,13 @@ export const ManagePacksPage: React.FC<ManagePacksPageProps> = ({ packs, setPack
                                         {`${pack.includedProductIds.length} produit(s)`}
                                         {(pack.includedPackIds?.length || 0) > 0 && `, ${pack.includedPackIds?.length} pack(s)`}
                                     </td>
+                                     <td className="px-6 py-4">
+                                        {isAvailable ? (
+                                             <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Disponible</span>
+                                        ) : (
+                                            <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Indisponible</span>
+                                        )}
+                                    </td>
                                     <td className="px-6 py-4 flex items-center gap-4">
                                         <button onClick={() => openEditModal(pack)} className="text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400">
                                             <PencilIcon className="w-5 h-5" />
@@ -89,7 +119,7 @@ export const ManagePacksPage: React.FC<ManagePacksPageProps> = ({ packs, setPack
                                         </button>
                                     </td>
                                 </tr>
-                            ))}
+                            )})}
                         </tbody>
                     </table>
                 </div>

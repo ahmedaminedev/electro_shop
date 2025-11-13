@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Product } from '../types';
-import { getProductsByCategory, categories } from '../constants';
+import { categories } from '../constants';
 import { Breadcrumb } from './Breadcrumb';
 import { FiltersSidebar } from './FiltersSidebar';
 import { ProductCard } from './ProductCard';
@@ -16,6 +16,7 @@ interface ProductListPageProps {
     onToggleNav: () => void;
     onPreview: (product: Product) => void;
     onNavigateToPacks: () => void;
+    products: Product[];
 }
 
 export const ProductListPage: React.FC<ProductListPageProps> = ({ 
@@ -25,7 +26,8 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
     isNavCollapsed,
     onToggleNav,
     onPreview,
-    onNavigateToPacks
+    onNavigateToPacks,
+    products: allProducts
 }) => {
     const [initialProducts, setInitialProducts] = useState<Product[]>([]);
     const [sortOrder, setSortOrder] = useState('price-asc');
@@ -40,9 +42,16 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
         Math.ceil(initialProducts.reduce((max, p) => p.price > max ? p.price : max, 0)) || 3000,
     [initialProducts]);
 
+     const getProductsByCategory = (category: string, allProducts: Product[]) => {
+        const categoryProducts = allProducts.filter(p => p.category === category || (category === 'Lave-linge frontal' && p.name.toLowerCase().includes('lave')));
+        if (categoryProducts.length > 0) return categoryProducts;
+        if(category.toLowerCase().includes('raclette')) return allProducts.filter(p => p.category === 'Appareil à raclette');
+        return []; // Return empty if no match to avoid showing wrong products
+    };
+
     useEffect(() => {
         document.title = `${categoryName} - Electro Shop`;
-        const products = getProductsByCategory(categoryName);
+        const products = getProductsByCategory(categoryName, allProducts);
         setInitialProducts(products);
 
         // Reset filters when category changes
@@ -52,7 +61,7 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
             brands: [],
             materials: [],
         });
-    }, [categoryName]);
+    }, [categoryName, allProducts]);
 
     const displayedProducts = useMemo(() => {
         let filtered = [...initialProducts]

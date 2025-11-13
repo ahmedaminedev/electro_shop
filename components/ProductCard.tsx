@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Product } from '../types';
 import { CartIcon, EyeIcon } from './IconComponents';
@@ -11,8 +10,10 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) => {
     const { addToCart, openCart } = useCart();
+    const isOutOfStock = product.quantity === 0;
 
     const handleAddToCart = () => {
+        if (isOutOfStock) return;
         addToCart(product);
         openCart();
     };
@@ -24,7 +25,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) 
                     <img 
                         src={product.imageUrl} 
                         alt={product.name} 
-                        className="w-full h-56 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110" 
+                        className={`w-full h-56 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 ${isOutOfStock ? 'filter grayscale' : ''}`}
                     />
                 </a>
                 
@@ -43,6 +44,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) 
                         -{product.discount}%
                     </span>
                 )}
+                 {isOutOfStock && (
+                    <span className="absolute top-3 right-3 bg-gray-700 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md z-10">
+                        ÉPUISÉ
+                    </span>
+                )}
             </div>
 
             <div className="p-4 flex flex-col flex-grow">
@@ -54,8 +60,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) 
                 <div className="mt-auto pt-2">
                      {/* Stock Status */}
                     <div className="flex items-center mb-3">
-                        <span className="w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span>
-                        <span className="text-xs font-semibold text-green-700 dark:text-green-400">En stock</span>
+                         {isOutOfStock ? (
+                            <>
+                                <span className="w-2.5 h-2.5 bg-red-500 rounded-full mr-2"></span>
+                                <span className="text-xs font-semibold text-red-700 dark:text-red-400">Épuisé</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span>
+                                <span className="text-xs font-semibold text-green-700 dark:text-green-400">En stock</span>
+                            </>
+                        )}
                     </div>
                 
                     <div className="mb-4">
@@ -67,10 +82,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) 
 
                     <button 
                         onClick={handleAddToCart}
-                        className="w-full bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
+                        disabled={isOutOfStock}
+                        className="w-full font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:text-gray-500 bg-red-600 text-white hover:bg-red-700 focus:ring-red-300"
                     >
                         <CartIcon className="w-5 h-5" />
-                        <span>Ajouter au panier</span>
+                        <span>{isOutOfStock ? 'Épuisé' : 'Ajouter au panier'}</span>
                     </button>
                 </div>
             </div>
