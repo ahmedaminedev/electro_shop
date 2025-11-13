@@ -6,9 +6,10 @@ import { ManageCategoriesPage } from './ManageCategoriesPage';
 import { ManagePacksPage } from './ManagePacksPage';
 import { ViewOrdersPage } from './ViewOrdersPage';
 import { ViewMessagesPage } from './ViewMessagesPage';
-import type { Product, Category, Pack, Order, ContactMessage } from '../../types';
+import { ManageAdsPage } from './ManageAdsPage';
+import type { Product, Category, Pack, Order, ContactMessage, Advertisements } from '../../types';
 
-type AdminPageName = 'dashboard' | 'products' | 'categories' | 'packs' | 'orders' | 'messages';
+export type AdminPageName = 'dashboard' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'ads';
 
 interface AdminPageProps {
     onNavigateHome: () => void;
@@ -22,6 +23,8 @@ interface AdminPageProps {
     setOrdersData: React.Dispatch<React.SetStateAction<Order[]>>;
     messagesData: ContactMessage[];
     setMessagesData: React.Dispatch<React.SetStateAction<ContactMessage[]>>;
+    advertisementsData: Advertisements;
+    setAdvertisementsData: React.Dispatch<React.SetStateAction<Advertisements>>;
 }
 
 export const AdminPage: React.FC<AdminPageProps> = (props) => {
@@ -53,6 +56,13 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                 return <ViewOrdersPage orders={props.ordersData} />;
             case 'messages':
                 return <ViewMessagesPage messages={props.messagesData} />;
+            case 'ads':
+                return <ManageAdsPage 
+                            initialAds={props.advertisementsData}
+                            onSave={props.setAdvertisementsData}
+                            allProducts={props.productsData}
+                            allPacks={props.packsData}
+                        />;
             default:
                 return <DashboardHomePage orders={props.ordersData} products={props.productsData} messages={props.messagesData}/>;
         }
@@ -61,7 +71,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     return (
         <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
             <AdminSidebar activePage={activePage} setActivePage={setActivePage} onNavigateHome={props.onNavigateHome} />
-            <main className="flex-1 p-6 lg:p-10">
+            <main className="flex-1 p-8 overflow-y-auto">
                 {renderActivePage()}
             </main>
         </div>

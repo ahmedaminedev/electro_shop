@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { Header } from './components/Header';
@@ -16,11 +17,11 @@ import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
 import { PromotionsPage } from './components/PromotionsPage';
 import { CheckoutPage } from './components/CheckoutPage';
-import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem } from './types';
+import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem, Advertisements } from './types';
 import { CartProvider } from './components/CartContext';
 import { CartSidebar } from './components/CartSidebar';
 import { AdminPage } from './components/admin/AdminPage';
-import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages } from './constants';
+import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages, initialAdvertisements } from './constants';
 
 
 type View =
@@ -48,6 +49,7 @@ const App: React.FC = () => {
     const [packs, setPacks] = useState<Pack[]>(initialPacks);
     const [orders, setOrders] = useState<Order[]>(initialOrders);
     const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
+    const [advertisements, setAdvertisements] = useState<Advertisements>(initialAdvertisements);
 
     const handleNavigate = (newView: View) => {
         setView(newView);
@@ -151,6 +153,7 @@ const App: React.FC = () => {
                     onNavigateToPacks={handleNavigateToPacks}
                     products={products}
                     packs={packs}
+                    advertisements={advertisements}
                 />;
             case 'productList':
                 return <ProductListPage 
@@ -204,6 +207,8 @@ const App: React.FC = () => {
                             setOrdersData={setOrders}
                             messagesData={messages}
                             setMessagesData={setMessages}
+                            advertisementsData={advertisements}
+                            setAdvertisementsData={setAdvertisements}
                         />;
             default:
                 return <HomePage 
@@ -214,50 +219,47 @@ const App: React.FC = () => {
                     onNavigateToPacks={handleNavigateToPacks}
                     products={products}
                     packs={packs}
+                    advertisements={advertisements}
                 />;
         }
     };
     
-    if (view.name === 'admin') {
-        return (
-             <ThemeProvider>
-                <div className="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
-                   {renderContent()}
-                </div>
-            </ThemeProvider>
-        );
-    }
-    
     return (
         <ThemeProvider>
             <CartProvider>
-                <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
-                    <TopBar onNavigateToAdmin={handleNavigateToAdmin} />
-                    <Header 
-                        onNavigateToLogin={handleNavigateToLogin}
-                        isLoggedIn={isLoggedIn}
-                        onLogout={handleLogout}
-                    />
-                    <NavBar 
-                        onNavigateHome={handleNavigateHome}
-                        onNavigateToPacks={handleNavigateToPacks}
-                        onNavigateToPromotions={handleNavigateToPromotions}
-                        onNavigateToBlog={handleNavigateToBlog}
-                        onNavigateToContact={handleNavigateToContact}
-                    />
+                {view.name === 'admin' ? (
+                    <div className="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
+                       {renderContent()}
+                    </div>
+                ) : (
+                    <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
+                        <TopBar onNavigateToAdmin={handleNavigateToAdmin} />
+                        <Header 
+                            onNavigateToLogin={handleNavigateToLogin}
+                            isLoggedIn={isLoggedIn}
+                            onLogout={handleLogout}
+                        />
+                        <NavBar 
+                            onNavigateHome={handleNavigateHome}
+                            onNavigateToPacks={handleNavigateToPacks}
+                            onNavigateToPromotions={handleNavigateToPromotions}
+                            onNavigateToBlog={handleNavigateToBlog}
+                            onNavigateToContact={handleNavigateToContact}
+                        />
 
-                    {renderContent()}
-                    
-                    <Footer />
-                    <WhatsAppButton />
-                    <ScrollToTopButton />
-                    <ProductPreviewModal product={previewProduct} onClose={handleClosePreview} />
-                    <CartSidebar 
-                        isLoggedIn={isLoggedIn}
-                        onNavigateToCheckout={handleNavigateToCheckout}
-                        onNavigateToLogin={handleNavigateToLogin}
-                    />
-                </div>
+                        {renderContent()}
+                        
+                        <Footer />
+                        <WhatsAppButton />
+                        <ScrollToTopButton />
+                        <ProductPreviewModal product={previewProduct} onClose={handleClosePreview} />
+                        <CartSidebar 
+                            isLoggedIn={isLoggedIn}
+                            onNavigateToCheckout={handleNavigateToCheckout}
+                            onNavigateToLogin={handleNavigateToLogin}
+                        />
+                    </div>
+                )}
             </CartProvider>
         </ThemeProvider>
     );

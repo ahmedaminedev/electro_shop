@@ -1,4 +1,4 @@
-import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage } from './types';
+import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements } from './types';
 
 export const allProducts: Product[] = [
     { id: 1, name: 'Pack encastrable de 2 Pièces de la marque AUXSTAR', brand: 'AUXSTAR', price: 899, oldPrice: 1299, imageUrl: 'https://picsum.photos/id/10/400/400', discount: 30, category: 'Pack encastrable', promo: true, description: 'Un pack complet pour équiper votre cuisine avec style et efficacité. Profitez de la qualité AUXSTAR pour des résultats de cuisson parfaits.', quantity: 10 },
@@ -342,3 +342,127 @@ export const contactMessages: ContactMessage[] = [
     { id: 2, name: 'Sami Khelifi', email: 'sami.k@email.com', subject: 'Suivi de commande', message: 'Pouvez-vous me donner des nouvelles de ma commande ES-1023 ?', date: '2023-10-26', read: false },
     { id: 3, name: 'Nour Hammami', email: 'nour.h@email.com', subject: 'Service après-vente', message: 'Mon climatiseur NEWSTAR ne refroidit plus correctement, que dois-je faire ? Il est encore sous garantie.', date: '2023-10-26', read: true },
 ];
+
+export const initialAdvertisements: Advertisements = {
+    heroSlides: [
+        {
+            id: 1,
+            bgImage: "https://picsum.photos/id/1/1200/400",
+            title: "La meilleure technologie, au meilleur prix.",
+            subtitle: "Explorez nos offres exclusives sur l'électronique et l'électroménager.",
+            buttonText: "Découvrir"
+        },
+        {
+            id: 2,
+            bgImage: "https://picsum.photos/id/102/1200/400",
+            title: "Collection Été: Fraîcheur Garantie !",
+            subtitle: "Découvrez nos nouveaux climatiseurs et ventilateurs en promotion.",
+            buttonText: "Voir les offres"
+        },
+        {
+            id: 3,
+            bgImage: "https://picsum.photos/id/104/1200/400",
+            title: "Cuisine de Chef, Prix Malin.",
+            subtitle: "Équipez votre cuisine avec nos packs encastrables.",
+            buttonText: "Explorer"
+        }
+    ],
+    destockage: [
+        {
+            id: 1,
+            mainTitle: "Destockage",
+            subTitle: "Pack encastrable de 3 Pièces",
+            price: "765 DT",
+            oldPrice: "900 DT",
+            images: [
+                { src: "https://picsum.photos/seed/hotte/200/100", alt: "Hotte" },
+                { src: "https://picsum.photos/seed/plaque/200/200", alt: "Plaque de cuisson" },
+                { src: "https://picsum.photos/seed/four/250/300", alt: "Four" }
+            ],
+            chefImage: "https://picsum.photos/seed/chef/250/320",
+            duration: 10,
+        },
+        {
+            id: 2,
+            mainTitle: "Vente Flash",
+            subTitle: "Lave-Linge & Sèche-Linge",
+            price: "1250 DT",
+            oldPrice: "1500 DT",
+            images: [
+                { src: "https://picsum.photos/seed/lavelinge_promo/200/200", alt: "Lave-linge" },
+                { src: "https://picsum.photos/seed/sechelinge_promo/200/200", alt: "Sèche-linge" },
+                { src: "https://picsum.photos/seed/buandrie/250/300", alt: "Buandrie" }
+            ],
+            chefImage: "https://picsum.photos/seed/femme/250/320",
+            duration: 8,
+        }
+    ],
+    audioPromo: [
+        {
+            id: 1,
+            title: "jusqu'à -40%",
+            subtitle1: "SUR NOTRE SÉLECTION",
+            subtitle2: "Écouteurs, Casque, Enceinte",
+            image: "https://picsum.photos/seed/audio/800/400",
+            background: "from-teal-400 to-cyan-600",
+            duration: 8,
+        },
+        {
+            id: 2,
+            title: "Son Immersif",
+            subtitle1: "NOUVELLES BARRES DE SON",
+            subtitle2: "Vivez le cinéma à la maison",
+            image: "https://picsum.photos/seed/soundbar/800/400",
+            background: "from-indigo-500 to-purple-700",
+            duration: 7,
+        }
+    ],
+    promoBanners: [
+        {
+            id: 1,
+            title: "Climatiseurs",
+            subtitle: "Restez au frais tout l'été",
+            buttonText: "Acheter",
+            image: "https://picsum.photos/id/101/600/300",
+        },
+        {
+            id: 2,
+            title: "Smart TVs",
+            subtitle: "Qualité d'image incroyable",
+            buttonText: "Explorer",
+            image: "https://picsum.photos/id/103/600/300",
+        }
+    ],
+    smallPromoBanners: [
+        {
+            id: 1,
+            imageUrl: "https://picsum.photos/seed/aircon/400/400",
+            altText: "Promotion sur les climatiseurs",
+            link: "#"
+        },
+        {
+            id: 2,
+            imageUrl: "https://picsum.photos/seed/freezer/400/400",
+            altText: "Congélateurs à partir de 850 DT",
+            link: "#"
+        },
+        {
+            id: 3,
+            imageUrl: "https://picsum.photos/seed/watch/400/400",
+            altText: "Vente flash sur les smartwatches",
+            link: "#"
+        },
+        {
+            id: 4,
+            imageUrl: "https://picsum.photos/seed/kitchen/400/400",
+            altText: "Promotions sur le petit électroménager",
+            link: "#"
+        },
+        {
+            id: 5,
+            imageUrl: "https://picsum.photos/seed/tv/400/400",
+            altText: "Offres TV 4K",
+            link: "#"
+        }
+    ]
+};

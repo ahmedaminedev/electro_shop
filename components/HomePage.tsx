@@ -1,9 +1,9 @@
 import React from 'react';
-import type { Product, Pack } from '../types';
+import type { Product, Pack, Advertisements } from '../types';
 import { VerticalNav } from './VerticalNav';
 import { HeroSection } from './HeroSection';
 import { TrustBadges } from './TrustBadges';
-import { DestockageBanner } from './DestockageBanner';
+import { DestockageCarousel } from './DestockageBanner';
 import { ProductCarousel } from './ProductCarousel';
 import { AudioPromoBanner } from './AudioPromoBanner';
 import { PromoBanners } from './PromoBanners';
@@ -20,9 +20,10 @@ interface HomePageProps {
     onNavigateToPacks: () => void;
     products: Product[];
     packs: Pack[];
+    advertisements: Advertisements;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview, onNavigateToPacks, products, packs }) => {
+export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview, onNavigateToPacks, products, packs, advertisements }) => {
     
     // This logic should be here to ensure it uses up-to-date product quantities
     const getProductById = (id: number) => products.find(p => p.id === id);
@@ -42,13 +43,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, 
                     />
                 </aside>
                 <main className="flex-1 min-w-0 relative z-10">
-                    <HeroSection />
+                    <HeroSection slides={advertisements.heroSlides} />
                     <TrustBadges />
-                    <DestockageBanner />
+                    <DestockageCarousel ads={advertisements.destockage} />
                     <ProductCarousel title="Nouvelles Arrivées" products={newArrivalProducts} onPreview={onPreview} />
-                    <AudioPromoBanner />
-                    <PromoBanners />
-                    <SmallPromoBanners />
+                    <AudioPromoBanner ads={advertisements.audioPromo} />
+                    <PromoBanners banners={advertisements.promoBanners} />
+                    <SmallPromoBanners ads={advertisements.smallPromoBanners} />
                     <ProductCarousel title="Sélection d'été" products={summerSelectionProducts} onPreview={onPreview} />
                     <ProductGridSection allProducts={products} onPreview={onPreview} />
                     <BrandCarousel brands={brands} />

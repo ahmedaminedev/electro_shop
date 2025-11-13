@@ -90,3 +90,90 @@ export interface ContactMessage {
   date: string;
   read: boolean;
 }
+
+// Advertisement Types
+export interface HeroSlide {
+  id: number;
+  bgImage: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+}
+
+export interface DestockageAd {
+  id: number;
+  mainTitle: string;
+  subTitle: string;
+  price: string;
+  oldPrice: string;
+  images: { src: string; alt: string }[];
+  chefImage: string;
+  duration: number; // Duration in seconds
+}
+
+export interface AudioPromoAd {
+  id: number;
+  title: string;
+  subtitle1: string;
+  subtitle2: string;
+  image: string;
+  background: string;
+  duration: number;
+}
+
+export interface MediumPromoAd {
+  id: number;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  image: string;
+}
+
+export interface ImagePromoAd {
+  id: number;
+  imageUrl: string;
+  altText: string;
+  link: string;
+}
+
+// FIX: Add missing 'SmallPromoAd' type definition to fix an import error in components/SmallPromoBanner.tsx.
+interface BaseSmallPromoAd {
+  id: number;
+  bgGradient: string;
+  image: string;
+}
+
+interface DiscountPromoAd extends BaseSmallPromoAd {
+  type: 'discount';
+  promoText: string;
+  title: string;
+  discount: string;
+}
+
+interface PriceStartPromoAd extends BaseSmallPromoAd {
+  type: 'price_start';
+  title: string;
+  features: string[];
+  priceStartText: string;
+  price: string;
+  priceUnit: string;
+}
+
+interface FlashSalePromoAd extends BaseSmallPromoAd {
+  type: 'flash_sale';
+  flashTitle: string;
+  title?: string;
+  discountText?: string;
+  flashSubtitle: string;
+  notice: string;
+}
+
+export type SmallPromoAd = DiscountPromoAd | PriceStartPromoAd | FlashSalePromoAd;
+
+export interface Advertisements {
+  heroSlides: HeroSlide[];
+  destockage: DestockageAd[];
+  audioPromo: AudioPromoAd[];
+  promoBanners: [MediumPromoAd, MediumPromoAd];
+  smallPromoBanners: ImagePromoAd[];
+}

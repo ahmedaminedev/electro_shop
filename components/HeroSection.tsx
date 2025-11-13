@@ -1,28 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from './IconComponents';
+import type { HeroSlide } from '../types';
 
-const slides = [
-    {
-        bgImage: "url('https://picsum.photos/id/1/1200/400')",
-        title: "La meilleure technologie, au meilleur prix.",
-        subtitle: "Explorez nos offres exclusives sur l'électronique et l'électroménager.",
-        buttonText: "Découvrir"
-    },
-    {
-        bgImage: "url('https://picsum.photos/id/102/1200/400')",
-        title: "Collection Été: Fraîcheur Garantie !",
-        subtitle: "Découvrez nos nouveaux climatiseurs et ventilateurs en promotion.",
-        buttonText: "Voir les offres"
-    },
-    {
-        bgImage: "url('https://picsum.photos/id/104/1200/400')",
-        title: "Cuisine de Chef, Prix Malin.",
-        subtitle: "Équipez votre cuisine avec nos packs encastrables.",
-        buttonText: "Explorer"
-    }
-];
+interface HeroSectionProps {
+    slides: HeroSlide[];
+}
 
-export const HeroSection: React.FC = () => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ slides }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
 
     const nextSlide = () => {
@@ -36,18 +20,18 @@ export const HeroSection: React.FC = () => {
     useEffect(() => {
         const slideInterval = setInterval(nextSlide, 5000);
         return () => clearInterval(slideInterval);
-    }, []);
+    }, [slides]);
 
 
     return (
         <section className="relative h-96 w-full overflow-hidden rounded-lg">
             {slides.map((slide, index) => (
                 <div
-                    key={index}
+                    key={slide.id}
                     className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
                     style={{ opacity: index === currentSlide ? 1 : 0 }}
                 >
-                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: slide.bgImage }} />
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${slide.bgImage}')` }} />
                     <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-start p-12">
                         <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4 transition-all duration-500 transform" style={{ transform: index === currentSlide ? 'translateY(0)' : 'translateY(20px)', opacity: index === currentSlide ? 1 : 0, transitionDelay: '200ms' }}>{slide.title}</h1>
                         <p className="text-lg text-white mb-6 transition-all duration-500 transform" style={{ transform: index === currentSlide ? 'translateY(0)' : 'translateY(20px)', opacity: index === currentSlide ? 1 : 0, transitionDelay: '400ms' }}>{slide.subtitle}</p>
