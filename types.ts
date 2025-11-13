@@ -42,6 +42,8 @@ export interface Pack {
   imageUrl: string;
   includedItems: string[];
   includedProductIds: number[];
+  includedPackIds?: number[];
+  discount?: number;
 }
 
 export interface BlogPost {
@@ -67,4 +69,23 @@ export interface CartItem {
   imageUrl: string;
   quantity: number;
   originalItem: Cartable;
+}
+
+export interface Order {
+  id: string;
+  customerName: string;
+  date: string;
+  total: number;
+  status: 'En attente' | 'Expédiée' | 'Livrée' | 'Annulée';
+  itemCount: number;
+}
+
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  date: string;
+  read: boolean;
 }

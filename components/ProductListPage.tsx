@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Product } from '../types';
 import { getProductsByCategory, categories } from '../constants';
@@ -16,6 +15,7 @@ interface ProductListPageProps {
     isNavCollapsed: boolean;
     onToggleNav: () => void;
     onPreview: (product: Product) => void;
+    onNavigateToPacks: () => void;
 }
 
 export const ProductListPage: React.FC<ProductListPageProps> = ({ 
@@ -24,7 +24,8 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
     onNavigateToCategory,
     isNavCollapsed,
     onToggleNav,
-    onPreview
+    onPreview,
+    onNavigateToPacks
 }) => {
     const [initialProducts, setInitialProducts] = useState<Product[]>([]);
     const [sortOrder, setSortOrder] = useState('price-asc');
@@ -99,6 +100,7 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
                         isCollapsed={isNavCollapsed}
                         onToggleCollapse={onToggleNav}
                         onCategoryClick={onNavigateToCategory}
+                        onNavigateToPacks={onNavigateToPacks}
                     />
                 </aside>
                 <div className="flex-1 min-w-0">

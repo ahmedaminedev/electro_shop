@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { packs, categories, allProducts } from '../constants';
+import { categories } from '../constants';
 import type { Pack, Product } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { CartIcon, Squares2X2Icon, Bars3Icon, ChevronDownIcon } from './IconComponents';
@@ -13,9 +12,13 @@ interface PacksPageProps {
     onNavigateToCategory: (categoryName: string) => void;
     isNavCollapsed: boolean;
     onToggleNav: () => void;
+    packs: Pack[];
+    allProducts: Product[];
+    allPacks: Pack[];
+    onNavigateToPacks: () => void;
 }
 
-const PackCard: React.FC<{ pack: Pack }> = ({ pack }) => {
+const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[]; }> = ({ pack, allProducts, allPacks }) => {
     const { addToCart, openCart } = useCart();
     const savings = pack.oldPrice - pack.price;
 
@@ -23,6 +26,9 @@ const PackCard: React.FC<{ pack: Pack }> = ({ pack }) => {
         addToCart(pack);
         openCart();
     };
+    
+    const includedProducts = pack.includedProductIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
+    const includedPacks = (pack.includedPackIds || []).map(id => allPacks.find(p => p.id === id)).filter(Boolean);
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1">
@@ -43,10 +49,16 @@ const PackCard: React.FC<{ pack: Pack }> = ({ pack }) => {
                 <div className="mb-4">
                     <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 text-sm">Inclus dans ce pack :</h4>
                     <ul className="space-y-1.5">
-                        {pack.includedItems.map((item, index) => (
-                            <li key={index} className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        {includedPacks.map((item, index) => (
+                             <li key={`subpack-${index}`} className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3 shrink-0"></span>
+                                <span className="font-semibold">[PACK]</span>&nbsp;{item.name}
+                            </li>
+                        ))}
+                        {includedProducts.map((item, index) => (
+                            <li key={`product-${index}`} className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                 <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-3 shrink-0"></span>
-                                {item}
+                                {item.name}
                             </li>
                         ))}
                     </ul>
@@ -76,13 +88,16 @@ const PackCard: React.FC<{ pack: Pack }> = ({ pack }) => {
     );
 };
 
-const PackListItem: React.FC<{ pack: Pack }> = ({ pack }) => {
+const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[]; }> = ({ pack, allProducts, allPacks }) => {
     const { addToCart, openCart } = useCart();
 
     const handleAddToCart = () => {
         addToCart(pack);
         openCart();
     };
+
+    const includedProducts = pack.includedProductIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
+    const includedPacks = (pack.includedPackIds || []).map(id => allPacks.find(p => p.id === id)).filter(Boolean);
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-center p-4 gap-6">
@@ -100,10 +115,16 @@ const PackListItem: React.FC<{ pack: Pack }> = ({ pack }) => {
                 <div>
                     <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-2">Inclus dans ce pack :</h4>
                     <ul className="space-y-1">
-                        {pack.includedItems.map((item, index) => (
-                            <li key={index} className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                        {includedPacks.map((item, index) => (
+                             <li key={`subpack-${index}`} className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
+                                <span className="font-semibold">[PACK]</span>&nbsp;{item.name}
+                            </li>
+                        ))}
+                        {includedProducts.map((item, index) => (
+                            <li key={`product-${index}`} className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                                 <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
-                                {item}
+                                {item.name}
                             </li>
                         ))}
                     </ul>
@@ -130,38 +151,37 @@ const PackListItem: React.FC<{ pack: Pack }> = ({ pack }) => {
     );
 };
 
-export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigateToCategory, isNavCollapsed, onToggleNav }) => {
-    const [initialPacks] = useState<Pack[]>(packs);
+export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigateToCategory, isNavCollapsed, onToggleNav, packs, allProducts, allPacks, onNavigateToPacks }) => {
     const [sortOrder, setSortOrder] = useState('price-asc');
     const [viewMode, setViewMode] = useState('grid');
     const [filters, setFilters] = useState({
-        price: { min: 0, max: 4000 },
+        price: { min: 0, max: 5000 },
         brands: [] as string[],
         materials: [] as string[],
     });
 
     const productsInPacks = useMemo(() => {
-        const productIds = new Set(initialPacks.flatMap(p => p.includedProductIds));
+        const productIds = new Set(packs.flatMap(p => p.includedProductIds));
         return allProducts.filter(p => productIds.has(p.id));
-    }, [initialPacks]);
+    }, [packs, allProducts]);
 
     const maxPrice = useMemo(() =>
-        Math.ceil(initialPacks.reduce((max, p) => p.price > max ? p.price : max, 0)) || 4000,
-        [initialPacks]
+        Math.ceil(packs.reduce((max, p) => p.price > max ? p.price : max, 0)) || 5000,
+        [packs]
     );
 
     useEffect(() => {
         document.title = `Nos Packs - Electro Shop`;
-        const newMaxPrice = Math.ceil(initialPacks.reduce((max, p) => p.price > max ? p.price : max, 0)) || 4000;
+        const newMaxPrice = Math.ceil(packs.reduce((max, p) => p.price > max ? p.price : max, 0)) || 5000;
         setFilters({
             price: { min: 0, max: newMaxPrice },
             brands: [],
             materials: [],
         });
-    }, [initialPacks]);
+    }, [packs]);
     
     const displayedPacks = useMemo(() => {
-        let filtered = [...initialPacks]
+        let filtered = [...packs]
             .filter(p => p.price >= filters.price.min && p.price <= filters.price.max);
         
         if (filters.brands.length > 0) {
@@ -192,7 +212,7 @@ export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigate
         });
         
         return filtered;
-    }, [initialPacks, filters, sortOrder]);
+    }, [packs, filters, sortOrder, allProducts]);
     
     const gridClasses = viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1';
 
@@ -205,6 +225,7 @@ export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigate
                         isCollapsed={isNavCollapsed}
                         onToggleCollapse={onToggleNav}
                         onCategoryClick={onNavigateToCategory}
+                        onNavigateToPacks={onNavigateToPacks}
                     />
                 </aside>
                 <div className="flex-1 min-w-0">
@@ -246,13 +267,13 @@ export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigate
                                 viewMode === 'list' ? (
                                     <div className="space-y-6">
                                         {displayedPacks.map(pack => (
-                                            <PackListItem key={pack.id} pack={pack} />
+                                            <PackListItem key={pack.id} pack={pack} allProducts={allProducts} allPacks={allPacks} />
                                         ))}
                                     </div>
                                 ) : (
                                     <div className={`grid ${gridClasses} gap-8`}>
                                         {displayedPacks.map(pack => (
-                                            <PackCard key={pack.id} pack={pack} />
+                                            <PackCard key={pack.id} pack={pack} allProducts={allProducts} allPacks={allPacks} />
                                         ))}
                                     </div>
                                 )

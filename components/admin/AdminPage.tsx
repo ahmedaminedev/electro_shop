@@ -1,0 +1,69 @@
+import React, { useState } from 'react';
+import { AdminSidebar } from './AdminSidebar';
+import { DashboardHomePage } from './DashboardHomePage';
+import { ManageProductsPage } from './ManageProductsPage';
+import { ManageCategoriesPage } from './ManageCategoriesPage';
+import { ManagePacksPage } from './ManagePacksPage';
+import { ViewOrdersPage } from './ViewOrdersPage';
+import { ViewMessagesPage } from './ViewMessagesPage';
+import type { Product, Category, Pack, Order, ContactMessage } from '../../types';
+
+type AdminPageName = 'dashboard' | 'products' | 'categories' | 'packs' | 'orders' | 'messages';
+
+interface AdminPageProps {
+    onNavigateHome: () => void;
+    productsData: Product[];
+    setProductsData: React.Dispatch<React.SetStateAction<Product[]>>;
+    categoriesData: Category[];
+    setCategoriesData: React.Dispatch<React.SetStateAction<Category[]>>;
+    packsData: Pack[];
+    setPacksData: React.Dispatch<React.SetStateAction<Pack[]>>;
+    ordersData: Order[];
+    setOrdersData: React.Dispatch<React.SetStateAction<Order[]>>;
+    messagesData: ContactMessage[];
+    setMessagesData: React.Dispatch<React.SetStateAction<ContactMessage[]>>;
+}
+
+export const AdminPage: React.FC<AdminPageProps> = (props) => {
+    const [activePage, setActivePage] = useState<AdminPageName>('dashboard');
+
+    const renderActivePage = () => {
+        switch (activePage) {
+            case 'dashboard':
+                return <DashboardHomePage orders={props.ordersData} products={props.productsData} messages={props.messagesData}/>;
+            case 'products':
+                return <ManageProductsPage 
+                            products={props.productsData} 
+                            setProducts={props.setProductsData} 
+                            categories={props.categoriesData}
+                        />;
+            case 'categories':
+                return <ManageCategoriesPage 
+                            categories={props.categoriesData}
+                            setCategories={props.setCategoriesData}
+                        />;
+            case 'packs':
+                return <ManagePacksPage 
+                            packs={props.packsData}
+                            setPacks={props.setPacksData}
+                            allProducts={props.productsData}
+                            allCategories={props.categoriesData}
+                        />;
+            case 'orders':
+                return <ViewOrdersPage orders={props.ordersData} />;
+            case 'messages':
+                return <ViewMessagesPage messages={props.messagesData} />;
+            default:
+                return <DashboardHomePage orders={props.ordersData} products={props.productsData} messages={props.messagesData}/>;
+        }
+    };
+
+    return (
+        <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+            <AdminSidebar activePage={activePage} setActivePage={setActivePage} onNavigateHome={props.onNavigateHome} />
+            <main className="flex-1 p-6 lg:p-10">
+                {renderActivePage()}
+            </main>
+        </div>
+    );
+};

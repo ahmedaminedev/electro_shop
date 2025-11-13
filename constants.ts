@@ -1,21 +1,20 @@
-
-import type { Product, Category, Brand, Pack, BlogPost } from './types';
+import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage } from './types';
 
 export const allProducts: Product[] = [
     { id: 1, name: 'Pack encastrable de 2 Pièces de la marque AUXSTAR', brand: 'AUXSTAR', price: 899, oldPrice: 1299, imageUrl: 'https://picsum.photos/id/10/400/400', discount: 30, category: 'Pack encastrable', promo: true, description: 'Un pack complet pour équiper votre cuisine avec style et efficacité. Profitez de la qualité AUXSTAR pour des résultats de cuisson parfaits.' },
     { id: 2, name: 'Pack encastrable de 2 pièces de la marque STARONE', brand: 'STARONE', price: 999, oldPrice: 1399, imageUrl: 'https://picsum.photos/id/11/400/400', discount: 28, category: 'Pack encastrable', promo: true, description: 'Optimisez votre espace avec ce pack encastrable STARONE. Design moderne et performances fiables pour une cuisine fonctionnelle.' },
     { id: 3, name: 'Pack encastrable de 2 pièces de la marque AUXSTAR', brand: 'AUXSTAR', price: 1099, oldPrice: 1429, imageUrl: 'https://picsum.photos/id/12/400/400', discount: 23, category: 'Pack encastrable', description: 'Le meilleur de la technologie AUXSTAR dans un pack encastrable pratique. Idéal pour les cuisines modernes et exigeantes.' },
-    { id: 4, name: 'Lave vaisselle Pose libre WHIRLPOOL 14 Couverts Inox', brand: 'WHIRLPOOL', price: 2389, oldPrice: 2599, imageUrl: 'https://picsum.photos/id/13/400/400', discount: 8, category: 'Gros électroménagers', description: 'Une vaisselle impeccable à chaque lavage grâce à la technologie 6ème Sens de Whirlpool. Grande capacité et faible consommation d\'énergie.' },
-    { id: 5, name: 'Lave vaisselle Pose libre LG 14 Couverts Inox', brand: 'LG', price: 2349, oldPrice: 2599, imageUrl: 'https://picsum.photos/id/14/400/400', discount: 10, category: 'Gros électroménagers', description: 'Technologie QuadWash pour un nettoyage optimal sous tous les angles. Silencieux, efficace et élégant, il s\'intègre parfaitement dans votre cuisine.' },
-    { id: 6, name: 'Lave vaisselle Pose libre TELEFUNKEN 13 couverts Silver', brand: 'TELEFUNKEN', price: 989, oldPrice: 1359, imageUrl: 'https://picsum.photos/id/15/400/400', discount: 27, category: 'Gros électroménagers', description: 'Alliez performance et économie avec ce lave-vaisselle Telefunken. Plusieurs programmes pour s\'adapter à tous vos besoins.' },
-    { id: 7, name: 'Lave vaisselle Pose libre ARISTON 14 Couverts Inox', brand: 'ARISTON', price: 1765, oldPrice: 1999, imageUrl: 'https://picsum.photos/id/16/400/400', discount: 11, category: 'Gros électroménagers', description: 'La technologie 3D Zone Wash offre une puissance de lavage ciblée pour éliminer les saletés les plus tenaces. Flexibilité et performance au rendez-vous.' },
-    { id: 8, name: 'Lave vaisselle Pose libre BRANDT 14 Couverts noir', brand: 'BRANDT', price: 1689, oldPrice: 1799, imageUrl: 'https://picsum.photos/id/17/400/400', discount: 6, category: 'Gros électroménagers', description: 'Design élégant noir et performance de lavage supérieure. Optimisez votre temps avec ses programmes rapides et efficaces.' },
-    { id: 9, name: 'Climatiseur NEWSTAR 12000 BTU Inverter Chaud & froid', brand: 'NEWSTAR', price: 1239, oldPrice: 1599, imageUrl: 'https://picsum.photos/id/18/400/400', discount: 23, category: 'Climatiseurs', description: 'Confort thermique toute l\'année avec la technologie Inverter. Économies d\'énergie et silence de fonctionnement assurés.' },
-    { id: 10, name: 'Climatiseur BIOLUX 12000 BTU Tropical smart chaud & froid', brand: 'BIOLUX', price: 1435, oldPrice: 1559, imageUrl: 'https://picsum.photos/id/19/400/400', discount: 8, category: 'Climatiseurs', description: 'Conçu pour les climats exigeants, ce climatiseur tropicalisé offre une performance fiable même par fortes chaleurs. Contrôlez-le à distance grâce à ses fonctions smart.' },
-    { id: 11, name: 'Climatiseur GREE 24000 BTU Tropicalisé Chaud & froid', brand: 'GREE', price: 2959, oldPrice: 3299, imageUrl: 'https://picsum.photos/id/20/400/400', discount: 10, category: 'Climatiseurs', description: 'Puissance et robustesse pour les grands espaces. Le climatiseur GREE 24000 BTU assure un confort optimal en toutes saisons.' },
-    { id: 12, name: 'Climatiseur MIDEA 18000 BTU Inverter Chaud & froid', brand: 'MIDEA', price: 1999, oldPrice: 2299, imageUrl: 'https://picsum.photos/id/21/400/400', discount: 13, category: 'Climatiseurs', description: 'La performance Inverter de Midea pour un refroidissement rapide et des économies d\'énergie substantielles. Un choix intelligent pour votre confort.' },
-    { id: 13, name: 'ARISTON Product', brand: 'ARISTON', price: 1500, imageUrl: 'https://picsum.photos/id/22/400/400', category: 'Petit électroménagers cuisine', description: 'Un appareil de petit électroménager fiable et performant de la marque ARISTON pour faciliter votre quotidien en cuisine.' },
-    { id: 14, name: 'Candy Product', brand: 'Candy', price: 750, imageUrl: 'https://picsum.photos/id/23/400/400', category: 'Tv-son-photos', description: 'Découvrez l\'univers Tv-son-photos avec ce produit de la marque Candy, alliant design et technologie.' },
+    { id: 4, name: 'Lave vaisselle Pose libre WHIRLPOOL 14 Couverts Inox', brand: 'WHIRLPOOL', price: 2389, oldPrice: 2599, imageUrl: 'https://picsum.photos/id/13/400/400', discount: 8, category: 'Lave vaisselle pose libre', description: 'Une vaisselle impeccable à chaque lavage grâce à la technologie 6ème Sens de Whirlpool. Grande capacité et faible consommation d\'énergie.' },
+    { id: 5, name: 'Lave vaisselle Pose libre LG 14 Couverts Inox', brand: 'LG', price: 2349, oldPrice: 2599, imageUrl: 'https://picsum.photos/id/14/400/400', discount: 10, category: 'Lave vaisselle pose libre', description: 'Technologie QuadWash pour un nettoyage optimal sous tous les angles. Silencieux, efficace et élégant, il s\'intègre parfaitement dans votre cuisine.' },
+    { id: 6, name: 'Lave vaisselle Pose libre TELEFUNKEN 13 couverts Silver', brand: 'TELEFUNKEN', price: 989, oldPrice: 1359, imageUrl: 'https://picsum.photos/id/15/400/400', discount: 27, category: 'Lave vaisselle pose libre', description: 'Alliez performance et économie avec ce lave-vaisselle Telefunken. Plusieurs programmes pour s\'adapter à tous vos besoins.' },
+    { id: 7, name: 'Lave vaisselle Pose libre ARISTON 14 Couverts Inox', brand: 'ARISTON', price: 1765, oldPrice: 1999, imageUrl: 'https://picsum.photos/id/16/400/400', discount: 11, category: 'Lave vaisselle pose libre', description: 'La technologie 3D Zone Wash offre une puissance de lavage ciblée pour éliminer les saletés les plus tenaces. Flexibilité et performance au rendez-vous.' },
+    { id: 8, name: 'Lave vaisselle Pose libre BRANDT 14 Couverts noir', brand: 'BRANDT', price: 1689, oldPrice: 1799, imageUrl: 'https://picsum.photos/id/17/400/400', discount: 6, category: 'Lave vaisselle pose libre', description: 'Design élégant noir et performance de lavage supérieure. Optimisez votre temps avec ses programmes rapides et efficaces.' },
+    { id: 9, name: 'Climatiseur NEWSTAR 12000 BTU Inverter Chaud & froid', brand: 'NEWSTAR', price: 1239, oldPrice: 1599, imageUrl: 'https://picsum.photos/id/18/400/400', discount: 23, category: 'Climatiseur', description: 'Confort thermique toute l\'année avec la technologie Inverter. Économies d\'énergie et silence de fonctionnement assurés.' },
+    { id: 10, name: 'Climatiseur BIOLUX 12000 BTU Tropical smart chaud & froid', brand: 'BIOLUX', price: 1435, oldPrice: 1559, imageUrl: 'https://picsum.photos/id/19/400/400', discount: 8, category: 'Climatiseur', description: 'Conçu pour les climats exigeants, ce climatiseur tropicalisé offre une performance fiable même par fortes chaleurs. Contrôlez-le à distance grâce à ses fonctions smart.' },
+    { id: 11, name: 'Climatiseur GREE 24000 BTU Tropicalisé Chaud & froid', brand: 'GREE', price: 2959, oldPrice: 3299, imageUrl: 'https://picsum.photos/id/20/400/400', discount: 10, category: 'Climatiseur', description: 'Puissance et robustesse pour les grands espaces. Le climatiseur GREE 24000 BTU assure un confort optimal en toutes saisons.' },
+    { id: 12, name: 'Climatiseur MIDEA 18000 BTU Inverter Chaud & froid', brand: 'MIDEA', price: 1999, oldPrice: 2299, imageUrl: 'https://picsum.photos/id/21/400/400', discount: 13, category: 'Climatiseur', description: 'La performance Inverter de Midea pour un refroidissement rapide et des économies d\'énergie substantielles. Un choix intelligent pour votre confort.' },
+    { id: 13, name: 'ARISTON Product', brand: 'ARISTON', price: 1500, imageUrl: 'https://picsum.photos/id/22/400/400', category: 'Cafetières & Expresso', description: 'Un appareil de petit électroménager fiable et performant de la marque ARISTON pour faciliter votre quotidien en cuisine.' },
+    { id: 14, name: 'Candy Product', brand: 'Candy', price: 750, imageUrl: 'https://picsum.photos/id/23/400/400', category: 'TV LED', description: 'Découvrez l\'univers Tv-son-photos avec ce produit de la marque Candy, alliant design et technologie.' },
     { id: 15, name: 'Appareil à raclette TECHWOOD 6 Poêlons 800 W (TRA-64)', brand: 'Techwood', price: 145, oldPrice: 199, imageUrl: 'https://picsum.photos/seed/raclette1/400/400', discount: 27, category: 'Appareil à raclette', description: 'Pour des soirées conviviales, cet appareil à raclette Techwood pour 6 personnes est l\'allié idéal. Simple d\'utilisation et efficace.' },
     { id: 16, name: 'Appareil à raclette PRINCESS Gril Party 6 800W noir (162725)', brand: 'Princess', price: 149, oldPrice: 195, imageUrl: 'https://picsum.photos/seed/raclette2/400/400', discount: 24, category: 'Appareil à raclette', description: 'Profitez de moments chaleureux avec cet appareil à raclette et gril Princess. Parfait pour 6 convives.' },
     { id: 17, name: 'Appareil à raclette LIVOVO 800W noir (DOC207)', brand: 'livoo', price: 157, oldPrice: 199, imageUrl: 'https://picsum.photos/seed/raclette3/400/400', discount: 21, category: 'Appareil à raclette', material: 'Inox', description: 'Un design moderne en inox pour cet appareil à raclette Livoo. Robuste et facile à nettoyer pour des repas réussis.' },
@@ -24,15 +23,15 @@ export const allProducts: Product[] = [
     { id: 20, name: 'Appareil à Raclette LIVOVO 1200W Noir (DOC242)', brand: 'livoo', price: 170, oldPrice: 200, imageUrl: 'https://picsum.photos/seed/raclette6/400/400', discount: 15, category: 'Appareil à raclette', material: 'Inox', description: 'Plus de puissance pour une chauffe rapide. L\'appareil à raclette Livoo 1200W en inox est parfait pour les grandes tablées.' },
     { id: 21, name: 'Appareil à raclette multifonction SEVERIN 1300W Noir (RG2371)', brand: 'severin', price: 180, oldPrice: 277, imageUrl: 'https://picsum.photos/seed/raclette7/400/400', discount: 35, category: 'Appareil à raclette', material: 'bois clair', description: 'Un appareil polyvalent avec une pierre naturelle et un gril. La finition en bois clair apporte une touche d\'élégance à votre table.' },
     { id: 22, name: 'Appareil à Fondue électrique SEVERIN 1500W inox (FO2470)', brand: 'severin', price: 120, oldPrice: 240, imageUrl: 'https://picsum.photos/seed/fondue1/400/400', discount: 50, category: 'Appareil à raclette', description: 'Variez les plaisirs avec cet appareil à fondue électrique Severin. Parfait pour les fondues savoyardes, bourguignonnes ou au chocolat.' },
-    { id: 23, name: 'Plaque de cuisson à gaz STARONE', brand: 'STARONE', price: 550, category: 'Gros électroménagers', material: 'Inox', imageUrl: 'https://picsum.photos/seed/plaque_pack/400/400' },
-    { id: 24, name: 'Four encastrable électrique WHIRLPOOL', brand: 'WHIRLPOOL', price: 950, category: 'Gros électroménagers', material: 'Inox', imageUrl: 'https://picsum.photos/seed/four_pack/400/400' },
-    { id: 25, name: 'Hotte décorative 60cm BRANDT', brand: 'BRANDT', price: 850, category: 'Gros électroménagers', material: 'Noir', imageUrl: 'https://picsum.photos/seed/hotte_pack/400/400' },
-    { id: 26, name: 'Lave-linge frontal 9kg LG', brand: 'LG', price: 1800, category: 'Gros électroménagers', imageUrl: 'https://picsum.photos/seed/lavelinge_pack/400/400' },
-    { id: 27, name: 'Sèche-linge à condensation CANDY', brand: 'CANDY', price: 1300, category: 'Gros électroménagers', imageUrl: 'https://picsum.photos/seed/sechelinge_pack/400/400' },
-    { id: 28, name: 'Cafetière à filtre programmable MIDEA', brand: 'MIDEA', price: 250, category: 'Petit électroménagers cuisine', imageUrl: 'https://picsum.photos/seed/cafetiere_pack/400/400' },
-    { id: 29, name: 'Grille-pain 2 fentes TELEFUNKEN', brand: 'TELEFUNKEN', price: 180, category: 'Petit électroménagers cuisine', imageUrl: 'https://picsum.photos/seed/grillepain_pack/400/400' },
+    { id: 23, name: 'Plaque de cuisson à gaz STARONE', brand: 'STARONE', price: 550, category: 'Plaque à gaz', material: 'Inox', imageUrl: 'https://picsum.photos/seed/plaque_pack/400/400' },
+    { id: 24, name: 'Four encastrable électrique WHIRLPOOL', brand: 'WHIRLPOOL', price: 950, category: 'Four encastrable', material: 'Inox', imageUrl: 'https://picsum.photos/seed/four_pack/400/400' },
+    { id: 25, name: 'Hotte décorative 60cm BRANDT', brand: 'BRANDT', price: 850, category: 'Hotte inox', material: 'Noir', imageUrl: 'https://picsum.photos/seed/hotte_pack/400/400' },
+    { id: 26, name: 'Lave-linge frontal 9kg LG', brand: 'LG', price: 1800, category: 'Lave-linge frontal', imageUrl: 'https://picsum.photos/seed/lavelinge_pack/400/400' },
+    { id: 27, name: 'Sèche-linge à condensation CANDY', brand: 'CANDY', price: 1300, category: 'Sèche Linge', imageUrl: 'https://picsum.photos/seed/sechelinge_pack/400/400' },
+    { id: 28, name: 'Cafetière à filtre programmable MIDEA', brand: 'MIDEA', price: 250, category: 'Cafetières & Expresso', imageUrl: 'https://picsum.photos/seed/cafetiere_pack/400/400' },
+    { id: 29, name: 'Grille-pain 2 fentes TELEFUNKEN', brand: 'TELEFUNKEN', price: 180, category: 'Grille-pain & Gaufriers', imageUrl: 'https://picsum.photos/seed/grillepain_pack/400/400' },
     { id: 30, name: 'Bouilloire électrique 1.7L BIOLUX', brand: 'BIOLUX', price: 220, category: 'Petit électroménagers cuisine', imageUrl: 'https://picsum.photos/seed/bouilloire_pack/400/400' },
-    { id: 31, name: 'Réfrigérateur combiné 350L ARISTON', brand: 'ARISTON', price: 2450, category: 'Gros électroménagers', material: 'Silver', imageUrl: 'https://picsum.photos/seed/frigo_pack/400/400' }
+    { id: 31, name: 'Réfrigérateur combiné 350L ARISTON', brand: 'ARISTON', price: 2450, category: 'Réfrigérateur combiné', material: 'Silver', imageUrl: 'https://picsum.photos/seed/frigo_pack/400/400' }
 ];
 
 export const getProductsByCategory = (category: string) => {
@@ -234,9 +233,9 @@ export const packs: Pack[] = [
         id: 1, 
         name: 'Pack Cuisine Essentiel', 
         description: 'Le trio parfait pour débuter : plaque de cuisson, four et hotte assortis pour une cuisine moderne et fonctionnelle.',
-        price: 1899,
+        price: 1880,
         oldPrice: 2350,
-        // FIX: Add missing properties to conform to the Pack type
+        discount: 20,
         imageUrl: 'https://picsum.photos/seed/pack1/400/300',
         includedItems: ['Plaque de cuisson à gaz STARONE', 'Four encastrable électrique WHIRLPOOL', 'Hotte décorative 60cm BRANDT'],
         includedProductIds: [23, 24, 25]
@@ -245,8 +244,9 @@ export const packs: Pack[] = [
         id: 2, 
         name: 'Pack Buanderie Performant', 
         description: 'Optimisez votre espace buanderie avec ce duo lave-linge et sèche-linge efficace et économique.',
-        price: 3000,
+        price: 2945,
         oldPrice: 3100,
+        discount: 5,
         imageUrl: 'https://picsum.photos/seed/pack2/400/300',
         includedItems: ['Lave-linge frontal 9kg LG', 'Sèche-linge à condensation CANDY'],
         includedProductIds: [26, 27]
@@ -255,8 +255,9 @@ export const packs: Pack[] = [
         id: 3, 
         name: 'Pack Petit Déjeuner Complet', 
         description: 'Commencez la journée du bon pied avec notre sélection d\'appareils pour un petit déjeuner parfait.',
-        price: 600,
+        price: 585,
         oldPrice: 650,
+        discount: 10,
         imageUrl: 'https://picsum.photos/seed/pack3/400/300',
         includedItems: ['Cafetière à filtre programmable MIDEA', 'Grille-pain 2 fentes TELEFUNKEN', 'Bouilloire électrique 1.7L BIOLUX'],
         includedProductIds: [28, 29, 30]
@@ -264,12 +265,14 @@ export const packs: Pack[] = [
     { 
         id: 4, 
         name: 'Pack Cuisine Premium', 
-        description: 'Équipez entièrement votre cuisine avec des appareils de haute qualité pour une expérience culinaire exceptionnelle.',
-        price: 4800,
-        oldPrice: 5650,
+        description: 'Le pack Essentiel plus un réfrigérateur pour une cuisine quasi-complète et harmonieuse.',
+        price: 4200,
+        oldPrice: 4800,
+        discount: 12.5,
         imageUrl: 'https://picsum.photos/seed/pack4/400/300',
-        includedItems: ['Plaque de cuisson à gaz STARONE', 'Four encastrable électrique WHIRLPOOL', 'Hotte décorative 60cm BRANDT', 'Réfrigérateur combiné 350L ARISTON'],
-        includedProductIds: [23, 24, 25, 31]
+        includedItems: ['Pack Cuisine Essentiel', 'Réfrigérateur combiné 350L ARISTON'],
+        includedProductIds: [31],
+        includedPackIds: [1]
     }
 ];
 
@@ -324,4 +327,18 @@ export const blogPosts: BlogPost[] = [
         date: '2023-09-10',
         category: 'Nouveautés',
     }
+];
+
+export const orders: Order[] = [
+    { id: 'ES-1024', customerName: 'Karim Gharbi', date: '2023-10-26', total: 1099, status: 'Livrée', itemCount: 1 },
+    { id: 'ES-1023', customerName: 'Amina Ben Salah', date: '2023-10-25', total: 2389, status: 'Expédiée', itemCount: 1 },
+    { id: 'ES-1022', customerName: 'Mehdi Trabelsi', date: '2023-10-25', total: 398, status: 'En attente', itemCount: 3 },
+    { id: 'ES-1021', customerName: 'Fatma Bouaziz', date: '2023-10-24', total: 1239, status: 'Livrée', itemCount: 1 },
+    { id: 'ES-1020', customerName: 'Youssef Jlassi', date: '2023-10-22', total: 1899, status: 'Annulée', itemCount: 2 },
+];
+
+export const contactMessages: ContactMessage[] = [
+    { id: 1, name: 'Linda Jouini', email: 'linda.j@email.com', subject: 'Question sur un produit', message: 'Bonjour, je voudrais savoir si le Lave vaisselle Pose libre WHIRLPOOL est disponible en blanc. Merci.', date: '2023-10-27', read: false },
+    { id: 2, name: 'Sami Khelifi', email: 'sami.k@email.com', subject: 'Suivi de commande', message: 'Pouvez-vous me donner des nouvelles de ma commande ES-1023 ?', date: '2023-10-26', read: false },
+    { id: 3, name: 'Nour Hammami', email: 'nour.h@email.com', subject: 'Service après-vente', message: 'Mon climatiseur NEWSTAR ne refroidit plus correctement, que dois-je faire ? Il est encore sous garantie.', date: '2023-10-26', read: true },
 ];

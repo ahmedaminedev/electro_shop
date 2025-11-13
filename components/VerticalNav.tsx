@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import type { Category } from '../types';
 import { ListBulletIcon, ChevronRightIcon, ChevronDoubleLeftIcon, ChevronDownIcon } from './IconComponents';
@@ -8,14 +7,22 @@ interface VerticalNavProps {
     isCollapsed: boolean;
     onToggleCollapse: () => void;
     onCategoryClick: (categoryName: string) => void;
+    onNavigateToPacks: () => void;
 }
 
-export const VerticalNav: React.FC<VerticalNavProps> = ({ categories, isCollapsed, onToggleCollapse, onCategoryClick }) => {
+export const VerticalNav: React.FC<VerticalNavProps> = ({ categories, isCollapsed, onToggleCollapse, onCategoryClick, onNavigateToPacks }) => {
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const navRef = useRef<HTMLElement>(null);
 
     const handleCategoryClick = (e: React.MouseEvent, categoryName: string) => {
         e.preventDefault();
+        
+        if (categoryName === 'Pack électroménager') {
+            onNavigateToPacks();
+            setActiveCategory(null);
+            return;
+        }
+
         const category = categories.find(c => c.name === categoryName);
         if (category?.subCategories || category?.megaMenu) {
             setActiveCategory(prev => (prev === categoryName ? null : categoryName));
@@ -69,7 +76,7 @@ export const VerticalNav: React.FC<VerticalNavProps> = ({ categories, isCollapse
                                 aria-expanded={activeCategory === category.name}
                             >
                                 <span className="truncate">{category.name}</span>
-                                {(category.subCategories || category.megaMenu) && (
+                                {(category.subCategories || category.megaMenu || category.name === 'Pack électroménager') && (
                                     activeCategory === category.name ? 
                                     <ChevronDownIcon className="w-4 h-4 text-gray-400" /> :
                                     <ChevronRightIcon className="w-4 h-4 text-gray-400" />

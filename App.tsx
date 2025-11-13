@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { Header } from './components/Header';
@@ -17,9 +16,12 @@ import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
 import { PromotionsPage } from './components/PromotionsPage';
 import { CheckoutPage } from './components/CheckoutPage';
-import type { Product } from './types';
+import type { Product, Pack, Category, Brand, Order, ContactMessage } from './types';
 import { CartProvider } from './components/CartContext';
 import { CartSidebar } from './components/CartSidebar';
+import { AdminPage } from './components/admin/AdminPage';
+import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages } from './constants';
+
 
 type View =
   | { name: 'home'; data: null }
@@ -30,7 +32,8 @@ type View =
   | { name: 'blogPost'; data: { slug: string } }
   | { name: 'contact'; data: null }
   | { name: 'login'; data: null }
-  | { name: 'checkout'; data: null };
+  | { name: 'checkout'; data: null }
+  | { name: 'admin'; data: null };
 
 
 const App: React.FC = () => {
@@ -38,6 +41,13 @@ const App: React.FC = () => {
     const [isNavCollapsed, setIsNavCollapsed] = useState(false);
     const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    // Centralized data management for admin CRUD
+    const [products, setProducts] = useState<Product[]>(allProducts);
+    const [categories, setCategories] = useState<Category[]>(initialCategories);
+    const [packs, setPacks] = useState<Pack[]>(initialPacks);
+    const [orders, setOrders] = useState<Order[]>(initialOrders);
+    const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
 
     const handleNavigate = (newView: View) => {
         setView(newView);
@@ -53,6 +63,7 @@ const App: React.FC = () => {
     const handleNavigateToContact = () => handleNavigate({ name: 'contact', data: null });
     const handleNavigateToLogin = () => handleNavigate({ name: 'login', data: null });
     const handleNavigateToCheckout = () => handleNavigate({ name: 'checkout', data: null });
+    const handleNavigateToAdmin = () => handleNavigate({ name: 'admin', data: null });
 
     const handleLoginSuccess = () => {
         setIsLoggedIn(true);
@@ -63,7 +74,6 @@ const App: React.FC = () => {
         setIsLoggedIn(false);
         handleNavigateHome();
     };
-
 
     const handlePreviewProduct = (product: Product) => {
         setPreviewProduct(product);
@@ -81,6 +91,7 @@ const App: React.FC = () => {
                     isNavCollapsed={isNavCollapsed}
                     onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
                     onPreview={handlePreviewProduct}
+                    onNavigateToPacks={handleNavigateToPacks}
                 />;
             case 'productList':
                 return <ProductListPage 
@@ -90,6 +101,7 @@ const App: React.FC = () => {
                     isNavCollapsed={isNavCollapsed}
                     onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
                     onPreview={handlePreviewProduct}
+                    onNavigateToPacks={handleNavigateToPacks}
                 />;
             case 'packs':
                 return <PacksPage
@@ -97,6 +109,10 @@ const App: React.FC = () => {
                     onNavigateToCategory={handleNavigateToCategory}
                     isNavCollapsed={isNavCollapsed}
                     onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
+                    packs={packs}
+                    allProducts={products}
+                    allPacks={packs}
+                    onNavigateToPacks={handleNavigateToPacks}
                 />;
             case 'promotions':
                 return <PromotionsPage
@@ -114,21 +130,46 @@ const App: React.FC = () => {
                 return <LoginPage onNavigateHome={handleNavigateHome} onLoginSuccess={handleLoginSuccess} />;
             case 'checkout':
                 return <CheckoutPage onNavigateHome={handleNavigateHome} />;
+            case 'admin':
+                return <AdminPage 
+                            onNavigateHome={handleNavigateHome}
+                            productsData={products}
+                            setProductsData={setProducts}
+                            categoriesData={categories}
+                            setCategoriesData={setCategories}
+                            packsData={packs}
+                            setPacksData={setPacks}
+                            ordersData={orders}
+                            setOrdersData={setOrders}
+                            messagesData={messages}
+                            setMessagesData={setMessages}
+                        />;
             default:
                 return <HomePage 
                     onNavigate={handleNavigateToCategory} 
                     isNavCollapsed={isNavCollapsed}
                     onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
                     onPreview={handlePreviewProduct}
+                    onNavigateToPacks={handleNavigateToPacks}
                 />;
         }
     };
+    
+    if (view.name === 'admin') {
+        return (
+             <ThemeProvider>
+                <div className="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
+                   {renderContent()}
+                </div>
+            </ThemeProvider>
+        );
+    }
     
     return (
         <ThemeProvider>
             <CartProvider>
                 <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
-                    <TopBar />
+                    <TopBar onNavigateToAdmin={handleNavigateToAdmin} />
                     <Header 
                         onNavigateToLogin={handleNavigateToLogin}
                         isLoggedIn={isLoggedIn}

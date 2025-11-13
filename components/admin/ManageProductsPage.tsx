@@ -1,0 +1,204 @@
+import React, { useState, useMemo } from 'react';
+import type { Product, Category } from '../../types';
+import { PencilIcon, TrashIcon, PlusIcon, SearchIcon } from '../IconComponents';
+import { ProductFormModal } from './ProductFormModal';
+
+interface ManageProductsPageProps {
+    products: Product[];
+    setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+    categories: Category[];
+}
+
+const AdminProductCard: React.FC<{
+    product: Product;
+    onEdit: () => void;
+    onDelete: () => void;
+}> = ({ product, onEdit, onDelete }) => {
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1">
+            <div className="relative">
+                <img src={product.imageUrl} alt={product.name} className="w-full h-40 object-cover" />
+                <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button onClick={onEdit} className="bg-white/80 dark:bg-gray-900/80 p-2 rounded-full text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 shadow-md" aria-label={`Modifier ${product.name}`}>
+                        <PencilIcon className="w-5 h-5" />
+                    </button>
+                    <button onClick={onDelete} className="bg-white/80 dark:bg-gray-900/80 p-2 rounded-full text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 shadow-md" aria-label={`Supprimer ${product.name}`}>
+                        <TrashIcon className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+            <div className="p-4 flex flex-col flex-grow">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 flex-grow">{product.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{product.category}</p>
+                <p className="text-lg font-bold text-red-600 dark:text-red-500 mt-2">{product.price.toFixed(3).replace('.', ',')} DT</p>
+            </div>
+        </div>
+    );
+};
+
+export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products, setProducts, categories }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterCategory, setFilterCategory] = useState('all');
+    const [sortOption, setSortOption] = useState('name-asc');
+    const [currentPage, setCurrentPage] = useState(1);
+    const PRODUCTS_PER_PAGE = 12;
+
+    const handleAddProduct = (newProduct: Omit<Product, 'id'>) => {
+        setProducts(prev => [...prev, { ...newProduct, id: Date.now() }]);
+    };
+
+    const handleUpdateProduct = (updatedProduct: Product) => {
+        setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    };
+    
+    const handleDeleteProduct = (productId: number) => {
+        if(window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+            setProducts(prev => prev.filter(p => p.id !== productId));
+        }
+    };
+    
+    const openCreateModal = () => {
+        setEditingProduct(null);
+        setIsModalOpen(true);
+    };
+    
+    const openEditModal = (product: Product) => {
+        setEditingProduct(product);
+        setIsModalOpen(true);
+    };
+
+    const processedProducts = useMemo(() => {
+        let filtered = products
+            .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            .filter(p => filterCategory === 'all' || p.category === filterCategory);
+
+        filtered.sort((a, b) => {
+            switch (sortOption) {
+                case 'name-asc': return a.name.localeCompare(b.name);
+                case 'name-desc': return b.name.localeCompare(a.name);
+                case 'price-asc': return a.price - b.price;
+                case 'price-desc': return b.price - a.price;
+                default: return 0;
+            }
+        });
+
+        return filtered;
+    }, [products, searchTerm, filterCategory, sortOption]);
+
+    const totalPages = Math.ceil(processedProducts.length / PRODUCTS_PER_PAGE);
+    const paginatedProducts = processedProducts.slice(
+        (currentPage - 1) * PRODUCTS_PER_PAGE,
+        currentPage * PRODUCTS_PER_PAGE
+    );
+
+    const uniqueCategoryNames = useMemo(() => {
+        const allCategoryNames = categories.flatMap(c => 
+            [c.name, ...(c.subCategories || []), ...(c.megaMenu?.flatMap(m => m.items.map(i => i.name)) || [])]
+        );
+        return [...new Set(allCategoryNames)].sort();
+    }, [categories]);
+    
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Gérer les Produits</h1>
+                <button 
+                    onClick={openCreateModal}
+                    className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-red-700 transition-colors shadow-md hover:shadow-lg"
+                >
+                    <PlusIcon className="w-5 h-5" />
+                    Ajouter un produit
+                </button>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-8 flex flex-col md:flex-row gap-4 items-center">
+                <div className="relative flex-grow w-full md:w-auto">
+                    <SearchIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                        type="text"
+                        placeholder="Rechercher par nom..."
+                        value={searchTerm}
+                        onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                        className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-10 pr-3 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                    />
+                </div>
+                <select
+                    value={filterCategory}
+                    onChange={e => { setFilterCategory(e.target.value); setCurrentPage(1); }}
+                    className="w-full md:w-auto bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                >
+                    <option value="all">Toutes les catégories</option>
+                    {uniqueCategoryNames.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+                <select
+                    value={sortOption}
+                    onChange={e => { setSortOption(e.target.value); setCurrentPage(1); }}
+                    className="w-full md:w-auto bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                >
+                    <option value="name-asc">Trier par: Nom (A-Z)</option>
+                    <option value="name-desc">Trier par: Nom (Z-A)</option>
+                    <option value="price-asc">Trier par: Prix (Bas-Haut)</option>
+                    <option value="price-desc">Trier par: Prix (Haut-Bas)</option>
+                </select>
+            </div>
+
+            {paginatedProducts.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {paginatedProducts.map(product => (
+                        <AdminProductCard
+                            key={product.id}
+                            product={product}
+                            onEdit={() => openEditModal(product)}
+                            onDelete={() => handleDeleteProduct(product.id)}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <p className="text-lg text-gray-600 dark:text-gray-400">Aucun produit trouvé.</p>
+                    <p className="text-sm text-gray-500 mt-2">Essayez de modifier vos filtres de recherche.</p>
+                </div>
+            )}
+
+            {totalPages > 1 && (
+                <nav className="flex justify-center items-center mt-8 space-x-2" aria-label="Pagination">
+                    <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                    >
+                        Précédent
+                    </button>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Page {currentPage} sur {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                    >
+                        Suivant
+                    </button>
+                </nav>
+            )}
+
+            {isModalOpen && (
+                <ProductFormModal 
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={(data) => {
+                        if (editingProduct) {
+                            handleUpdateProduct({ ...editingProduct, ...data });
+                        } else {
+                            handleAddProduct(data);
+                        }
+                    }}
+                    product={editingProduct}
+                    categories={categories}
+                />
+            )}
+        </div>
+    );
+};

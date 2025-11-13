@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Product } from '../types';
 import { VerticalNav } from './VerticalNav';
@@ -18,9 +17,10 @@ interface HomePageProps {
     isNavCollapsed: boolean;
     onToggleNav: () => void;
     onPreview: (product: Product) => void;
+    onNavigateToPacks: () => void;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview }) => {
+export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview, onNavigateToPacks }) => {
     return (
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
             <div className="flex flex-col lg:flex-row gap-8">
@@ -30,6 +30,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, 
                         isCollapsed={isNavCollapsed}
                         onToggleCollapse={onToggleNav}
                         onCategoryClick={onNavigate}
+                        onNavigateToPacks={onNavigateToPacks}
                     />
                 </aside>
                 <main className="flex-1 min-w-0 relative z-10">
