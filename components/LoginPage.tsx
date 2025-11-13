@@ -105,11 +105,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome }) => {
                     <div className={`absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 ease-in-out z-50 ${isSignUpActive ? '-translate-x-full' : 'translate-x-0'}`}>
                         <div className={`relative -left-full h-full w-[200%] transition-transform duration-700 ease-in-out transform ${isSignUpActive ? 'translate-x-1/2' : 'translate-x-0'}`}>
                             {/* Overlay Left Panel (Welcomes back returning user) */}
-                            <div className="absolute top-0 h-full w-1/2 flex items-center justify-center text-center p-10 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+                            <div className="absolute top-0 h-full w-1/2 flex items-center justify-center text-center p-10 bg-gradient-to-br from-red-600 to-red-800 text-white">
                                 <div>
                                     <h2 className="text-3xl font-bold mb-4">Content de vous revoir !</h2>
-                                    <p className="mb-6 text-white/80">Pour rester connecté, veuillez vous connecter avec vos informations personnelles.</p>
-                                    <button onClick={() => setIsSignUpActive(false)} className="font-bold bg-transparent border-2 border-white/80 rounded-full py-2 px-10 uppercase tracking-wider hover:bg-white hover:text-black transition-colors duration-300">
+                                    <p className="mb-6 text-gray-200">Pour rester connecté, veuillez vous connecter avec vos informations personnelles.</p>
+                                    <button onClick={() => setIsSignUpActive(false)} className="font-bold bg-transparent border-2 border-white rounded-full py-2 px-10 uppercase tracking-wider hover:bg-white hover:text-black transition-colors duration-300">
                                         Se connecter
                                     </button>
                                 </div>
