@@ -20,7 +20,7 @@ const InputField = ({ id, type, placeholder, icon: Icon }: { id: string; type: s
                 id={id}
                 type={isPassword && !passwordVisible ? 'password' : 'text'}
                 placeholder={placeholder}
-                className="w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md py-3 pl-12 pr-12 text-sm focus:ring-2 focus:ring-red-500"
+                className="w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md py-3 pl-12 pr-12 text-sm focus:ring-2 focus:ring-red-500/50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20 transition-all duration-300"
             />
             {isPassword && (
                 <button type="button" onClick={() => setPasswordVisible(!passwordVisible)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -33,29 +33,38 @@ const InputField = ({ id, type, placeholder, icon: Icon }: { id: string; type: s
 
 // Social Login Buttons Component
 const SocialLoginButtons = () => (
-    <>
-        <div className="flex items-center my-4">
-            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-            <span className="flex-shrink mx-4 text-gray-500 dark:text-gray-400 text-xs">ou</span>
-            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-        </div>
-        <div className="flex justify-center gap-4">
-            <button type="button" aria-label="Continuer avec Google" className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm">
-                <GoogleIcon className="w-5 h-5" />
-            </button>
-            <button type="button" aria-label="Continuer avec Facebook" className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm">
-                <FacebookIcon className="w-5 h-5 text-blue-600" />
-            </button>
-        </div>
-    </>
+    <div className="w-full space-y-3">
+        <button
+            type="button"
+            aria-label="Continuer avec Google"
+            className="w-full h-11 flex items-center justify-center gap-3 bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm font-semibold text-gray-700 dark:text-gray-200 text-sm active:scale-95 duration-200"
+        >
+            <GoogleIcon className="w-5 h-5" />
+            <span>Continuer avec Google</span>
+        </button>
+        <button
+            type="button"
+            aria-label="Continuer avec Facebook"
+            className="w-full h-11 flex items-center justify-center gap-3 bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm font-semibold text-gray-700 dark:text-gray-200 text-sm active:scale-95 duration-200"
+        >
+            <FacebookIcon className="w-5 h-5 text-blue-600" />
+            <span>Continuer avec Facebook</span>
+        </button>
+    </div>
 );
 
 const SignInForm = () => (
     <form className="w-full space-y-4">
+        <SocialLoginButtons />
+        <div className="flex items-center py-2">
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+            <span className="flex-shrink mx-4 text-gray-500 dark:text-gray-400 text-xs">ou</span>
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+        </div>
         <InputField id="signin-email" type="email" placeholder="Email" icon={MailIcon} />
         <InputField id="signin-password" type="password" placeholder="Mot de passe" icon={LockIcon} />
         <a href="#" className="block text-center text-sm text-gray-500 dark:text-gray-400 hover:underline my-4">Mot de passe oublié ?</a>
-        <button type="submit" className="w-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full py-3 uppercase tracking-wider hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg transform hover:scale-105">
+        <button type="submit" className="w-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full py-3 uppercase tracking-wider hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-[0.98] active:brightness-95">
             Se Connecter
         </button>
     </form>
@@ -63,10 +72,16 @@ const SignInForm = () => (
 
 const SignUpForm = () => (
     <form className="w-full space-y-4">
+        <SocialLoginButtons />
+        <div className="flex items-center py-2">
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+            <span className="flex-shrink mx-4 text-gray-500 dark:text-gray-400 text-xs">ou</span>
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+        </div>
         <InputField id="signup-name" type="text" placeholder="Nom complet" icon={UserIcon} />
         <InputField id="signup-email" type="email" placeholder="Email" icon={MailIcon} />
         <InputField id="signup-password" type="password" placeholder="Mot de passe" icon={LockIcon} />
-        <button type="submit" className="w-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full py-3 uppercase tracking-wider hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg transform hover:scale-105">
+        <button type="submit" className="w-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full py-3 uppercase tracking-wider hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-[0.98] active:brightness-95">
             S'inscrire
         </button>
     </form>
@@ -79,26 +94,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome }) => {
     return (
         <div 
             className="relative py-16 sm:py-24 bg-cover bg-center font-sans"
-            style={{ backgroundImage: "url('https://picsum.photos/seed/loginbg/1920/1080')" }}
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=2768&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')" }}
         >
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-md"></div>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
             
             <div className="relative max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
                 {/* Main Container for Desktop */}
-                <div className="relative w-full max-w-3xl min-h-[580px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden hidden md:block">
+                <div className="relative w-full max-w-3xl min-h-[620px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden hidden md:block">
                     
                     {/* Sign Up Form Container */}
                     <div className={`absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center p-8 text-center transition-all duration-700 ease-in-out transform opacity-0 z-10 bg-gradient-to-br from-stone-100 to-stone-200 dark:from-slate-800 dark:to-slate-900 ${isSignUpActive ? 'translate-x-full opacity-100 z-20' : ''}`}>
                         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Créer un compte</h1>
                         <SignUpForm />
-                        <SocialLoginButtons />
                     </div>
                     
                     {/* Sign In Form Container */}
                     <div className={`absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center p-8 text-center transition-all duration-700 ease-in-out transform bg-gradient-to-br from-stone-100 to-stone-200 dark:from-slate-800 dark:to-slate-900 ${isSignUpActive ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100 z-20'}`}>
                         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Se connecter</h1>
                         <SignInForm />
-                        <SocialLoginButtons />
                     </div>
 
                     {/* Overlay Container */}
@@ -135,7 +148,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome }) => {
                         <>
                             <h1 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">Se connecter</h1>
                             <SignInForm />
-                            <SocialLoginButtons />
                             <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
                             Pas encore de compte ? <button onClick={() => setIsSignUpActive(true)} className="font-semibold text-red-600 hover:underline">S'inscrire</button>
                             </p>
@@ -144,7 +156,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome }) => {
                         <>
                             <h1 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">Créer un compte</h1>
                             <SignUpForm />
-                            <SocialLoginButtons />
                             <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
                             Déjà un compte ? <button onClick={() => setIsSignUpActive(false)} className="font-semibold text-red-600 hover:underline">Se connecter</button>
                             </p>
