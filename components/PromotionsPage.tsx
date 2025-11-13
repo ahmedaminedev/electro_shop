@@ -6,6 +6,7 @@ import { Breadcrumb } from './Breadcrumb';
 import { ProductCard } from './ProductCard';
 import { Squares2X2Icon, Bars3Icon, ChevronDownIcon, CartIcon } from './IconComponents';
 import { ProductListItem } from './ProductListItem';
+import { useCart } from './CartContext';
 
 interface PromotionsPageProps {
     onNavigateHome: () => void;
@@ -58,6 +59,13 @@ const CountdownTimer: React.FC = () => {
 };
 
 const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) => void; }> = ({ product, onPreview }) => {
+    const { addToCart, openCart } = useCart();
+    
+    const handleAddToCart = () => {
+        addToCart(product);
+        openCart();
+    };
+
     return (
         <section className="my-12">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row items-center p-6 sm:p-8">
@@ -80,7 +88,7 @@ const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) =
                         <CountdownTimer />
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                         <button className="bg-red-600 text-white font-bold py-4 px-8 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 text-lg">
+                         <button onClick={handleAddToCart} className="bg-red-600 text-white font-bold py-4 px-8 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 text-lg">
                             <CartIcon className="w-6 h-6" />
                             <span>Ajouter au panier</span>
                         </button>

@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Product } from '../types';
 import { CartIcon, EyeIcon } from './IconComponents';
+import { useCart } from './CartContext';
 
 interface ProductCardProps {
     product: Product;
@@ -9,6 +10,13 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) => {
+    const { addToCart, openCart } = useCart();
+
+    const handleAddToCart = () => {
+        addToCart(product);
+        openCart();
+    };
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700">
             <div className="relative overflow-hidden">
@@ -57,7 +65,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) 
                         )}
                     </div>
 
-                    <button className="w-full bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300">
+                    <button 
+                        onClick={handleAddToCart}
+                        className="w-full bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
+                    >
                         <CartIcon className="w-5 h-5" />
                         <span>Ajouter au panier</span>
                     </button>

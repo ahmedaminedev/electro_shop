@@ -3,13 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { SearchIcon, UserIcon, CartIcon } from './IconComponents';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
+import { useCart } from './CartContext';
 
 interface HeaderProps {
     onNavigateToLogin: () => void;
+    isLoggedIn: boolean;
+    onLogout: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigateToLogin }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigateToLogin, isLoggedIn, onLogout }) => {
     const [isScrolled, setIsScrolled] = useState(false);
+    const { itemCount, openCart } = useCart();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -41,15 +45,26 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToLogin }) => {
                 </div>
                 <div className="flex items-center space-x-6">
                     <ThemeToggle />
-                    <button onClick={onNavigateToLogin} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
-                        <UserIcon className="w-6 h-6" />
-                        <span className="hidden md:block">Compte</span>
-                    </button>
-                    <a href="#" className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
+                    {isLoggedIn ? (
+                         <button onClick={onLogout} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
+                            <UserIcon className="w-6 h-6" />
+                            <span className="hidden md:block">Déconnexion</span>
+                        </button>
+                    ) : (
+                        <button onClick={onNavigateToLogin} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
+                            <UserIcon className="w-6 h-6" />
+                            <span className="hidden md:block">Compte</span>
+                        </button>
+                    )}
+                    <button onClick={openCart} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
                         <CartIcon className="w-6 h-6" />
                         <span className="hidden md:block">Panier</span>
-                        <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                    </a>
+                        {itemCount > 0 && (
+                            <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                                {itemCount}
+                            </span>
+                        )}
+                    </button>
                 </div>
             </div>
         </header>

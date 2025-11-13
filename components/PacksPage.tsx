@@ -6,6 +6,7 @@ import { Breadcrumb } from './Breadcrumb';
 import { CartIcon, Squares2X2Icon, Bars3Icon, ChevronDownIcon } from './IconComponents';
 import { VerticalNav } from './VerticalNav';
 import { FiltersSidebar } from './FiltersSidebar';
+import { useCart } from './CartContext';
 
 interface PacksPageProps {
     onNavigateHome: () => void;
@@ -15,7 +16,14 @@ interface PacksPageProps {
 }
 
 const PackCard: React.FC<{ pack: Pack }> = ({ pack }) => {
+    const { addToCart, openCart } = useCart();
     const savings = pack.oldPrice - pack.price;
+
+    const handleAddToCart = () => {
+        addToCart(pack);
+        openCart();
+    };
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1">
             <div className="relative">
@@ -55,7 +63,10 @@ const PackCard: React.FC<{ pack: Pack }> = ({ pack }) => {
                         </div>
                     </div>
 
-                    <button className="w-full bg-red-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300">
+                    <button 
+                        onClick={handleAddToCart}
+                        className="w-full bg-red-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
+                    >
                         <CartIcon className="w-5 h-5" />
                         <span>Ajouter le pack au panier</span>
                     </button>
@@ -66,6 +77,13 @@ const PackCard: React.FC<{ pack: Pack }> = ({ pack }) => {
 };
 
 const PackListItem: React.FC<{ pack: Pack }> = ({ pack }) => {
+    const { addToCart, openCart } = useCart();
+
+    const handleAddToCart = () => {
+        addToCart(pack);
+        openCart();
+    };
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-center p-4 gap-6">
             <div className="relative flex-shrink-0 w-full md:w-64">
@@ -100,7 +118,10 @@ const PackListItem: React.FC<{ pack: Pack }> = ({ pack }) => {
                     <p className="text-3xl font-bold text-red-600">{pack.price.toFixed(0)} DT</p>
                     <p className="text-md text-gray-400 line-through -mt-1">{pack.oldPrice.toFixed(0)} DT</p>
                 </div>
-                <button className="w-full md:w-auto bg-red-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center space-x-2 hover:bg-red-700 transition-colors duration-200 shadow-sm">
+                <button 
+                    onClick={handleAddToCart}
+                    className="w-full md:w-auto bg-red-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center space-x-2 hover:bg-red-700 transition-colors duration-200 shadow-sm"
+                >
                     <CartIcon className="w-5 h-5" />
                     <span>Ajouter le pack</span>
                 </button>

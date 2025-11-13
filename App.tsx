@@ -16,7 +16,10 @@ import { BlogPostPage } from './components/BlogPostPage';
 import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
 import { PromotionsPage } from './components/PromotionsPage';
+import { CheckoutPage } from './components/CheckoutPage';
 import type { Product } from './types';
+import { CartProvider } from './components/CartContext';
+import { CartSidebar } from './components/CartSidebar';
 
 type View =
   | { name: 'home'; data: null }
@@ -26,13 +29,15 @@ type View =
   | { name: 'blog'; data: null }
   | { name: 'blogPost'; data: { slug: string } }
   | { name: 'contact'; data: null }
-  | { name: 'login'; data: null };
+  | { name: 'login'; data: null }
+  | { name: 'checkout'; data: null };
 
 
 const App: React.FC = () => {
     const [view, setView] = useState<View>({ name: 'home', data: null });
     const [isNavCollapsed, setIsNavCollapsed] = useState(false);
     const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const handleNavigate = (newView: View) => {
         setView(newView);
@@ -47,6 +52,18 @@ const App: React.FC = () => {
     const handleNavigateToBlogPost = (slug: string) => handleNavigate({ name: 'blogPost', data: { slug } });
     const handleNavigateToContact = () => handleNavigate({ name: 'contact', data: null });
     const handleNavigateToLogin = () => handleNavigate({ name: 'login', data: null });
+    const handleNavigateToCheckout = () => handleNavigate({ name: 'checkout', data: null });
+
+    const handleLoginSuccess = () => {
+        setIsLoggedIn(true);
+        handleNavigateToCheckout();
+    };
+
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+        handleNavigateHome();
+    };
+
 
     const handlePreviewProduct = (product: Product) => {
         setPreviewProduct(product);
@@ -94,7 +111,9 @@ const App: React.FC = () => {
             case 'contact':
                 return <ContactPage onNavigateHome={handleNavigateHome} />;
             case 'login':
-                return <LoginPage onNavigateHome={handleNavigateHome} />;
+                return <LoginPage onNavigateHome={handleNavigateHome} onLoginSuccess={handleLoginSuccess} />;
+            case 'checkout':
+                return <CheckoutPage onNavigateHome={handleNavigateHome} />;
             default:
                 return <HomePage 
                     onNavigate={handleNavigateToCategory} 
@@ -107,24 +126,35 @@ const App: React.FC = () => {
     
     return (
         <ThemeProvider>
-            <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
-                <TopBar />
-                <Header onNavigateToLogin={handleNavigateToLogin} />
-                <NavBar 
-                    onNavigateHome={handleNavigateHome}
-                    onNavigateToPacks={handleNavigateToPacks}
-                    onNavigateToPromotions={handleNavigateToPromotions}
-                    onNavigateToBlog={handleNavigateToBlog}
-                    onNavigateToContact={handleNavigateToContact}
-                />
+            <CartProvider>
+                <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
+                    <TopBar />
+                    <Header 
+                        onNavigateToLogin={handleNavigateToLogin}
+                        isLoggedIn={isLoggedIn}
+                        onLogout={handleLogout}
+                    />
+                    <NavBar 
+                        onNavigateHome={handleNavigateHome}
+                        onNavigateToPacks={handleNavigateToPacks}
+                        onNavigateToPromotions={handleNavigateToPromotions}
+                        onNavigateToBlog={handleNavigateToBlog}
+                        onNavigateToContact={handleNavigateToContact}
+                    />
 
-                {renderContent()}
-                
-                <Footer />
-                <WhatsAppButton />
-                <ScrollToTopButton />
-                <ProductPreviewModal product={previewProduct} onClose={handleClosePreview} />
-            </div>
+                    {renderContent()}
+                    
+                    <Footer />
+                    <WhatsAppButton />
+                    <ScrollToTopButton />
+                    <ProductPreviewModal product={previewProduct} onClose={handleClosePreview} />
+                    <CartSidebar 
+                        isLoggedIn={isLoggedIn}
+                        onNavigateToCheckout={handleNavigateToCheckout}
+                        onNavigateToLogin={handleNavigateToLogin}
+                    />
+                </div>
+            </CartProvider>
         </ThemeProvider>
     );
 };

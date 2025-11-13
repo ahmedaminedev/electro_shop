@@ -4,6 +4,7 @@ import { GoogleIcon, FacebookIcon, EyeIcon, EyeSlashIcon, UserIcon, MailIcon, Lo
 
 interface LoginPageProps {
     onNavigateHome: () => void;
+    onLoginSuccess: () => void;
 }
 
 // Input Field Component with password toggle
@@ -53,8 +54,8 @@ const SocialLoginButtons = () => (
     </div>
 );
 
-const SignInForm = () => (
-    <form className="w-full space-y-4">
+const SignInForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => (
+    <form className="w-full space-y-4" onSubmit={(e) => { e.preventDefault(); onLoginSuccess(); }}>
         <SocialLoginButtons />
         <div className="flex items-center py-2">
             <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
@@ -88,7 +89,7 @@ const SignUpForm = () => (
 );
 
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome, onLoginSuccess }) => {
     const [isSignUpActive, setIsSignUpActive] = useState(false);
 
     return (
@@ -111,7 +112,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome }) => {
                     {/* Sign In Form Container */}
                     <div className={`absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center p-8 text-center transition-all duration-700 ease-in-out transform bg-gradient-to-br from-stone-100 to-stone-200 dark:from-slate-800 dark:to-slate-900 ${isSignUpActive ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100 z-20'}`}>
                         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Se connecter</h1>
-                        <SignInForm />
+                        <SignInForm onLoginSuccess={onLoginSuccess} />
                     </div>
 
                     {/* Overlay Container */}
@@ -147,7 +148,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome }) => {
                     {!isSignUpActive ? (
                         <>
                             <h1 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">Se connecter</h1>
-                            <SignInForm />
+                            <SignInForm onLoginSuccess={onLoginSuccess} />
                             <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
                             Pas encore de compte ? <button onClick={() => setIsSignUpActive(true)} className="font-semibold text-red-600 hover:underline">S'inscrire</button>
                             </p>

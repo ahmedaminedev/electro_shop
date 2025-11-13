@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Product } from '../types';
 import { EyeIcon, CartIcon } from './IconComponents';
+import { useCart } from './CartContext';
 
 interface ProductListItemProps {
     product: Product;
@@ -9,6 +10,13 @@ interface ProductListItemProps {
 }
 
 export const ProductListItem: React.FC<ProductListItemProps> = ({ product, onPreview }) => {
+    const { addToCart, openCart } = useCart();
+
+    const handleAddToCart = () => {
+        addToCart(product);
+        openCart();
+    };
+
     // Calculate the percentage for the discount badge
     const discountPercentage = product.oldPrice && product.price 
         ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
@@ -52,7 +60,10 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({ product, onPre
                         {product.price.toFixed(0)} DT
                     </span>
                 </div>
-                <button className="w-full md:w-auto bg-red-600 text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center space-x-2 hover:bg-red-700 transition-colors duration-200 shadow-sm">
+                <button 
+                    onClick={handleAddToCart}
+                    className="w-full md:w-auto bg-red-600 text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center space-x-2 hover:bg-red-700 transition-colors duration-200 shadow-sm"
+                >
                     <CartIcon className="w-5 h-5" />
                     <span>Ajouter au panier</span>
                 </button>

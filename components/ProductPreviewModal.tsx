@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Product } from '../types';
 import { XMarkIcon, CartIcon, PlusIcon, MinusIcon } from './IconComponents';
+import { useCart } from './CartContext';
 
 interface ProductPreviewModalProps {
     product: Product | null;
@@ -9,6 +10,7 @@ interface ProductPreviewModalProps {
 }
 
 export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ product, onClose }) => {
+    const { addToCart, openCart } = useCart();
     const [quantity, setQuantity] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -40,6 +42,14 @@ export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ produc
 
     const handleIncrement = () => setQuantity(q => q + 1);
     const handleDecrement = () => setQuantity(q => (q > 1 ? q - 1 : 1));
+
+    const handleAddToCart = () => {
+        if (product) {
+            addToCart(product, quantity);
+            onClose(); // Close modal
+            openCart(); // Open cart sidebar
+        }
+    };
 
     return (
         <div 
@@ -116,7 +126,10 @@ export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ produc
                             </div>
                             
                             {/* Add to Cart Button */}
-                            <button className="w-full bg-red-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 text-lg">
+                            <button 
+                                onClick={handleAddToCart}
+                                className="w-full bg-red-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 text-lg"
+                            >
                                 <CartIcon className="w-6 h-6" />
                                 <span>Ajouter au panier</span>
                             </button>

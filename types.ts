@@ -57,3 +57,14 @@ export interface BlogPost {
   category: string;
   featured?: boolean;
 }
+
+export type Cartable = Product | Pack;
+
+export interface CartItem {
+  id: string; // e.g., 'product-1' or 'pack-2'
+  name: string;
+  price: number;
+  imageUrl: string;
+  quantity: number;
+  originalItem: Cartable;
+}
