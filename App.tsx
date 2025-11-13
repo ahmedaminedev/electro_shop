@@ -15,12 +15,14 @@ import { BlogPage } from './components/BlogPage';
 import { BlogPostPage } from './components/BlogPostPage';
 import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
+import { PromotionsPage } from './components/PromotionsPage';
 import type { Product } from './types';
 
 type View =
   | { name: 'home'; data: null }
   | { name: 'productList'; data: { categoryName: string } }
   | { name: 'packs'; data: null }
+  | { name: 'promotions'; data: null }
   | { name: 'blog'; data: null }
   | { name: 'blogPost'; data: { slug: string } }
   | { name: 'contact'; data: null }
@@ -40,6 +42,7 @@ const App: React.FC = () => {
     const handleNavigateToCategory = (categoryName: string) => handleNavigate({ name: 'productList', data: { categoryName } });
     const handleNavigateHome = () => handleNavigate({ name: 'home', data: null });
     const handleNavigateToPacks = () => handleNavigate({ name: 'packs', data: null });
+    const handleNavigateToPromotions = () => handleNavigate({ name: 'promotions', data: null });
     const handleNavigateToBlog = () => handleNavigate({ name: 'blog', data: null });
     const handleNavigateToBlogPost = (slug: string) => handleNavigate({ name: 'blogPost', data: { slug } });
     const handleNavigateToContact = () => handleNavigate({ name: 'contact', data: null });
@@ -78,6 +81,12 @@ const App: React.FC = () => {
                     isNavCollapsed={isNavCollapsed}
                     onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
                 />;
+            case 'promotions':
+                return <PromotionsPage
+                    onNavigateHome={handleNavigateHome}
+                    onNavigateToCategory={handleNavigateToCategory}
+                    onPreview={handlePreviewProduct}
+                />;
             case 'blog':
                 return <BlogPage onNavigateHome={handleNavigateHome} onSelectPost={handleNavigateToBlogPost} />;
             case 'blogPost':
@@ -104,6 +113,7 @@ const App: React.FC = () => {
                 <NavBar 
                     onNavigateHome={handleNavigateHome}
                     onNavigateToPacks={handleNavigateToPacks}
+                    onNavigateToPromotions={handleNavigateToPromotions}
                     onNavigateToBlog={handleNavigateToBlog}
                     onNavigateToContact={handleNavigateToContact}
                 />

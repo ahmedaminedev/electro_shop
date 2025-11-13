@@ -5,13 +5,15 @@ import { MenuIcon } from './IconComponents';
 interface NavBarProps {
     onNavigateHome: () => void;
     onNavigateToPacks: () => void;
+    onNavigateToPromotions: () => void;
     onNavigateToBlog: () => void;
     onNavigateToContact: () => void;
 }
 
 export const NavBar: React.FC<NavBarProps> = ({ 
     onNavigateHome, 
-    onNavigateToPacks, 
+    onNavigateToPacks,
+    onNavigateToPromotions,
     onNavigateToBlog, 
     onNavigateToContact 
 }) => {
@@ -61,7 +63,7 @@ export const NavBar: React.FC<NavBarProps> = ({
                     
                     {/* Right side: Promotions link */}
                     <div className="flex-1 flex items-center justify-end">
-                         <a href="#" className="text-sm font-semibold text-red-600 hover:underline">
+                         <a href="#" onClick={(e) => handleLinkClick(e, onNavigateToPromotions)} className="text-sm font-semibold text-red-600 hover:underline">
                             PROMOTIONS
                         </a>
                     </div>
