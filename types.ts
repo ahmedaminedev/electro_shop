@@ -11,6 +11,7 @@ export interface Product {
   material?: string;
   description?: string;
   quantity: number;
+  specifications?: { name: string; value: string; }[];
 }
 
 export interface SubCategoryItem {
@@ -207,4 +208,14 @@ export interface Promotion {
   endDate: string; // YYYY-MM-DD
   productIds: number[];
   packIds: number[];
+}
+
+export interface SearchResultItem {
+  item: Product;
+  context: string; // e.g., 'In category: ...', 'In pack: ...'
+}
+
+export interface SearchResult {
+  products: SearchResultItem[];
+  categories: { name: string }[];
 }

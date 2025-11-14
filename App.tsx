@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { Header } from './components/Header';
@@ -26,11 +27,15 @@ import { AdminPage } from './components/admin/AdminPage';
 import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages, initialAdvertisements, mockUser, mockPromotions } from './constants';
 import { FavoritesPage } from './components/FavoritesPage';
 import { ProfilePage } from './components/ProfilePage';
+import { ProductDetailPage } from './components/ProductDetailPage';
+import { PackDetailPage } from './components/PackDetailPage';
 
 
 type View =
   | { name: 'home'; data: null }
   | { name: 'productList'; data: { categoryName: string } }
+  | { name: 'productDetail'; data: { productId: number } }
+  | { name: 'packDetail'; data: { packId: number } }
   | { name: 'packs'; data: null }
   | { name: 'promotions'; data: null }
   | { name: 'blog'; data: null }
@@ -76,6 +81,8 @@ const App: React.FC = () => {
     const handleNavigateToAdmin = () => handleNavigate({ name: 'admin', data: null });
     const handleNavigateToFavorites = () => handleNavigate({ name: 'favorites', data: null });
     const handleNavigateToProfile = () => handleNavigate({ name: 'profile', data: null });
+    const handleNavigateToProductDetail = (productId: number) => handleNavigate({ name: 'productDetail', data: { productId } });
+    const handleNavigateToPackDetail = (packId: number) => handleNavigate({ name: 'packDetail', data: { packId } });
 
 
     const handleLoginSuccess = () => {
@@ -167,6 +174,7 @@ const App: React.FC = () => {
                     products={products}
                     packs={packs}
                     advertisements={advertisements}
+                    onNavigateToProductDetail={handleNavigateToProductDetail}
                 />;
             case 'productList':
                 return <ProductListPage 
@@ -178,6 +186,35 @@ const App: React.FC = () => {
                     onPreview={handlePreviewProduct}
                     onNavigateToPacks={handleNavigateToPacks}
                     products={products}
+                    onNavigateToProductDetail={handleNavigateToProductDetail}
+                />;
+            case 'productDetail':
+                const product = products.find(p => p.id === view.data.productId);
+                if (!product) {
+                    // Fallback if product not found
+                    return <div>Produit non trouvé</div>
+                }
+                return <ProductDetailPage 
+                    product={product} 
+                    allProducts={products}
+                    onNavigateHome={handleNavigateHome}
+                    onNavigateToProductDetail={handleNavigateToProductDetail}
+                    onPreview={handlePreviewProduct}
+                />
+            case 'packDetail':
+                const packToDisplay = packs.find(p => p.id === view.data.packId);
+                if (!packToDisplay) {
+                    return <div>Pack non trouvé</div>;
+                }
+                return <PackDetailPage
+                    pack={packToDisplay}
+                    allProducts={products}
+                    allPacks={packs}
+                    onNavigateHome={handleNavigateHome}
+                    onNavigateToProductDetail={handleNavigateToProductDetail}
+                    onNavigateToPackDetail={handleNavigateToPackDetail}
+                    // FIX: Pass handleNavigateToPacks to PackDetailPage for breadcrumb navigation.
+                    onNavigateToPacks={handleNavigateToPacks}
                 />;
             case 'packs':
                 return <PacksPage
@@ -189,6 +226,7 @@ const App: React.FC = () => {
                     allProducts={products}
                     allPacks={packs}
                     onNavigateToPacks={handleNavigateToPacks}
+                    onNavigateToPackDetail={handleNavigateToPackDetail}
                 />;
             case 'promotions':
                 return <PromotionsPage
@@ -196,6 +234,7 @@ const App: React.FC = () => {
                     onNavigateToCategory={handleNavigateToCategory}
                     onPreview={handlePreviewProduct}
                     products={products}
+                    onNavigateToProductDetail={handleNavigateToProductDetail}
                 />;
             case 'blog':
                 return <BlogPage onNavigateHome={handleNavigateHome} onSelectPost={handleNavigateToBlogPost} />;
@@ -212,6 +251,7 @@ const App: React.FC = () => {
                     onNavigateHome={handleNavigateHome} 
                     onPreview={handlePreviewProduct}
                     allProducts={products}
+                    onNavigateToProductDetail={handleNavigateToProductDetail}
                 />;
             case 'profile':
                  if (!currentUser) {
@@ -252,6 +292,7 @@ const App: React.FC = () => {
                     products={products}
                     packs={packs}
                     advertisements={advertisements}
+                    onNavigateToProductDetail={handleNavigateToProductDetail}
                 />;
         }
     };
@@ -273,6 +314,11 @@ const App: React.FC = () => {
                                 onLogout={handleLogout}
                                 onNavigateToFavorites={handleNavigateToFavorites}
                                 onNavigateToProfile={handleNavigateToProfile}
+                                allProducts={products}
+                                allPacks={packs}
+                                allCategories={categories}
+                                onNavigateToCategory={handleNavigateToCategory}
+                                onNavigateToProductDetail={handleNavigateToProductDetail}
                             />
                             <NavBar 
                                 onNavigateHome={handleNavigateHome}

@@ -21,9 +21,10 @@ interface HomePageProps {
     products: Product[];
     packs: Pack[];
     advertisements: Advertisements;
+    onNavigateToProductDetail: (productId: number) => void;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview, onNavigateToPacks, products, packs, advertisements }) => {
+export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview, onNavigateToPacks, products, packs, advertisements, onNavigateToProductDetail }) => {
     
     // This logic should be here to ensure it uses up-to-date product quantities
     const getProductById = (id: number) => products.find(p => p.id === id);
@@ -46,7 +47,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, 
                     <HeroSection slides={advertisements.heroSlides} />
                     <TrustBadges />
                     <DestockageCarousel ads={advertisements.destockage} />
-                    <ProductCarousel title="Nouvelles Arrivées" products={newArrivalProducts} onPreview={onPreview} />
+                    <ProductCarousel title="Nouvelles Arrivées" products={newArrivalProducts} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                     <AudioPromoBanner ads={advertisements.audioPromo} />
                     <PromoBanners 
                         banners={advertisements.promoBanners}
@@ -55,8 +56,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, 
                         onPreview={onPreview}
                     />
                     <SmallPromoBanners ads={advertisements.smallPromoBanners} />
-                    <ProductCarousel title="Sélection d'été" products={summerSelectionProducts} onPreview={onPreview} />
-                    <ProductGridSection allProducts={products} onPreview={onPreview} />
+                    <ProductCarousel title="Sélection d'été" products={summerSelectionProducts} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
+                    <ProductGridSection allProducts={products} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                     <BrandCarousel brands={brands} />
                 </main>
             </div>

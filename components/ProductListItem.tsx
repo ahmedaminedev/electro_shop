@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { Product } from '../types';
 import { EyeIcon, CartIcon } from './IconComponents';
@@ -7,15 +8,21 @@ import { useCart } from './CartContext';
 interface ProductListItemProps {
     product: Product;
     onPreview: (product: Product) => void;
+    onNavigateToProductDetail: (productId: number) => void;
 }
 
-export const ProductListItem: React.FC<ProductListItemProps> = ({ product, onPreview }) => {
+export const ProductListItem: React.FC<ProductListItemProps> = ({ product, onPreview, onNavigateToProductDetail }) => {
     const { addToCart, openCart } = useCart();
 
     const handleAddToCart = () => {
         addToCart(product);
         openCart();
     };
+    
+    const handleProductClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        onNavigateToProductDetail(product.id);
+    }
 
     // Calculate the percentage for the discount badge
     const discountPercentage = product.oldPrice && product.price 
@@ -26,7 +33,7 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({ product, onPre
         <div className="flex flex-col md:flex-row items-center p-4 gap-6">
             {/* Image Section */}
             <div className="relative flex-shrink-0 w-full md:w-56">
-                <a href="#">
+                <a href="#" onClick={handleProductClick}>
                     <img
                         src={product.imageUrl}
                         alt={product.name}
@@ -42,7 +49,7 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({ product, onPre
 
             {/* Middle Section: Product Details */}
             <div className="flex-grow text-center md:text-left">
-                <a href="#" className="text-lg text-gray-800 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-500 transition-colors font-semibold">
+                <a href="#" onClick={handleProductClick} className="text-lg text-gray-800 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-500 transition-colors font-semibold">
                     {product.name}
                 </a>
                 {/* Could add more details here if needed, e.g., description snippets */}

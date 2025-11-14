@@ -11,6 +11,7 @@ interface PromotionsPageProps {
     onNavigateToCategory: (categoryName: string) => void;
     onPreview: (product: Product) => void;
     products: Product[];
+    onNavigateToProductDetail: (productId: number) => void;
 }
 
 const CountdownTimer: React.FC = () => {
@@ -57,7 +58,7 @@ const CountdownTimer: React.FC = () => {
     );
 };
 
-const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) => void; }> = ({ product, onPreview }) => {
+const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) => void; onNavigateToProductDetail: (productId: number) => void; }> = ({ product, onPreview, onNavigateToProductDetail }) => {
     const { addToCart, openCart } = useCart();
     
     const handleAddToCart = () => {
@@ -69,11 +70,17 @@ const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) =
         <section className="my-12">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row items-center p-6 sm:p-8">
                 <div className="w-full lg:w-2/5 mb-6 lg:mb-0">
-                    <img src={product.imageUrl} alt={product.name} className="w-full max-w-sm mx-auto object-contain rounded-lg transition-transform duration-500 hover:scale-105" />
+                    <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToProductDetail(product.id); }}>
+                        <img src={product.imageUrl} alt={product.name} className="w-full max-w-sm mx-auto object-contain rounded-lg transition-transform duration-500 hover:scale-105" />
+                    </a>
                 </div>
                 <div className="w-full lg:w-3/5 text-center lg:text-left lg:pl-12">
                     <h2 className="text-xl font-bold text-red-600 uppercase tracking-wider">Offre du jour</h2>
-                    <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white my-3">{product.name}</h3>
+                    <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white my-3">
+                        <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToProductDetail(product.id); }} className="hover:text-red-600 transition-colors">
+                            {product.name}
+                        </a>
+                    </h3>
                     <p className="text-gray-600 dark:text-gray-300 mb-6">{product.description}</p>
                     <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8">
                         <div className="flex items-baseline gap-2">
@@ -102,7 +109,7 @@ const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) =
 };
 
 
-export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, onPreview, products: allProducts }) => {
+export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, onPreview, products: allProducts, onNavigateToProductDetail }) => {
     const promotionProducts = useMemo(() => allProducts.filter(p => p.promo || p.discount), [allProducts]);
     const [sortOrder, setSortOrder] = useState('discount-desc');
     const [viewMode, setViewMode] = useState('grid');
@@ -160,7 +167,7 @@ export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, 
                     <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: 'Promotions' }]} />
                 </div>
                 
-                <DealOfTheDay product={dealOfTheDayProduct} onPreview={onPreview} />
+                <DealOfTheDay product={dealOfTheDayProduct} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
 
                 <main>
                     <div className="flex justify-between items-center mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -190,13 +197,13 @@ export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, 
                         viewMode === 'list' ? (
                             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
                                 {displayedProducts.map(product => (
-                                    <ProductListItem key={product.id} product={product} onPreview={onPreview} />
+                                    <ProductListItem key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                                 ))}
                             </div>
                         ) : (
                             <div className={`grid ${gridClasses} gap-6`}>
                                 {displayedProducts.map(product => (
-                                    <ProductCard key={product.id} product={product} onPreview={onPreview} />
+                                    <ProductCard key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                                 ))}
                             </div>
                         )

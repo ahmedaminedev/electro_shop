@@ -17,6 +17,7 @@ interface ProductListPageProps {
     onPreview: (product: Product) => void;
     onNavigateToPacks: () => void;
     products: Product[];
+    onNavigateToProductDetail: (productId: number) => void;
 }
 
 export const ProductListPage: React.FC<ProductListPageProps> = ({ 
@@ -27,7 +28,8 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
     onToggleNav,
     onPreview,
     onNavigateToPacks,
-    products: allProducts
+    products: allProducts,
+    onNavigateToProductDetail
 }) => {
     const [initialProducts, setInitialProducts] = useState<Product[]>([]);
     const [sortOrder, setSortOrder] = useState('price-asc');
@@ -151,13 +153,13 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
                                 viewMode === 'list' ? (
                                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
                                         {displayedProducts.map(product => (
-                                            <ProductListItem key={product.id} product={product} onPreview={onPreview} />
+                                            <ProductListItem key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail}/>
                                         ))}
                                     </div>
                                 ) : (
                                     <div className={`grid ${gridClasses} gap-6`}>
                                         {displayedProducts.map(product => (
-                                            <ProductCard key={product.id} product={product} onPreview={onPreview} />
+                                            <ProductCard key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                                         ))}
                                     </div>
                                 )

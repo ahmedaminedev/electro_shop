@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { Product } from '../types';
 import { ChevronLeftIcon, ChevronRightIcon } from './IconComponents';
@@ -8,9 +9,10 @@ interface ProductCarouselProps {
     title: string;
     products: Product[];
     onPreview: (product: Product) => void;
+    onNavigateToProductDetail: (productId: number) => void;
 }
 
-export const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products, onPreview }) => {
+export const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products, onPreview, onNavigateToProductDetail }) => {
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
@@ -38,7 +40,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, product
             <div ref={scrollRef} className="flex space-x-6 overflow-x-auto pb-4 no-scrollbar">
                 {products.map(product => (
                     <div key={product.id} className="flex-shrink-0 w-60 sm:w-64">
-                         <ProductCard product={product} onPreview={onPreview} />
+                         <ProductCard product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                     </div>
                 ))}
             </div>

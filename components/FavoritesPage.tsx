@@ -10,6 +10,7 @@ interface FavoritesPageProps {
     onNavigateHome: () => void;
     onPreview: (product: Product) => void;
     allProducts: Product[];
+    onNavigateToProductDetail: (productId: number) => void;
 }
 
 const FavoritesSummary: React.FC<{
@@ -81,7 +82,7 @@ const FavoritesSummary: React.FC<{
 };
 
 
-export const FavoritesPage: React.FC<FavoritesPageProps> = ({ onNavigateHome, onPreview, allProducts }) => {
+export const FavoritesPage: React.FC<FavoritesPageProps> = ({ onNavigateHome, onPreview, allProducts, onNavigateToProductDetail }) => {
     const { favoriteIds } = useFavorites();
     const { addToCart, openCart } = useCart();
 
@@ -123,7 +124,7 @@ export const FavoritesPage: React.FC<FavoritesPageProps> = ({ onNavigateHome, on
                         <main className="flex-grow">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {favoriteProducts.map(product => (
-                                    <ProductCard key={product.id} product={product} onPreview={onPreview} />
+                                    <ProductCard key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                                 ))}
                             </div>
                         </main>

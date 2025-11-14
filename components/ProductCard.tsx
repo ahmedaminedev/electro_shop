@@ -7,9 +7,10 @@ import { useFavorites } from './FavoritesContext';
 interface ProductCardProps {
     product: Product;
     onPreview: (product: Product) => void;
+    onNavigateToProductDetail: (productId: number) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, onNavigateToProductDetail }) => {
     const { addToCart, openCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
     const isOutOfStock = product.quantity === 0;
@@ -20,11 +21,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) 
         addToCart(product);
         openCart();
     };
+    
+    const handleProductClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        onNavigateToProductDetail(product.id);
+    };
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700">
             <div className="relative overflow-hidden">
-                <a href="#" className="block">
+                <a href="#" onClick={handleProductClick} className="block">
                     <img 
                         src={product.imageUrl} 
                         alt={product.name} 
@@ -64,7 +70,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) 
             <div className="p-4 flex flex-col flex-grow">
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 tracking-wider">{product.brand.toUpperCase()}</p>
                 <h3 className="font-semibold text-base text-gray-800 dark:text-gray-200 flex-grow mb-3">
-                    <a href="#" className="line-clamp-2 hover:text-red-600 transition-colors duration-200">{product.name}</a>
+                    <a href="#" onClick={handleProductClick} className="line-clamp-2 hover:text-red-600 transition-colors duration-200">{product.name}</a>
                 </h3>
 
                 <div className="mt-auto pt-2">

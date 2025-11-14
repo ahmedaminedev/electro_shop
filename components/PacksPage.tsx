@@ -16,6 +16,7 @@ interface PacksPageProps {
     allProducts: Product[];
     allPacks: Pack[];
     onNavigateToPacks: () => void;
+    onNavigateToPackDetail: (packId: number) => void;
 }
 
 // Helper function to check pack availability recursively
@@ -37,7 +38,7 @@ const isPackAvailable = (pack: Pack, allProducts: Product[], allPacks: Pack[]): 
     return true;
 };
 
-const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[]; }> = ({ pack, allProducts, allPacks }) => {
+const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[]; onNavigateToPackDetail: (packId: number) => void; }> = ({ pack, allProducts, allPacks, onNavigateToPackDetail }) => {
     const { addToCart, openCart } = useCart();
     const savings = pack.oldPrice - pack.price;
     const isAvailable = useMemo(() => isPackAvailable(pack, allProducts, allPacks), [pack, allProducts, allPacks]);
@@ -53,7 +54,7 @@ const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[];
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1">
-            <div className="relative">
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToPackDetail(pack.id); }} className="relative block">
                 <img 
                     src={pack.imageUrl} 
                     alt={pack.name} 
@@ -67,7 +68,7 @@ const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[];
                         INDISPONIBLE
                     </span>
                 )}
-            </div>
+            </a>
 
             <div className="p-4 flex flex-col flex-grow">
                 <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm flex-grow">{pack.description}</p>
@@ -115,7 +116,7 @@ const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[];
     );
 };
 
-const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[]; }> = ({ pack, allProducts, allPacks }) => {
+const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[]; onNavigateToPackDetail: (packId: number) => void; }> = ({ pack, allProducts, allPacks, onNavigateToPackDetail }) => {
     const { addToCart, openCart } = useCart();
     const isAvailable = useMemo(() => isPackAvailable(pack, allProducts, allPacks), [pack, allProducts, allPacks]);
 
@@ -130,16 +131,18 @@ const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pac
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-center p-4 gap-6">
-            <div className="relative flex-shrink-0 w-full md:w-64">
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToPackDetail(pack.id); }} className="relative flex-shrink-0 w-full md:w-64 block">
                 <img
                     src={pack.imageUrl}
                     alt={pack.name}
                     className={`w-full h-auto object-contain rounded-lg ${!isAvailable ? 'filter grayscale' : ''}`}
                 />
-            </div>
+            </a>
 
             <div className="flex-grow text-center md:text-left">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{pack.name}</h3>
+                <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToPackDetail(pack.id); }} className="block">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 hover:text-red-600 transition-colors">{pack.name}</h3>
+                </a>
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">{pack.description}</p>
                 <div>
                     <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-2">Inclus dans ce pack :</h4>
@@ -181,7 +184,7 @@ const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pac
     );
 };
 
-export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigateToCategory, isNavCollapsed, onToggleNav, packs, allProducts, allPacks, onNavigateToPacks }) => {
+export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigateToCategory, isNavCollapsed, onToggleNav, packs, allProducts, allPacks, onNavigateToPacks, onNavigateToPackDetail }) => {
     const [sortOrder, setSortOrder] = useState('price-asc');
     const [viewMode, setViewMode] = useState('grid');
     const [filters, setFilters] = useState({
@@ -297,13 +300,13 @@ export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigate
                                 viewMode === 'list' ? (
                                     <div className="space-y-6">
                                         {displayedPacks.map(pack => (
-                                            <PackListItem key={pack.id} pack={pack} allProducts={allProducts} allPacks={allPacks} />
+                                            <PackListItem key={pack.id} pack={pack} allProducts={allProducts} allPacks={allPacks} onNavigateToPackDetail={onNavigateToPackDetail} />
                                         ))}
                                     </div>
                                 ) : (
                                     <div className={`grid ${gridClasses} gap-8`}>
                                         {displayedPacks.map(pack => (
-                                            <PackCard key={pack.id} pack={pack} allProducts={allProducts} allPacks={allPacks} />
+                                            <PackCard key={pack.id} pack={pack} allProducts={allProducts} allPacks={allPacks} onNavigateToPackDetail={onNavigateToPackDetail} />
                                         ))}
                                     </div>
                                 )

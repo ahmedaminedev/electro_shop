@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import type { Product } from '../types';
 import { ProductCard } from './ProductCard';
@@ -6,9 +7,10 @@ import { ProductCard } from './ProductCard';
 interface ProductGridSectionProps {
     allProducts: Product[];
     onPreview: (product: Product) => void;
+    onNavigateToProductDetail: (productId: number) => void;
 }
 
-export const ProductGridSection: React.FC<ProductGridSectionProps> = ({ allProducts, onPreview }) => {
+export const ProductGridSection: React.FC<ProductGridSectionProps> = ({ allProducts, onPreview, onNavigateToProductDetail }) => {
     const [activeTab, setActiveTab] = useState('En promotion');
 
     const filteredProducts = useMemo(() => {
@@ -42,7 +44,7 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({ allProdu
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {filteredProducts.map(product => (
-                    <ProductCard key={product.id} product={product} onPreview={onPreview} />
+                    <ProductCard key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                 ))}
             </div>
 
