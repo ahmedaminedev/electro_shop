@@ -14,6 +14,7 @@
             darkMode: 'class',
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         /* Custom scrollbar for webkit browsers */
         .no-scrollbar::-webkit-scrollbar {
@@ -91,6 +92,31 @@
         .audio-promo-slide.active .ap-subtitle1 { transition-delay: 350ms; }
         .audio-promo-slide.active .ap-subtitle2 { transition-delay: 500ms; }
         .audio-promo-slide.active .ap-image { transition-delay: 400ms; }
+
+        /* Print styles for Invoice */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #invoice-printable-area, #invoice-printable-area * {
+                visibility: visible;
+            }
+            #invoice-printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+                /* Ensure dark mode styles are overridden for print */
+                color: black !important;
+                background-color: white !important;
+            }
+            .print-hide {
+                display: none !important;
+            }
+        }
     </style>
   <script type="importmap">
 {

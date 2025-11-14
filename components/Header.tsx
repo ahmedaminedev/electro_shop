@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import { SearchIcon, UserIcon, CartIcon, HeartIcon } from './IconComponents';
 import { Logo } from './Logo';
@@ -15,6 +14,7 @@ interface HeaderProps {
     onLogout: () => void;
     onNavigateToFavorites: () => void;
     onNavigateToProfile: () => void;
+    onNavigateToOrderHistory: () => void;
     allProducts: Product[];
     allPacks: Pack[];
     allCategories: Category[];
@@ -41,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
     onLogout, 
     onNavigateToFavorites, 
     onNavigateToProfile,
+    onNavigateToOrderHistory,
     allProducts,
     allPacks,
     allCategories,
@@ -211,6 +212,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 onMouseLeave={() => setIsProfileMenuOpen(false)}
                             >
                                 <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToProfile(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mon Profil</a>
+                                <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToOrderHistory(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mes Commandes</a>
                                 <a href="#" onClick={(e) => { e.preventDefault(); onLogout(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Déconnexion</a>
                             </div>
                         )}

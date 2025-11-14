@@ -1,17 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
-import type { User, Address, Order } from '../types';
+import type { User, Address } from '../types';
 import { Breadcrumb } from './Breadcrumb';
-import { UserIcon, LocationIcon, LockIcon, PencilIcon, TrashIcon, PlusIcon, ShoppingBagIcon, CalendarIcon } from './IconComponents';
-import { orders as mockOrders } from '../constants'; // For mock data
+import { UserIcon, LocationIcon, LockIcon, PencilIcon, TrashIcon, PlusIcon } from './IconComponents';
 
 interface ProfilePageProps {
     user: User | null;
     onNavigateHome: () => void;
     onUpdateUser: (user: User) => void;
-    orders: Order[]; // Passed from App.tsx
 }
 
-type ProfileTab = 'info' | 'orders' | 'address' | 'security';
+type ProfileTab = 'info' | 'address' | 'security';
 
 const TabButton: React.FC<{ icon: React.ReactNode; label: string; tab: ProfileTab; activeTab: ProfileTab; onClick: (tab: ProfileTab) => void }> = 
 ({ icon, label, tab, activeTab, onClick }) => (
@@ -41,49 +40,6 @@ const InfoSection: React.FC<{ user: User, onUpdateUser: (user: User) => void }> 
             </div>
              <div className="flex justify-end mt-8">
                 <button className="bg-red-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-red-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Enregistrer les modifications</button>
-            </div>
-        </div>
-    );
-};
-
-const OrderStatusBadge: React.FC<{ status: Order['status'] }> = ({ status }) => {
-    const baseClasses = 'px-2.5 py-1 text-xs font-semibold rounded-full';
-    const statusClasses = {
-        'Livrée': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        'Expédiée': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        'En attente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        'Annulée': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-    };
-    return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
-};
-
-const OrdersSection: React.FC<{ orders: Order[] }> = ({ orders }) => {
-    // In a real app, you would filter orders for the current user.
-    // For this mock, we'll display the first few from the global list.
-    const userOrders = orders.slice(0, 3);
-    return (
-        <div className="animate-fadeIn">
-            <h3 className="text-2xl font-bold mb-6">Mes Commandes</h3>
-            <div className="space-y-4">
-                {userOrders.length > 0 ? userOrders.map(order => (
-                    <div key={order.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-md border dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                       <div className="flex-grow">
-                            <p className="font-bold text-gray-800 dark:text-gray-100">Commande #{order.id}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
-                                <CalendarIcon className="w-4 h-4" /> Fait le {order.date}
-                            </p>
-                       </div>
-                       <div className="flex-shrink-0">
-                           <OrderStatusBadge status={order.status} />
-                       </div>
-                       <div className="text-lg font-bold text-gray-900 dark:text-white flex-shrink-0 sm:text-right">
-                           {order.total.toFixed(3).replace('.',',')} DT
-                       </div>
-                       <button className="text-red-600 dark:text-red-500 text-sm font-semibold hover:underline">Voir les détails</button>
-                    </div>
-                )) : (
-                    <p>Vous n'avez aucune commande.</p>
-                )}
             </div>
         </div>
     );
@@ -139,7 +95,7 @@ const InputField: React.FC<{ label: string; id: string; value?: string | number;
 );
 
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onNavigateHome, onUpdateUser, orders }) => {
+export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onNavigateHome, onUpdateUser }) => {
     const [activeTab, setActiveTab] = useState<ProfileTab>('info');
 
     useEffect(() => {
@@ -165,7 +121,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onNavigateHome, 
     const renderContent = () => {
         switch(activeTab) {
             case 'info': return <InfoSection user={user} onUpdateUser={onUpdateUser} />;
-            case 'orders': return <OrdersSection orders={orders} />;
             case 'address': return <AddressSection user={user} onUpdateUser={onUpdateUser} />;
             case 'security': return <SecuritySection />;
             default: return null;
@@ -190,7 +145,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onNavigateHome, 
                         <aside className="w-full md:w-1/4 lg:w-1/5 p-6 border-r dark:border-gray-700">
                              <nav className="space-y-2">
                                 <TabButton icon={<UserIcon className="w-5 h-5"/>} label="Mon Compte" tab="info" activeTab={activeTab} onClick={setActiveTab} />
-                                <TabButton icon={<ShoppingBagIcon className="w-5 h-5"/>} label="Mes Commandes" tab="orders" activeTab={activeTab} onClick={setActiveTab} />
                                 <TabButton icon={<LocationIcon className="w-5 h-5"/>} label="Mes Adresses" tab="address" activeTab={activeTab} onClick={setActiveTab} />
                                 <TabButton icon={<LockIcon className="w-5 h-5"/>} label="Sécurité" tab="security" activeTab={activeTab} onClick={setActiveTab} />
                             </nav>

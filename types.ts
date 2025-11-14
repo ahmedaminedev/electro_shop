@@ -1,3 +1,4 @@
+
 export interface Product {
   id: number;
   name: string;
@@ -73,6 +74,15 @@ export interface CartItem {
   originalItem: Cartable;
 }
 
+export interface OrderItem {
+  productId: number;
+  name: string;
+  imageUrl: string;
+  quantity: number;
+  price: number;
+}
+
+
 export interface Order {
   id: string;
   customerName: string;
@@ -80,6 +90,9 @@ export interface Order {
   total: number;
   status: 'En attente' | 'Expédiée' | 'Livrée' | 'Annulée';
   itemCount: number;
+  items: (OrderItem & Product)[]; // Merging for convenience to have product details readily available
+  shippingAddress: Address;
+  paymentMethod: string;
 }
 
 export interface ContactMessage {
@@ -218,4 +231,16 @@ export interface SearchResultItem {
 export interface SearchResult {
   products: SearchResultItem[];
   categories: { name: string }[];
+}
+
+export interface CustomerInfo {
+  email: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  address2: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  phone: string;
 }

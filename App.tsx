@@ -1,9 +1,5 @@
 
 
-
-
-
-
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { Header } from './components/Header';
@@ -22,7 +18,7 @@ import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
 import { PromotionsPage } from './components/PromotionsPage';
 import { CheckoutPage } from './components/CheckoutPage';
-import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem, Advertisements, User, Promotion } from './types';
+import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem, Advertisements, User, Promotion, CustomerInfo } from './types';
 import { CartProvider } from './components/CartContext';
 import { FavoritesProvider } from './components/FavoritesContext';
 import { CartSidebar } from './components/CartSidebar';
@@ -33,6 +29,8 @@ import { ProfilePage } from './components/ProfilePage';
 import { ProductDetailPage } from './components/ProductDetailPage';
 import { PackDetailPage } from './components/PackDetailPage';
 import { PaymentGatewayPage } from './components/PaymentGatewayPage';
+import { OrderHistoryPage } from './components/OrderHistoryPage';
+import { OrderDetailPage } from './components/OrderDetailPage';
 
 
 type View =
@@ -47,10 +45,12 @@ type View =
   | { name: 'contact'; data: null }
   | { name: 'login'; data: null }
   | { name: 'checkout'; data: null }
-  | { name: 'paymentGateway'; data: { orderId: string; total: number } }
+  | { name: 'paymentGateway'; data: { orderId: string; total: number; customerInfo: CustomerInfo } }
   | { name: 'admin'; data: null }
   | { name: 'favorites'; data: null }
-  | { name: 'profile'; data: null };
+  | { name: 'profile'; data: null }
+  | { name: 'orderHistory'; data: null }
+  | { name: 'orderDetail'; data: { orderId: string } };
 
 
 const App: React.FC = () => {
@@ -86,9 +86,11 @@ const App: React.FC = () => {
     const handleNavigateToAdmin = () => handleNavigate({ name: 'admin', data: null });
     const handleNavigateToFavorites = () => handleNavigate({ name: 'favorites', data: null });
     const handleNavigateToProfile = () => handleNavigate({ name: 'profile', data: null });
+    const handleNavigateToOrderHistory = () => handleNavigate({ name: 'orderHistory', data: null });
+    const handleNavigateToOrderDetail = (orderId: string) => handleNavigate({ name: 'orderDetail', data: { orderId } });
     const handleNavigateToProductDetail = (productId: number) => handleNavigate({ name: 'productDetail', data: { productId } });
     const handleNavigateToPackDetail = (packId: number) => handleNavigate({ name: 'packDetail', data: { packId } });
-    const handleNavigateToPaymentGateway = (orderId: string, total: number) => handleNavigate({ name: 'paymentGateway', data: { orderId, total } });
+    const handleNavigateToPaymentGateway = (orderId: string, total: number, customerInfo: CustomerInfo) => handleNavigate({ name: 'paymentGateway', data: { orderId, total, customerInfo } });
 
 
     const handleLoginSuccess = () => {
@@ -111,7 +113,7 @@ const App: React.FC = () => {
         setPreviewProduct(null);
     };
 
-    const handleOrderComplete = (cartItems: CartItem[]) => {
+    const handleOrderComplete = (cartItems: CartItem[], customerInfo: CustomerInfo) => {
         setProducts(currentProducts => {
             const newProducts = [...currentProducts];
             const productQuantityUpdates: { [id: number]: number } = {};
@@ -156,11 +158,33 @@ const App: React.FC = () => {
         // Optionally, add a new order to the list
         const newOrder: Order = {
             id: `ES-${1025 + orders.length}`,
-            customerName: "Nouveau Client",
+            customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
             date: new Date().toISOString().split('T')[0],
             total: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
             status: 'En attente',
-            itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0)
+            itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
+            items: cartItems.map(cartItem => {
+                const isPack = cartItem.id.startsWith('pack-');
+                const originalProduct = isPack ? null : cartItem.originalItem as Product;
+
+                // FIX: Add missing 'id' property required by the `(OrderItem & Product)` type.
+                return {
+                    id: cartItem.originalItem.id,
+                    productId: cartItem.originalItem.id,
+                    name: cartItem.name,
+                    imageUrl: cartItem.imageUrl,
+                    quantity: cartItem.quantity,
+                    price: cartItem.price,
+                    // These fields below are from Product type, we fill them if we can
+                    // This is to satisfy OrderItem which extends Product
+                    brand: originalProduct?.brand || 'Pack',
+                    category: originalProduct?.category || 'Packs',
+                    promo: originalProduct?.promo,
+                    description: originalProduct?.description,
+                };
+            }),
+            shippingAddress: mockUser.addresses.find(a => a.isDefault) || mockUser.addresses[0], // Use a default address for now
+            paymentMethod: 'Paiement par carte',
         };
         setOrders(prev => [newOrder, ...prev]);
 
@@ -259,6 +283,7 @@ const App: React.FC = () => {
                 return <PaymentGatewayPage
                     orderId={view.data.orderId}
                     total={view.data.total}
+                    customerInfo={view.data.customerInfo}
                     onNavigateHome={handleNavigateHome}
                     onOrderComplete={handleOrderComplete}
                     onGoBack={handleNavigateToCheckout}
@@ -279,7 +304,33 @@ const App: React.FC = () => {
                     user={currentUser} 
                     onNavigateHome={handleNavigateHome} 
                     onUpdateUser={setCurrentUser}
+                />;
+            case 'orderHistory':
+                if (!currentUser) {
+                    handleNavigateToLogin();
+                    return null;
+                }
+                return <OrderHistoryPage
                     orders={orders}
+                    onNavigateHome={handleNavigateHome}
+                    onNavigateToProfile={handleNavigateToProfile}
+                    onNavigateToOrderDetail={handleNavigateToOrderDetail}
+                />;
+            case 'orderDetail':
+                if (!currentUser) {
+                    handleNavigateToLogin();
+                    return null;
+                }
+                const order = orders.find(o => o.id === view.data.orderId);
+                if (!order) {
+                    return <div className="text-center p-20">Commande non trouvée.</div>
+                }
+                return <OrderDetailPage
+                    order={order}
+                    allProducts={products}
+                    onNavigateToOrderHistory={handleNavigateToOrderHistory}
+                    onNavigateHome={handleNavigateHome}
+                    onNavigateToProductDetail={handleNavigateToProductDetail}
                 />;
             case 'admin':
                 return <AdminPage 
@@ -331,6 +382,7 @@ const App: React.FC = () => {
                                 onLogout={handleLogout}
                                 onNavigateToFavorites={handleNavigateToFavorites}
                                 onNavigateToProfile={handleNavigateToProfile}
+                                onNavigateToOrderHistory={handleNavigateToOrderHistory}
                                 allProducts={products}
                                 allPacks={packs}
                                 allCategories={categories}

@@ -1,18 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
 import { useCart } from './CartContext';
-import type { CartItem } from '../types';
+import type { CartItem, CustomerInfo } from '../types';
 import { LockIcon, VisaIcon, MastercardIcon, ArrowLongLeftIcon } from './IconComponents';
 import { Logo } from './Logo';
 
 interface PaymentGatewayPageProps {
     orderId: string;
     total: number;
+    customerInfo: CustomerInfo;
     onNavigateHome: () => void;
-    onOrderComplete: (cartItems: CartItem[]) => void;
+    onOrderComplete: (cartItems: CartItem[], customerInfo: CustomerInfo) => void;
     onGoBack: () => void;
 }
 
-export const PaymentGatewayPage: React.FC<PaymentGatewayPageProps> = ({ orderId, total, onNavigateHome, onOrderComplete, onGoBack }) => {
+export const PaymentGatewayPage: React.FC<PaymentGatewayPageProps> = ({ orderId, total, customerInfo, onNavigateHome, onOrderComplete, onGoBack }) => {
     const { cartItems, clearCart } = useCart();
     const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
 
@@ -36,7 +38,7 @@ export const PaymentGatewayPage: React.FC<PaymentGatewayPageProps> = ({ orderId,
     const handlePayment = (e: React.FormEvent) => {
         e.preventDefault();
         // Simulate payment success
-        onOrderComplete(cartItems);
+        onOrderComplete(cartItems, customerInfo);
         clearCart();
     };
 

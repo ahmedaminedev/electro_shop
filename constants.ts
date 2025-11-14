@@ -1,3 +1,4 @@
+
 import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements, User, Promotion } from './types';
 
 export const allProducts: Product[] = [
@@ -329,12 +330,81 @@ export const blogPosts: BlogPost[] = [
     }
 ];
 
+export const mockUser: User = {
+    id: 1,
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@email.com',
+    phone: '+216 22 123 456',
+    age: 34,
+    addresses: [
+        { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true },
+        { id: 2, type: 'Travail', street: '456 Avenue Habib Bourguiba', city: 'Tunis', postalCode: '1001', isDefault: false },
+    ]
+};
+
 export const orders: Order[] = [
-    { id: 'ES-1024', customerName: 'Karim Gharbi', date: '2023-10-26', total: 1099, status: 'Livrée', itemCount: 1 },
-    { id: 'ES-1023', customerName: 'Amina Ben Salah', date: '2023-10-25', total: 2389, status: 'Expédiée', itemCount: 1 },
-    { id: 'ES-1022', customerName: 'Mehdi Trabelsi', date: '2023-10-25', total: 398, status: 'En attente', itemCount: 3 },
-    { id: 'ES-1021', customerName: 'Fatma Bouaziz', date: '2023-10-24', total: 1239, status: 'Livrée', itemCount: 1 },
-    { id: 'ES-1020', customerName: 'Youssef Jlassi', date: '2023-10-22', total: 1899, status: 'Annulée', itemCount: 2 },
+    { 
+        id: 'ES-1024', 
+        customerName: 'Karim Gharbi', 
+        date: '2023-10-26', 
+        total: 1099, 
+        status: 'Livrée', 
+        itemCount: 1,
+        items: [{ ...allProducts.find(p => p.id === 3)!, productId: 3, quantity: 1, price: 1099 }],
+        shippingAddress: mockUser.addresses[0],
+        paymentMethod: 'Paiement par carte'
+    },
+    { 
+        id: 'ES-1023', 
+        customerName: 'Amina Ben Salah', 
+        date: '2023-10-25', 
+        total: 2389, 
+        status: 'Expédiée', 
+        itemCount: 1,
+        items: [{ ...allProducts.find(p => p.id === 4)!, productId: 4, quantity: 1, price: 2389 }],
+        shippingAddress: mockUser.addresses[1],
+        paymentMethod: 'Paiement par carte'
+    },
+    { 
+        id: 'ES-1022', 
+        customerName: 'Mehdi Trabelsi', 
+        date: '2023-10-25', 
+        total: 443, 
+        status: 'En attente', 
+        itemCount: 3,
+        items: [
+            { ...allProducts.find(p => p.id === 15)!, productId: 15, quantity: 1, price: 145 },
+            { ...allProducts.find(p => p.id === 16)!, productId: 16, quantity: 2, price: 149 }
+        ],
+        shippingAddress: mockUser.addresses[0],
+        paymentMethod: 'Paiement à la livraison'
+    },
+    { 
+        id: 'ES-1021', 
+        customerName: 'Fatma Bouaziz', 
+        date: '2023-10-24', 
+        total: 1239, 
+        status: 'Livrée', 
+        itemCount: 1,
+        items: [{ ...allProducts.find(p => p.id === 9)!, productId: 9, quantity: 1, price: 1239 }],
+        shippingAddress: mockUser.addresses[0],
+        paymentMethod: 'Paiement par carte'
+    },
+    { 
+        id: 'ES-1020', 
+        customerName: 'Youssef Jlassi', 
+        date: '2023-10-22', 
+        total: 1988, 
+        status: 'Annulée', 
+        itemCount: 2,
+        items: [
+            { ...allProducts.find(p => p.id === 2)!, productId: 2, quantity: 1, price: 999 },
+            { ...allProducts.find(p => p.id === 6)!, productId: 6, quantity: 1, price: 989 }
+        ],
+        shippingAddress: mockUser.addresses[1],
+        paymentMethod: 'Paiement par carte'
+    },
 ];
 
 export const contactMessages: ContactMessage[] = [
@@ -498,18 +568,5 @@ export const initialAdvertisements: Advertisements = {
             altText: "Offres TV 4K",
             link: "#"
         }
-    ]
-};
-
-export const mockUser: User = {
-    id: 1,
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@email.com',
-    phone: '+216 22 123 456',
-    age: 34,
-    addresses: [
-        { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true },
-        { id: 2, type: 'Travail', street: '456 Avenue Habib Bourguiba', city: 'Tunis', postalCode: '1001', isDefault: false },
     ]
 };

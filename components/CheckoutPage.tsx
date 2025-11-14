@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useCart } from './CartContext';
 import { 
@@ -13,12 +14,12 @@ import {
     MastercardIcon,
     PencilIcon
 } from './IconComponents';
-import type { CartItem } from '../types';
+import type { CartItem, CustomerInfo } from '../types';
 
 interface CheckoutPageProps {
     onNavigateHome: () => void;
-    onOrderComplete: (cartItems: CartItem[]) => void;
-    onNavigateToPaymentGateway: (orderId: string, total: number) => void;
+    onOrderComplete: (cartItems: CartItem[], customerInfo: CustomerInfo) => void;
+    onNavigateToPaymentGateway: (orderId: string, total: number, customerInfo: CustomerInfo) => void;
 }
 
 const FormInputWithIcon: React.FC<{ name: string; label: string; icon: React.ReactNode; type?: string; optional?: boolean; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }> = ({ name, label, icon, type = 'text', optional, value, onChange }) => (
@@ -195,7 +196,7 @@ const PaymentMethodSelector: React.FC<{ method: 'cod' | 'card'; selectedMethod: 
 
 export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOrderComplete, onNavigateToPaymentGateway }) => {
     const [activeStep, setActiveStep] = useState(1);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<CustomerInfo>({
         email: 'ahmed.nafti@example.com',
         firstName: 'ahmed',
         lastName: 'nafti',
@@ -242,11 +243,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
         }
 
         if (paymentMethod === 'cod') {
-            onOrderComplete(cartItems);
+            onOrderComplete(cartItems, formData);
             clearCart();
         } else if (paymentMethod === 'card') {
             const orderId = 'ES' + Date.now().toString().slice(-8).toUpperCase();
-            onNavigateToPaymentGateway(orderId, finalTotal);
+            onNavigateToPaymentGateway(orderId, finalTotal, formData);
         }
     };
 
