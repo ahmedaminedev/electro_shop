@@ -1,7 +1,8 @@
 import React from 'react';
 import type { Product } from '../types';
-import { CartIcon, EyeIcon } from './IconComponents';
+import { CartIcon, EyeIcon, HeartIcon } from './IconComponents';
 import { useCart } from './CartContext';
+import { useFavorites } from './FavoritesContext';
 
 interface ProductCardProps {
     product: Product;
@@ -10,7 +11,9 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) => {
     const { addToCart, openCart } = useCart();
+    const { toggleFavorite, isFavorite } = useFavorites();
     const isOutOfStock = product.quantity === 0;
+    const isFav = isFavorite(product.id);
 
     const handleAddToCart = () => {
         if (isOutOfStock) return;
@@ -44,8 +47,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview }) 
                         -{product.discount}%
                     </span>
                 )}
+                <button 
+                    onClick={() => toggleFavorite(product.id)} 
+                    className={`absolute top-3 right-3 p-2 rounded-full transition-colors z-10 ${isFav ? 'bg-red-100 text-red-600' : 'bg-white/70 text-gray-600 hover:bg-white hover:text-red-500'}`} 
+                    aria-label="Ajouter aux favoris"
+                >
+                    <HeartIcon className="w-5 h-5" solid={isFav} />
+                </button>
                  {isOutOfStock && (
-                    <span className="absolute top-3 right-3 bg-gray-700 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md z-10">
+                    <span className="absolute top-12 right-3 bg-gray-700 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md z-10 transform -rotate-12">
                         ÉPUISÉ
                     </span>
                 )}

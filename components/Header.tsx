@@ -1,19 +1,25 @@
 
+
 import React, { useState, useEffect } from 'react';
-import { SearchIcon, UserIcon, CartIcon } from './IconComponents';
+import { SearchIcon, UserIcon, CartIcon, HeartIcon } from './IconComponents';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { useCart } from './CartContext';
+import { useFavorites } from './FavoritesContext';
 
 interface HeaderProps {
     onNavigateToLogin: () => void;
     isLoggedIn: boolean;
     onLogout: () => void;
+    onNavigateToFavorites: () => void;
+    onNavigateToProfile: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigateToLogin, isLoggedIn, onLogout }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigateToLogin, isLoggedIn, onLogout, onNavigateToFavorites, onNavigateToProfile }) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const { itemCount, openCart } = useCart();
+    const { favoritesCount } = useFavorites();
+    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -45,17 +51,37 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToLogin, isLoggedIn, o
                 </div>
                 <div className="flex items-center space-x-6">
                     <ThemeToggle />
-                    {isLoggedIn ? (
-                         <button onClick={onLogout} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
-                            <UserIcon className="w-6 h-6" />
-                            <span className="hidden md:block">Déconnexion</span>
-                        </button>
-                    ) : (
-                        <button onClick={onNavigateToLogin} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
-                            <UserIcon className="w-6 h-6" />
-                            <span className="hidden md:block">Compte</span>
-                        </button>
-                    )}
+                     <button onClick={onNavigateToFavorites} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
+                        <HeartIcon className="w-6 h-6" />
+                        <span className="hidden md:block">Favoris</span>
+                        {favoritesCount > 0 && (
+                            <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {favoritesCount}
+                            </span>
+                        )}
+                    </button>
+                    <div className="relative">
+                        {isLoggedIn ? (
+                             <button onMouseEnter={() => setIsProfileMenuOpen(true)} onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
+                                <UserIcon className="w-6 h-6" />
+                                <span className="hidden md:block">Mon Compte</span>
+                            </button>
+                        ) : (
+                            <button onClick={onNavigateToLogin} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
+                                <UserIcon className="w-6 h-6" />
+                                <span className="hidden md:block">Compte</span>
+                            </button>
+                        )}
+                         {isLoggedIn && isProfileMenuOpen && (
+                             <div 
+                                className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border dark:border-gray-700"
+                                onMouseLeave={() => setIsProfileMenuOpen(false)}
+                            >
+                                <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToProfile(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mon Profil</a>
+                                <a href="#" onClick={(e) => { e.preventDefault(); onLogout(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Déconnexion</a>
+                            </div>
+                        )}
+                    </div>
                     <button onClick={openCart} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
                         <CartIcon className="w-6 h-6" />
                         <span className="hidden md:block">Panier</span>

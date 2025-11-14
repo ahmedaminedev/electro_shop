@@ -1,8 +1,10 @@
 
+
 import React, { useState, useEffect } from 'react';
 import type { Product } from '../types';
-import { XMarkIcon, CartIcon, PlusIcon, MinusIcon } from './IconComponents';
+import { XMarkIcon, CartIcon, PlusIcon, MinusIcon, HeartIcon } from './IconComponents';
 import { useCart } from './CartContext';
+import { useFavorites } from './FavoritesContext';
 
 interface ProductPreviewModalProps {
     product: Product | null;
@@ -11,6 +13,7 @@ interface ProductPreviewModalProps {
 
 export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ product, onClose }) => {
     const { addToCart, openCart } = useCart();
+    const { toggleFavorite, isFavorite } = useFavorites();
     const [quantity, setQuantity] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -39,6 +42,8 @@ export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ produc
     if (!product) {
         return null;
     }
+    
+    const isFav = isFavorite(product.id);
 
     const handleIncrement = () => setQuantity(q => q + 1);
     const handleDecrement = () => setQuantity(q => (q > 1 ? q - 1 : 1));
@@ -88,9 +93,15 @@ export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ produc
                             <h1 id="modal-title" className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{product.name}</h1>
                         </div>
                         
-                        <div className="flex items-center">
-                            <span className="w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span>
-                            <span className="text-sm font-semibold text-green-700 dark:text-green-400">En stock</span>
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                                <span className="w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span>
+                                <span className="text-sm font-semibold text-green-700 dark:text-green-400">En stock</span>
+                            </div>
+                             <button onClick={() => toggleFavorite(product.id)} className={`p-2 rounded-full transition-colors ${isFav ? 'bg-red-100 text-red-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-100 hover:text-red-500'}`}>
+                                <HeartIcon className="w-6 h-6" solid={isFav} />
+                                <span className="sr-only">Ajouter aux favoris</span>
+                            </button>
                         </div>
 
                         <div className="flex items-baseline gap-3">

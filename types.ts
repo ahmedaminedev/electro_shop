@@ -91,6 +91,25 @@ export interface ContactMessage {
   read: boolean;
 }
 
+export interface Address {
+  id: number;
+  type: 'Domicile' | 'Travail';
+  street: string;
+  city: string;
+  postalCode: string;
+  isDefault: boolean;
+}
+
+export interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  age?: number;
+  addresses: Address[];
+}
+
 // Advertisement Types
 export interface HeroSlide {
   id: number;

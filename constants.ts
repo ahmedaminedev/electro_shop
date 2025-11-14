@@ -1,4 +1,4 @@
-import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements } from './types';
+import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements, User } from './types';
 
 export const allProducts: Product[] = [
     { id: 1, name: 'Pack encastrable de 2 Pièces de la marque AUXSTAR', brand: 'AUXSTAR', price: 899, oldPrice: 1299, imageUrl: 'https://picsum.photos/id/10/400/400', discount: 30, category: 'Pack encastrable', promo: true, description: 'Un pack complet pour équiper votre cuisine avec style et efficacité. Profitez de la qualité AUXSTAR pour des résultats de cuisson parfaits.', quantity: 10 },
@@ -468,5 +468,18 @@ export const initialAdvertisements: Advertisements = {
             altText: "Offres TV 4K",
             link: "#"
         }
+    ]
+};
+
+export const mockUser: User = {
+    id: 1,
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@email.com',
+    phone: '+216 22 123 456',
+    age: 34,
+    addresses: [
+        { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true },
+        { id: 2, type: 'Travail', street: '456 Avenue Habib Bourguiba', city: 'Tunis', postalCode: '1001', isDefault: false },
     ]
 };

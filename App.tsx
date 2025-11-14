@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { Header } from './components/Header';
@@ -17,11 +18,14 @@ import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
 import { PromotionsPage } from './components/PromotionsPage';
 import { CheckoutPage } from './components/CheckoutPage';
-import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem, Advertisements } from './types';
+import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem, Advertisements, User } from './types';
 import { CartProvider } from './components/CartContext';
+import { FavoritesProvider } from './components/FavoritesContext';
 import { CartSidebar } from './components/CartSidebar';
 import { AdminPage } from './components/admin/AdminPage';
-import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages, initialAdvertisements } from './constants';
+import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages, initialAdvertisements, mockUser } from './constants';
+import { FavoritesPage } from './components/FavoritesPage';
+import { ProfilePage } from './components/ProfilePage';
 
 
 type View =
@@ -34,7 +38,9 @@ type View =
   | { name: 'contact'; data: null }
   | { name: 'login'; data: null }
   | { name: 'checkout'; data: null }
-  | { name: 'admin'; data: null };
+  | { name: 'admin'; data: null }
+  | { name: 'favorites'; data: null }
+  | { name: 'profile'; data: null };
 
 
 const App: React.FC = () => {
@@ -42,6 +48,7 @@ const App: React.FC = () => {
     const [isNavCollapsed, setIsNavCollapsed] = useState(false);
     const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
 
     // Centralized data management for admin CRUD
     const [products, setProducts] = useState<Product[]>(allProducts);
@@ -66,14 +73,19 @@ const App: React.FC = () => {
     const handleNavigateToLogin = () => handleNavigate({ name: 'login', data: null });
     const handleNavigateToCheckout = () => handleNavigate({ name: 'checkout', data: null });
     const handleNavigateToAdmin = () => handleNavigate({ name: 'admin', data: null });
+    const handleNavigateToFavorites = () => handleNavigate({ name: 'favorites', data: null });
+    const handleNavigateToProfile = () => handleNavigate({ name: 'profile', data: null });
+
 
     const handleLoginSuccess = () => {
         setIsLoggedIn(true);
-        handleNavigateToCheckout();
+        setCurrentUser(mockUser);
+        handleNavigateToProfile();
     };
 
     const handleLogout = () => {
         setIsLoggedIn(false);
+        setCurrentUser(null);
         handleNavigateHome();
     };
 
@@ -194,6 +206,22 @@ const App: React.FC = () => {
                 return <LoginPage onNavigateHome={handleNavigateHome} onLoginSuccess={handleLoginSuccess} />;
             case 'checkout':
                 return <CheckoutPage onNavigateHome={handleNavigateHome} onOrderComplete={handleOrderComplete} />;
+            case 'favorites':
+                return <FavoritesPage 
+                    onNavigateHome={handleNavigateHome} 
+                    onPreview={handlePreviewProduct}
+                    allProducts={products}
+                />;
+            case 'profile':
+                 if (!currentUser) {
+                    handleNavigateToLogin();
+                    return null;
+                }
+                return <ProfilePage 
+                    user={currentUser} 
+                    onNavigateHome={handleNavigateHome} 
+                    onUpdateUser={setCurrentUser}
+                />;
             case 'admin':
                 return <AdminPage 
                             onNavigateHome={handleNavigateHome}
@@ -226,41 +254,45 @@ const App: React.FC = () => {
     
     return (
         <ThemeProvider>
-            <CartProvider>
-                {view.name === 'admin' ? (
-                    <div className="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
-                       {renderContent()}
-                    </div>
-                ) : (
-                    <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
-                        <TopBar onNavigateToAdmin={handleNavigateToAdmin} />
-                        <Header 
-                            onNavigateToLogin={handleNavigateToLogin}
-                            isLoggedIn={isLoggedIn}
-                            onLogout={handleLogout}
-                        />
-                        <NavBar 
-                            onNavigateHome={handleNavigateHome}
-                            onNavigateToPacks={handleNavigateToPacks}
-                            onNavigateToPromotions={handleNavigateToPromotions}
-                            onNavigateToBlog={handleNavigateToBlog}
-                            onNavigateToContact={handleNavigateToContact}
-                        />
+            <FavoritesProvider>
+                <CartProvider>
+                    {view.name === 'admin' ? (
+                        <div className="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
+                           {renderContent()}
+                        </div>
+                    ) : (
+                        <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
+                            <TopBar onNavigateToAdmin={handleNavigateToAdmin} />
+                            <Header 
+                                onNavigateToLogin={handleNavigateToLogin}
+                                isLoggedIn={isLoggedIn}
+                                onLogout={handleLogout}
+                                onNavigateToFavorites={handleNavigateToFavorites}
+                                onNavigateToProfile={handleNavigateToProfile}
+                            />
+                            <NavBar 
+                                onNavigateHome={handleNavigateHome}
+                                onNavigateToPacks={handleNavigateToPacks}
+                                onNavigateToPromotions={handleNavigateToPromotions}
+                                onNavigateToBlog={handleNavigateToBlog}
+                                onNavigateToContact={handleNavigateToContact}
+                            />
 
-                        {renderContent()}
-                        
-                        <Footer />
-                        <WhatsAppButton />
-                        <ScrollToTopButton />
-                        <ProductPreviewModal product={previewProduct} onClose={handleClosePreview} />
-                        <CartSidebar 
-                            isLoggedIn={isLoggedIn}
-                            onNavigateToCheckout={handleNavigateToCheckout}
-                            onNavigateToLogin={handleNavigateToLogin}
-                        />
-                    </div>
-                )}
-            </CartProvider>
+                            {renderContent()}
+                            
+                            <Footer />
+                            <WhatsAppButton />
+                            <ScrollToTopButton />
+                            <ProductPreviewModal product={previewProduct} onClose={handleClosePreview} />
+                            <CartSidebar 
+                                isLoggedIn={isLoggedIn}
+                                onNavigateToCheckout={handleNavigateToCheckout}
+                                onNavigateToLogin={handleNavigateToLogin}
+                            />
+                        </div>
+                    )}
+                </CartProvider>
+            </FavoritesProvider>
         </ThemeProvider>
     );
 };
