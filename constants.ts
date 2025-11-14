@@ -1,4 +1,4 @@
-import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements, User } from './types';
+import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements, User, Promotion } from './types';
 
 export const allProducts: Product[] = [
     { id: 1, name: 'Pack encastrable de 2 Pièces de la marque AUXSTAR', brand: 'AUXSTAR', price: 899, oldPrice: 1299, imageUrl: 'https://picsum.photos/id/10/400/400', discount: 30, category: 'Pack encastrable', promo: true, description: 'Un pack complet pour équiper votre cuisine avec style et efficacité. Profitez de la qualité AUXSTAR pour des résultats de cuisson parfaits.', quantity: 10 },
@@ -341,6 +341,36 @@ export const contactMessages: ContactMessage[] = [
     { id: 1, name: 'Linda Jouini', email: 'linda.j@email.com', subject: 'Question sur un produit', message: 'Bonjour, je voudrais savoir si le Lave vaisselle Pose libre WHIRLPOOL est disponible en blanc. Merci.', date: '2023-10-27', read: false },
     { id: 2, name: 'Sami Khelifi', email: 'sami.k@email.com', subject: 'Suivi de commande', message: 'Pouvez-vous me donner des nouvelles de ma commande ES-1023 ?', date: '2023-10-26', read: false },
     { id: 3, name: 'Nour Hammami', email: 'nour.h@email.com', subject: 'Service après-vente', message: 'Mon climatiseur NEWSTAR ne refroidit plus correctement, que dois-je faire ? Il est encore sous garantie.', date: '2023-10-26', read: true },
+];
+
+export const mockPromotions: Promotion[] = [
+    {
+        id: 1,
+        name: "Vente Flash Lave-vaisselle",
+        discountPercentage: 15,
+        startDate: "2024-07-01",
+        endDate: "2024-07-10",
+        productIds: [4, 5, 6, 7, 8],
+        packIds: [],
+    },
+    {
+        id: 2,
+        name: "Promo Cuisine d'été",
+        discountPercentage: 20,
+        startDate: "2024-06-15",
+        endDate: "2025-08-15",
+        productIds: [],
+        packIds: [1],
+    },
+    {
+        id: 3,
+        name: "Offre Spéciale Raclette",
+        discountPercentage: 10,
+        startDate: "2023-12-01",
+        endDate: "2023-12-31",
+        productIds: [15, 16, 17, 18, 19, 20, 21, 22],
+        packIds: [],
+    }
 ];
 
 export const initialAdvertisements: Advertisements = {

@@ -1,46 +1,37 @@
-// FIX: Import `useEffect` from 'react' to resolve 'Cannot find name' error.
 import React, { useState, useEffect } from 'react';
-import type { User, Address } from '../types';
+import type { User, Address, Order } from '../types';
 import { Breadcrumb } from './Breadcrumb';
-import { UserIcon, LocationIcon, LockIcon, PencilIcon, TrashIcon, PlusIcon } from './IconComponents';
+import { UserIcon, LocationIcon, LockIcon, PencilIcon, TrashIcon, PlusIcon, ShoppingBagIcon, CalendarIcon } from './IconComponents';
+import { orders as mockOrders } from '../constants'; // For mock data
 
 interface ProfilePageProps {
     user: User | null;
     onNavigateHome: () => void;
     onUpdateUser: (user: User) => void;
+    orders: Order[]; // Passed from App.tsx
 }
 
-type ProfileTab = 'info' | 'address' | 'security';
+type ProfileTab = 'info' | 'orders' | 'address' | 'security';
 
-const ProfileSidebar: React.FC<{ activeTab: ProfileTab, setActiveTab: (tab: ProfileTab) => void, userName: string }> = ({ activeTab, setActiveTab, userName }) => (
-    <aside className="w-full md:w-1/4 lg:w-1/5 flex-shrink-0">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md sticky top-24">
-            <h2 className="text-xl font-bold mb-1">{userName}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Bienvenue sur votre profil</p>
-            <nav className="space-y-2">
-                <NavItem icon={<UserIcon className="w-5 h-5"/>} label="Informations" tab="info" activeTab={activeTab} onClick={setActiveTab} />
-                <NavItem icon={<LocationIcon className="w-5 h-5"/>} label="Adresses" tab="address" activeTab={activeTab} onClick={setActiveTab} />
-                <NavItem icon={<LockIcon className="w-5 h-5"/>} label="Sécurité" tab="security" activeTab={activeTab} onClick={setActiveTab} />
-            </nav>
-        </div>
-    </aside>
-);
-
-const NavItem: React.FC<{ icon: React.ReactNode; label: string; tab: ProfileTab; activeTab: ProfileTab; onClick: (tab: ProfileTab) => void }> = 
+const TabButton: React.FC<{ icon: React.ReactNode; label: string; tab: ProfileTab; activeTab: ProfileTab; onClick: (tab: ProfileTab) => void }> = 
 ({ icon, label, tab, activeTab, onClick }) => (
-    <button onClick={() => onClick(tab)} className={`w-full flex items-center gap-3 p-3 rounded-md text-left transition-colors ${
-        activeTab === tab ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400 font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-700/50'
-    }`}>
+    <button 
+        onClick={() => onClick(tab)} 
+        className={`w-full flex items-center gap-3 p-3 rounded-md text-left transition-colors ${
+            activeTab === tab 
+            ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400 font-semibold' 
+            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+        }`}
+    >
         {icon}
         <span>{label}</span>
     </button>
 );
 
 const InfoSection: React.FC<{ user: User, onUpdateUser: (user: User) => void }> = ({ user, onUpdateUser }) => {
-    // In a real app, this would have state and handle changes
     return (
-        <div className="space-y-6">
-            <h3 className="text-2xl font-bold">Informations Personnelles</h3>
+        <div className="animate-fadeIn">
+            <h3 className="text-2xl font-bold mb-6">Informations Personnelles</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField label="Prénom" id="firstName" value={user.firstName} readOnly />
                 <InputField label="Nom" id="lastName" value={user.lastName} readOnly />
@@ -48,35 +39,77 @@ const InfoSection: React.FC<{ user: User, onUpdateUser: (user: User) => void }> 
                 <InputField label="Numéro de téléphone" id="phone" value={user.phone} />
                 <InputField label="Âge" id="age" type="number" value={user.age || ''} />
             </div>
-             <div className="flex justify-end">
-                <button className="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors">Enregistrer</button>
+             <div className="flex justify-end mt-8">
+                <button className="bg-red-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-red-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Enregistrer les modifications</button>
+            </div>
+        </div>
+    );
+};
+
+const OrderStatusBadge: React.FC<{ status: Order['status'] }> = ({ status }) => {
+    const baseClasses = 'px-2.5 py-1 text-xs font-semibold rounded-full';
+    const statusClasses = {
+        'Livrée': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+        'Expédiée': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+        'En attente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+        'Annulée': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    };
+    return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
+};
+
+const OrdersSection: React.FC<{ orders: Order[] }> = ({ orders }) => {
+    // In a real app, you would filter orders for the current user.
+    // For this mock, we'll display the first few from the global list.
+    const userOrders = orders.slice(0, 3);
+    return (
+        <div className="animate-fadeIn">
+            <h3 className="text-2xl font-bold mb-6">Mes Commandes</h3>
+            <div className="space-y-4">
+                {userOrders.length > 0 ? userOrders.map(order => (
+                    <div key={order.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-md border dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                       <div className="flex-grow">
+                            <p className="font-bold text-gray-800 dark:text-gray-100">Commande #{order.id}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
+                                <CalendarIcon className="w-4 h-4" /> Fait le {order.date}
+                            </p>
+                       </div>
+                       <div className="flex-shrink-0">
+                           <OrderStatusBadge status={order.status} />
+                       </div>
+                       <div className="text-lg font-bold text-gray-900 dark:text-white flex-shrink-0 sm:text-right">
+                           {order.total.toFixed(3).replace('.',',')} DT
+                       </div>
+                       <button className="text-red-600 dark:text-red-500 text-sm font-semibold hover:underline">Voir les détails</button>
+                    </div>
+                )) : (
+                    <p>Vous n'avez aucune commande.</p>
+                )}
             </div>
         </div>
     );
 };
 
 const AddressSection: React.FC<{ user: User, onUpdateUser: (user: User) => void }> = ({ user, onUpdateUser }) => {
-     // In a real app, this would have logic to add/edit/delete
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="animate-fadeIn">
+            <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold">Mes Adresses</h3>
                 <button className="bg-green-600 text-white font-semibold text-sm py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors">
                     <PlusIcon className="w-5 h-5" />
-                    Ajouter
+                    Ajouter une nouvelle adresse
                 </button>
             </div>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {user.addresses.map(addr => (
-                <div key={addr.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-md border dark:border-gray-600 flex justify-between items-start">
-                    <div>
-                        <p className="font-semibold">{addr.type} {addr.isDefault && <span className="text-xs bg-yellow-400 text-gray-800 px-2 py-0.5 rounded-full ml-2">Défaut</span>}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{addr.street}, {addr.city}, {addr.postalCode}</p>
+                <div key={addr.id} className="bg-gray-50 dark:bg-gray-700/50 p-5 rounded-lg border dark:border-gray-600">
+                    <div className="flex justify-between items-start mb-3">
+                        <p className="font-bold text-lg">{addr.type} {addr.isDefault && <span className="text-xs bg-yellow-400 text-gray-800 px-2 py-0.5 rounded-full ml-2 align-middle">Défaut</span>}</p>
+                         <div className="flex gap-1">
+                            <button className="text-blue-600 p-2 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full transition-colors"><PencilIcon className="w-5 h-5"/></button>
+                            <button className="text-red-600 p-2 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-full transition-colors"><TrashIcon className="w-5 h-5"/></button>
+                        </div>
                     </div>
-                    <div className="flex gap-2">
-                        <button className="text-blue-600 p-1 hover:bg-blue-100 rounded-full"><PencilIcon className="w-5 h-5"/></button>
-                        <button className="text-red-600 p-1 hover:bg-red-100 rounded-full"><TrashIcon className="w-5 h-5"/></button>
-                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{addr.street}<br/>{addr.city}, {addr.postalCode}</p>
                 </div>
             ))}
             </div>
@@ -84,17 +117,16 @@ const AddressSection: React.FC<{ user: User, onUpdateUser: (user: User) => void 
     );
 };
 
-
 const SecuritySection: React.FC = () => (
-    <div className="space-y-6">
-        <h3 className="text-2xl font-bold">Changer le mot de passe</h3>
+    <div className="animate-fadeIn">
+        <h3 className="text-2xl font-bold mb-6">Changer le mot de passe</h3>
         <div className="max-w-md space-y-4">
              <InputField label="Ancien mot de passe" id="oldPassword" type="password" />
              <InputField label="Nouveau mot de passe" id="newPassword" type="password" />
              <InputField label="Confirmer le nouveau mot de passe" id="confirmPassword" type="password" />
         </div>
-        <div className="flex justify-end">
-            <button className="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors">Mettre à jour</button>
+        <div className="flex justify-start mt-8">
+            <button className="bg-red-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-red-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Mettre à jour le mot de passe</button>
         </div>
     </div>
 );
@@ -102,16 +134,28 @@ const SecuritySection: React.FC = () => (
 const InputField: React.FC<{ label: string; id: string; value?: string | number; type?: string; readOnly?: boolean }> = ({ label, id, value, type = "text", readOnly = false }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-        <input type={type} id={id} name={id} defaultValue={value} readOnly={readOnly} className="w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all read-only:bg-gray-100 dark:read-only:bg-gray-800" />
+        <input type={type} id={id} name={id} defaultValue={value} readOnly={readOnly} className="w-full bg-white dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-4 text-sm focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all read-only:bg-gray-100 dark:read-only:bg-gray-800 dark:read-only:border-gray-700" />
     </div>
 );
 
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onNavigateHome, onUpdateUser }) => {
+export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onNavigateHome, onUpdateUser, orders }) => {
     const [activeTab, setActiveTab] = useState<ProfileTab>('info');
 
     useEffect(() => {
         document.title = `Mon Profil - Electro Shop`;
+        const style = document.createElement('style');
+        style.innerHTML = `
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.4s ease-in-out;
+        }
+        `;
+        document.head.appendChild(style);
+        return () => { document.head.removeChild(style); };
     }, []);
 
     if (!user) {
@@ -121,6 +165,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onNavigateHome, 
     const renderContent = () => {
         switch(activeTab) {
             case 'info': return <InfoSection user={user} onUpdateUser={onUpdateUser} />;
+            case 'orders': return <OrdersSection orders={orders} />;
             case 'address': return <AddressSection user={user} onUpdateUser={onUpdateUser} />;
             case 'security': return <SecuritySection />;
             default: return null;
@@ -131,14 +176,32 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onNavigateHome, 
         <div className="bg-gray-100 dark:bg-gray-950 min-h-screen">
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="mb-8">
-                    <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: 'Mon Profil' }]} />
+                    <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: 'Mon Compte' }]} />
                 </div>
-                <div className="flex flex-col md:flex-row gap-8 items-start">
-                    <ProfileSidebar activeTab={activeTab} setActiveTab={setActiveTab} userName={`${user.firstName} ${user.lastName}`} />
-                    <main className="w-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md flex-grow">
-                        {renderContent()}
-                    </main>
-                </div>
+                
+                <main className="bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+                    <div className="p-6 border-b dark:border-gray-700">
+                        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Bonjour, {user.firstName} !</h1>
+                        <p className="mt-1 text-gray-600 dark:text-gray-300">Gérez vos informations, commandes et adresses ici.</p>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row">
+                        {/* Tabs Navigation */}
+                        <aside className="w-full md:w-1/4 lg:w-1/5 p-6 border-r dark:border-gray-700">
+                             <nav className="space-y-2">
+                                <TabButton icon={<UserIcon className="w-5 h-5"/>} label="Mon Compte" tab="info" activeTab={activeTab} onClick={setActiveTab} />
+                                <TabButton icon={<ShoppingBagIcon className="w-5 h-5"/>} label="Mes Commandes" tab="orders" activeTab={activeTab} onClick={setActiveTab} />
+                                <TabButton icon={<LocationIcon className="w-5 h-5"/>} label="Mes Adresses" tab="address" activeTab={activeTab} onClick={setActiveTab} />
+                                <TabButton icon={<LockIcon className="w-5 h-5"/>} label="Sécurité" tab="security" activeTab={activeTab} onClick={setActiveTab} />
+                            </nav>
+                        </aside>
+
+                        {/* Tab Content */}
+                        <div className="flex-grow p-8">
+                            {renderContent()}
+                        </div>
+                    </div>
+                </main>
             </div>
         </div>
     );

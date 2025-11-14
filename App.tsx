@@ -18,12 +18,12 @@ import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
 import { PromotionsPage } from './components/PromotionsPage';
 import { CheckoutPage } from './components/CheckoutPage';
-import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem, Advertisements, User } from './types';
+import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem, Advertisements, User, Promotion } from './types';
 import { CartProvider } from './components/CartContext';
 import { FavoritesProvider } from './components/FavoritesContext';
 import { CartSidebar } from './components/CartSidebar';
 import { AdminPage } from './components/admin/AdminPage';
-import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages, initialAdvertisements, mockUser } from './constants';
+import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages, initialAdvertisements, mockUser, mockPromotions } from './constants';
 import { FavoritesPage } from './components/FavoritesPage';
 import { ProfilePage } from './components/ProfilePage';
 
@@ -57,6 +57,7 @@ const App: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>(initialOrders);
     const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
     const [advertisements, setAdvertisements] = useState<Advertisements>(initialAdvertisements);
+    const [promotions, setPromotions] = useState<Promotion[]>(mockPromotions);
 
     const handleNavigate = (newView: View) => {
         setView(newView);
@@ -221,6 +222,7 @@ const App: React.FC = () => {
                     user={currentUser} 
                     onNavigateHome={handleNavigateHome} 
                     onUpdateUser={setCurrentUser}
+                    orders={orders}
                 />;
             case 'admin':
                 return <AdminPage 
@@ -237,6 +239,8 @@ const App: React.FC = () => {
                             setMessagesData={setMessages}
                             advertisementsData={advertisements}
                             setAdvertisementsData={setAdvertisements}
+                            promotionsData={promotions}
+                            setPromotionsData={setPromotions}
                         />;
             default:
                 return <HomePage 

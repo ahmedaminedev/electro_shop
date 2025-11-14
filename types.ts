@@ -198,3 +198,13 @@ export interface Advertisements {
   promoBanners: [MediumPromoAd, MediumPromoAd];
   smallPromoBanners: ImagePromoAd[];
 }
+
+export interface Promotion {
+  id: number;
+  name: string;
+  discountPercentage: number;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  productIds: number[];
+  packIds: number[];
+}

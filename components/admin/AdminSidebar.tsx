@@ -1,6 +1,6 @@
 import React from 'react';
 import { Logo } from '../Logo';
-import { ChartPieIcon, ShoppingBagIcon, TagIcon, CubeIcon, UsersIcon, InboxIcon, WrenchIcon, ArrowLongLeftIcon } from '../IconComponents';
+import { ChartPieIcon, ShoppingBagIcon, TagIcon, CubeIcon, UsersIcon, InboxIcon, WrenchIcon, ArrowLongLeftIcon, SparklesIcon } from '../IconComponents';
 import type { AdminPageName } from './AdminPage';
 
 interface AdminSidebarProps {
@@ -40,6 +40,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activePage, setActiv
         { id: 'packs', label: 'Packs', icon: <CubeIcon /> },
         { id: 'orders', label: 'Commandes', icon: <UsersIcon /> },
         { id: 'messages', label: 'Messages', icon: <InboxIcon /> },
+        { id: 'promotions', label: 'Promotions', icon: <SparklesIcon /> },
         { id: 'ads', label: 'Publicités', icon: <WrenchIcon /> },
     ];
 
