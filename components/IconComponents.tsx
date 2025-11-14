@@ -1,5 +1,7 @@
 
 
+
+
 import React from 'react';
 
 export const PhoneIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -323,5 +325,23 @@ export const ArrowDownRightIcon: React.FC<{ className?: string }> = ({ className
 export const ArrowLongLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+    </svg>
+);
+
+export const VisaIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75 24">
+      <path d="M63.95,10.66a5.53,5.53,0,0,1,2.23-.46,7.52,7.52,0,0,1,3.34.69,3.58,3.58,0,0,1,1.4,2.83,2,2,0,0,1-.5,1.42,5,5,0,0,1-2.39,1.3,7.06,7.06,0,0,1-3.48-.77v.67a6.79,6.79,0,0,0,3.43.9,4.53,4.53,0,0,0,3.29-1.12,5.34,5.34,0,0,0,1.72-4.06,6.1,6.1,0,0,0-1.94-4.82,9.6,9.6,0,0,0-6.36-2.28,11.28,11.28,0,0,0-7.5,2.44,5,5,0,0,0-2,3.82,1.82,1.82,0,0,0,.58,1.35,3.68,3.68,0,0,0,2.26,1.21,6.16,6.16,0,0,0,3.62-1Zm.36-3.14a3.19,3.19,0,0,0-2.24-.77,3.17,3.17,0,0,0-2.24.81,2.21,2.21,0,0,0-.77,1.75,1.6,1.6,0,0,0,.58,1.26,3.34,3.34,0,0,0,2.26.77,3.38,3.38,0,0,0,2.24-.81,2.12,2.12,0,0,0,.9-1.71A2.08,2.08,0,0,0,64.31,7.52Z" fill="#142688"/>
+      <path d="M47.48,17.44,43.2,5.26H48.8L49.49,7h.23l2.21-1.7h4.89L51.49,17.44Z" fill="#142688"/>
+      <path d="M36.3,17.44H31.14l-3.21-12.18h5.81l1.6,7.52,2.1-7.52H43.3Z" fill="#142688"/>
+      <path d="M21.18,10.84,18.69,3.17,15.34,10.84Zm-9.3,6.6h5L22,3.17h-5Z" fill="#142688"/>
+      <polygon points="1.62 17.75 6.75 0 11.62 0 16.75 17.75 11.25 17.75 10.25 14.75 5.88 14.75 4.88 17.75 1.62 17.75" fill="#f7a600"/>
+    </svg>
+);
+
+export const MastercardIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <circle cx="8.5" cy="12" r="5" fill="#EB001B"/>
+        <circle cx="15.5" cy="12" r="5" fill="#F79E1B"/>
+        <path d="M12,12a5,5,0,0,1-3.5-1.48,5,5,0,0,0,0,2.96A5,5,0,0,0,12,12a5,5,0,0,1,3.5,1.48,5,5,0,0,0,0-2.96A5,5,0,0,0,12,12Z" fill="#FF5F00"/>
     </svg>
 );

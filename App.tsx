@@ -1,6 +1,9 @@
 
 
 
+
+
+
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { Header } from './components/Header';
@@ -29,6 +32,7 @@ import { FavoritesPage } from './components/FavoritesPage';
 import { ProfilePage } from './components/ProfilePage';
 import { ProductDetailPage } from './components/ProductDetailPage';
 import { PackDetailPage } from './components/PackDetailPage';
+import { PaymentGatewayPage } from './components/PaymentGatewayPage';
 
 
 type View =
@@ -43,6 +47,7 @@ type View =
   | { name: 'contact'; data: null }
   | { name: 'login'; data: null }
   | { name: 'checkout'; data: null }
+  | { name: 'paymentGateway'; data: { orderId: string; total: number } }
   | { name: 'admin'; data: null }
   | { name: 'favorites'; data: null }
   | { name: 'profile'; data: null };
@@ -83,6 +88,7 @@ const App: React.FC = () => {
     const handleNavigateToProfile = () => handleNavigate({ name: 'profile', data: null });
     const handleNavigateToProductDetail = (productId: number) => handleNavigate({ name: 'productDetail', data: { productId } });
     const handleNavigateToPackDetail = (packId: number) => handleNavigate({ name: 'packDetail', data: { packId } });
+    const handleNavigateToPaymentGateway = (orderId: string, total: number) => handleNavigate({ name: 'paymentGateway', data: { orderId, total } });
 
 
     const handleLoginSuccess = () => {
@@ -213,7 +219,6 @@ const App: React.FC = () => {
                     onNavigateHome={handleNavigateHome}
                     onNavigateToProductDetail={handleNavigateToProductDetail}
                     onNavigateToPackDetail={handleNavigateToPackDetail}
-                    // FIX: Pass handleNavigateToPacks to PackDetailPage for breadcrumb navigation.
                     onNavigateToPacks={handleNavigateToPacks}
                 />;
             case 'packs':
@@ -245,7 +250,19 @@ const App: React.FC = () => {
             case 'login':
                 return <LoginPage onNavigateHome={handleNavigateHome} onLoginSuccess={handleLoginSuccess} />;
             case 'checkout':
-                return <CheckoutPage onNavigateHome={handleNavigateHome} onOrderComplete={handleOrderComplete} />;
+                return <CheckoutPage 
+                    onNavigateHome={handleNavigateHome} 
+                    onOrderComplete={handleOrderComplete} 
+                    onNavigateToPaymentGateway={handleNavigateToPaymentGateway}
+                />;
+            case 'paymentGateway':
+                return <PaymentGatewayPage
+                    orderId={view.data.orderId}
+                    total={view.data.total}
+                    onNavigateHome={handleNavigateHome}
+                    onOrderComplete={handleOrderComplete}
+                    onGoBack={handleNavigateToCheckout}
+                />;
             case 'favorites':
                 return <FavoritesPage 
                     onNavigateHome={handleNavigateHome} 
