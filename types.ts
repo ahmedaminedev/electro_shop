@@ -244,3 +244,17 @@ export interface CustomerInfo {
   country: string;
   phone: string;
 }
+
+export interface Store {
+    id: number;
+    name: string;
+    address: string;
+    city: string;
+    postalCode: string;
+    phone: string;
+    email: string;
+    openingHours: string;
+    mapUrl?: string;
+    imageUrl: string;
+    isPickupPoint: boolean;
+}

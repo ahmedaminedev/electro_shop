@@ -1,5 +1,5 @@
 
-import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements, User, Promotion } from './types';
+import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements, User, Promotion, Store } from './types';
 
 export const allProducts: Product[] = [
     { id: 1, name: 'Pack encastrable de 2 Pièces de la marque AUXSTAR', brand: 'AUXSTAR', price: 899, oldPrice: 1299, imageUrl: 'https://picsum.photos/id/10/400/400', discount: 30, category: 'Pack encastrable', promo: true, description: 'Un pack complet pour équiper votre cuisine avec style et efficacité. Profitez de la qualité AUXSTAR pour des résultats de cuisson parfaits.', quantity: 10 },
@@ -440,6 +440,48 @@ export const mockPromotions: Promotion[] = [
         endDate: "2023-12-31",
         productIds: [15, 16, 17, 18, 19, 20, 21, 22],
         packIds: [],
+    }
+];
+
+export const initialStores: Store[] = [
+    {
+        id: 1,
+        name: "Electro Shop Tunis",
+        address: "10 Rue Saint Augustin",
+        city: "Tunis",
+        postalCode: "1002",
+        phone: "+216 71 123 456",
+        email: "tunis@electroshop.tn",
+        openingHours: "Lun - Sam: 08h30 - 19h00",
+        imageUrl: "https://picsum.photos/seed/store1/600/400",
+        isPickupPoint: true,
+        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3194.327286327346!2d10.181531315272312!3d36.80649487994732!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12fd34730e3703d3%3A0x6b8f703080e8230!2sTunis!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
+    },
+    {
+        id: 2,
+        name: "Electro Shop Sfax",
+        address: "Poudrière 1, Rue 18 Août (en face de Stoufa)",
+        city: "Sfax",
+        postalCode: "3000",
+        phone: "+216 74 987 654",
+        email: "sfax@electroshop.tn",
+        openingHours: "Lun - Sam: 08h00 - 19h30",
+        imageUrl: "https://picsum.photos/seed/store2/600/400",
+        isPickupPoint: true,
+        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3278.123456789012!2d10.76012345678901!3d34.74012345678901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x13002c1234567890%3A0x1234567890abcdef!2sSfax!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
+    },
+    {
+        id: 3,
+        name: "Electro Shop Sousse",
+        address: "Avenue Habib Bourguiba",
+        city: "Sousse",
+        postalCode: "4000",
+        phone: "+216 73 456 789",
+        email: "sousse@electroshop.tn",
+        openingHours: "Lun - Sam: 09h00 - 20h00",
+        imageUrl: "https://picsum.photos/seed/store3/600/400",
+        isPickupPoint: true,
+        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3235.123456789012!2d10.64012345678901!3d35.82512345678901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1302751234567890%3A0xabcdef1234567890!2sSousse!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
     }
 ];
 

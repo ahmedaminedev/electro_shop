@@ -1,8 +1,11 @@
+
 import React from 'react';
 import type { Product } from '../types';
-import { CartIcon, EyeIcon, HeartIcon } from './IconComponents';
+import { CartIcon, EyeIcon, HeartIcon, ScaleIcon } from './IconComponents';
 import { useCart } from './CartContext';
 import { useFavorites } from './FavoritesContext';
+import { useCompare } from './CompareContext';
+import { useToast } from './ToastContext';
 
 interface ProductCardProps {
     product: Product;
@@ -13,19 +16,33 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, onNavigateToProductDetail }) => {
     const { addToCart, openCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
+    const { addToCompare, isComparing, removeFromCompare } = useCompare();
+    const { addToast } = useToast();
+    
     const isOutOfStock = product.quantity === 0;
     const isFav = isFavorite(product.id);
+    const isComp = isComparing(product.id);
 
     const handleAddToCart = () => {
         if (isOutOfStock) return;
         addToCart(product);
-        openCart();
+        addToast("Produit ajouté au panier", "success");
+        // openCart(); // Optional: open cart automatically or just toast
     };
     
     const handleProductClick = (e: React.MouseEvent) => {
         e.preventDefault();
         onNavigateToProductDetail(product.id);
     };
+
+    const handleToggleCompare = () => {
+        if (isComp) {
+            removeFromCompare(product.id);
+            addToast("Retiré du comparateur", "info");
+        } else {
+            addToCompare(product);
+        }
+    }
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700">
@@ -53,13 +70,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
                         -{product.discount}%
                     </span>
                 )}
-                <button 
-                    onClick={() => toggleFavorite(product.id)} 
-                    className={`absolute top-3 right-3 p-2 rounded-full transition-colors z-10 ${isFav ? 'bg-red-100 text-red-600' : 'bg-white/70 text-gray-600 hover:bg-white hover:text-red-500'}`} 
-                    aria-label="Ajouter aux favoris"
-                >
-                    <HeartIcon className="w-5 h-5" solid={isFav} />
-                </button>
+                <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+                    <button 
+                        onClick={() => toggleFavorite(product.id)} 
+                        className={`p-2 rounded-full transition-colors shadow-sm ${isFav ? 'bg-red-100 text-red-600' : 'bg-white/70 text-gray-600 hover:bg-white hover:text-red-500'}`} 
+                        aria-label="Ajouter aux favoris"
+                    >
+                        <HeartIcon className="w-5 h-5" solid={isFav} />
+                    </button>
+                    <button 
+                        onClick={handleToggleCompare} 
+                        className={`p-2 rounded-full transition-colors shadow-sm ${isComp ? 'bg-blue-100 text-blue-600' : 'bg-white/70 text-gray-600 hover:bg-white hover:text-blue-500'}`} 
+                        aria-label="Ajouter au comparateur"
+                    >
+                        <ScaleIcon className="w-5 h-5" />
+                    </button>
+                </div>
+
                  {isOutOfStock && (
                     <span className="absolute top-12 right-3 bg-gray-700 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md z-10 transform -rotate-12">
                         ÉPUISÉ

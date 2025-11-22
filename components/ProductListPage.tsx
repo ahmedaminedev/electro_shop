@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Product } from '../types';
 import { categories } from '../constants';
@@ -7,6 +8,7 @@ import { ProductCard } from './ProductCard';
 import { ProductListItem } from './ProductListItem';
 import { Squares2X2Icon, Bars3Icon, ChevronDownIcon } from './IconComponents';
 import { VerticalNav } from './VerticalNav';
+import { ProductListSkeleton } from './Skeletons';
 
 interface ProductListPageProps {
     categoryName: string;
@@ -34,6 +36,7 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
     const [initialProducts, setInitialProducts] = useState<Product[]>([]);
     const [sortOrder, setSortOrder] = useState('price-asc');
     const [viewMode, setViewMode] = useState('grid-3');
+    const [isLoading, setIsLoading] = useState(true); // Loading state
     const [filters, setFilters] = useState({
         price: { min: 0, max: 3000 },
         brands: [] as string[],
@@ -48,21 +51,29 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
         const categoryProducts = allProducts.filter(p => p.category === category || (category === 'Lave-linge frontal' && p.name.toLowerCase().includes('lave')));
         if (categoryProducts.length > 0) return categoryProducts;
         if(category.toLowerCase().includes('raclette')) return allProducts.filter(p => p.category === 'Appareil à raclette');
-        return []; // Return empty if no match to avoid showing wrong products
+        return []; 
     };
 
     useEffect(() => {
         document.title = `${categoryName} - Electro Shop`;
-        const products = getProductsByCategory(categoryName, allProducts);
-        setInitialProducts(products);
+        setIsLoading(true);
+        
+        // Simulate API delay
+        const timer = setTimeout(() => {
+            const products = getProductsByCategory(categoryName, allProducts);
+            setInitialProducts(products);
 
-        // Reset filters when category changes
-        const newMaxPrice = Math.ceil(products.reduce((max, p) => p.price > max ? p.price : max, 0)) || 3000;
-        setFilters({
-            price: { min: 0, max: newMaxPrice },
-            brands: [],
-            materials: [],
-        });
+            // Reset filters
+            const newMaxPrice = Math.ceil(products.reduce((max, p) => p.price > max ? p.price : max, 0)) || 3000;
+            setFilters({
+                price: { min: 0, max: newMaxPrice },
+                brands: [],
+                materials: [],
+            });
+            setIsLoading(false);
+        }, 800); // 800ms delay
+
+        return () => clearTimeout(timer);
     }, [categoryName, allProducts]);
 
     const displayedProducts = useMemo(() => {
@@ -149,25 +160,29 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
                                 </div>
                             </div>
                             
-                            {displayedProducts.length > 0 ? (
-                                viewMode === 'list' ? (
-                                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {displayedProducts.map(product => (
-                                            <ProductListItem key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail}/>
-                                        ))}
-                                    </div>
+                            {isLoading ? (
+                                <ProductListSkeleton count={9} />
+                            ) : (
+                                displayedProducts.length > 0 ? (
+                                    viewMode === 'list' ? (
+                                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
+                                            {displayedProducts.map(product => (
+                                                <ProductListItem key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail}/>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className={`grid ${gridClasses} gap-6`}>
+                                            {displayedProducts.map(product => (
+                                                <ProductCard key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
+                                            ))}
+                                        </div>
+                                    )
                                 ) : (
-                                    <div className={`grid ${gridClasses} gap-6`}>
-                                        {displayedProducts.map(product => (
-                                            <ProductCard key={product.id} product={product} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
-                                        ))}
+                                    <div className="text-center py-12">
+                                        <p className="text-lg text-gray-600 dark:text-gray-400">Aucun produit ne correspond à votre sélection.</p>
+                                        <p className="text-sm text-gray-500 mt-2">Essayez de modifier ou de réinitialiser vos filtres.</p>
                                     </div>
                                 )
-                            ) : (
-                                <div className="text-center py-12">
-                                    <p className="text-lg text-gray-600 dark:text-gray-400">Aucun produit ne correspond à votre sélection.</p>
-                                    <p className="text-sm text-gray-500 mt-2">Essayez de modifier ou de réinitialiser vos filtres.</p>
-                                </div>
                             )}
                         </main>
                     </div>

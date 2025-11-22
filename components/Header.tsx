@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { SearchIcon, UserIcon, CartIcon, HeartIcon } from './IconComponents';
+import { SearchIcon, UserIcon, CartIcon, HeartIcon, ScaleIcon } from './IconComponents';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { useCart } from './CartContext';
 import { useFavorites } from './FavoritesContext';
+import { useCompare } from './CompareContext';
 import type { Product, Pack, Category, SearchResult, SearchResultItem } from '../types';
 import { SearchResultsDropdown } from './SearchResultsDropdown';
 
@@ -20,6 +21,7 @@ interface HeaderProps {
     allCategories: Category[];
     onNavigateToCategory: (categoryName: string) => void;
     onNavigateToProductDetail: (productId: number) => void;
+    onNavigateToCompare: () => void;
 }
 
 const getProductIdsFromPack = (pack: Pack, allPacks: Pack[]): number[] => {
@@ -46,11 +48,13 @@ export const Header: React.FC<HeaderProps> = ({
     allPacks,
     allCategories,
     onNavigateToCategory,
-    onNavigateToProductDetail
+    onNavigateToProductDetail,
+    onNavigateToCompare
 }) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const { itemCount, openCart } = useCart();
     const { favoritesCount } = useFavorites();
+    const { compareList } = useCompare();
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [results, setResults] = useState<SearchResult | null>(null);
@@ -183,11 +187,23 @@ export const Header: React.FC<HeaderProps> = ({
                         )}
                     </div>
                 </div>
-                <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-4 md:space-x-6">
                     <ThemeToggle />
+                    
+                    {/* Compare Button */}
+                    <button onClick={onNavigateToCompare} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500" aria-label="Comparer">
+                        <ScaleIcon className="w-6 h-6" />
+                        <span className="hidden xl:block">Comparer</span>
+                        {compareList.length > 0 && (
+                            <span className="absolute -top-2 -right-3 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {compareList.length}
+                            </span>
+                        )}
+                    </button>
+
                      <button onClick={onNavigateToFavorites} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
                         <HeartIcon className="w-6 h-6" />
-                        <span className="hidden md:block">Favoris</span>
+                        <span className="hidden xl:block">Favoris</span>
                         {favoritesCount > 0 && (
                             <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                                 {favoritesCount}
@@ -198,12 +214,12 @@ export const Header: React.FC<HeaderProps> = ({
                         {isLoggedIn ? (
                              <button onMouseEnter={() => setIsProfileMenuOpen(true)} onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
                                 <UserIcon className="w-6 h-6" />
-                                <span className="hidden md:block">Mon Compte</span>
+                                <span className="hidden xl:block">Mon Compte</span>
                             </button>
                         ) : (
                             <button onClick={onNavigateToLogin} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
                                 <UserIcon className="w-6 h-6" />
-                                <span className="hidden md:block">Compte</span>
+                                <span className="hidden xl:block">Compte</span>
                             </button>
                         )}
                          {isLoggedIn && isProfileMenuOpen && (
@@ -219,7 +235,7 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                     <button onClick={openCart} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
                         <CartIcon className="w-6 h-6" />
-                        <span className="hidden md:block">Panier</span>
+                        <span className="hidden xl:block">Panier</span>
                         {itemCount > 0 && (
                             <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                                 {itemCount}

@@ -12,14 +12,16 @@ import {
     HomeIcon,
     VisaIcon,
     MastercardIcon,
-    PencilIcon
+    PencilIcon,
+    StorefrontIcon
 } from './IconComponents';
-import type { CartItem, CustomerInfo } from '../types';
+import type { CartItem, CustomerInfo, Store } from '../types';
 
 interface CheckoutPageProps {
     onNavigateHome: () => void;
-    onOrderComplete: (cartItems: CartItem[], customerInfo: CustomerInfo) => void;
+    onOrderComplete: (cartItems: CartItem[], customerInfo: CustomerInfo, paymentId?: string) => void;
     onNavigateToPaymentGateway: (orderId: string, total: number, customerInfo: CustomerInfo) => void;
+    stores: Store[];
 }
 
 const FormInputWithIcon: React.FC<{ name: string; label: string; icon: React.ReactNode; type?: string; optional?: boolean; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }> = ({ name, label, icon, type = 'text', optional, value, onChange }) => (
@@ -163,14 +165,20 @@ const OrderSummary: React.FC<{ shippingCost: number; fiscalStamp: number }> = ({
     );
 };
 
-const ShippingOptionCard: React.FC<{id: string; title: string; description: string; selectedOption: string; onSelect: (id: string) }> = ({ id, title, description, selectedOption, onSelect }) => {
+const ShippingOptionCard: React.FC<{id: string; title: string; description: string; selectedOption: string; onSelect: (id: string) => void; icon?: React.ReactNode; price?: string }> = ({ id, title, description, selectedOption, onSelect, icon, price }) => {
     const isSelected = id === selectedOption;
     return (
-        <label htmlFor={id} className={`p-4 border-2 rounded-lg flex items-start gap-4 cursor-pointer transition-all duration-200 ${isSelected ? 'border-red-500 bg-red-50 dark:bg-red-900/20 shadow-md' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-400'}`}>
-            <input type="radio" id={id} name="shipping-option" value={id} checked={isSelected} onChange={() => onSelect(id)} className="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300" />
-            <div>
-                <span className="font-semibold text-gray-800 dark:text-gray-100">{title}</span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+        <label htmlFor={id} className={`p-4 border-2 rounded-lg flex items-center gap-4 cursor-pointer transition-all duration-200 ${isSelected ? 'border-red-500 bg-red-50 dark:bg-red-900/20 shadow-md' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-400'}`}>
+            <input type="radio" id={id} name="shipping-option" value={id} checked={isSelected} onChange={() => onSelect(id)} className="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 flex-shrink-0" />
+            <div className="flex-grow">
+                <div className="flex justify-between items-center">
+                    <span className="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        {icon}
+                        {title}
+                    </span>
+                    {price && <span className={`text-sm font-bold ${price === 'gratuit' ? 'text-green-600' : 'text-gray-700 dark:text-gray-300'}`}>{price}</span>}
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
             </div>
         </label>
     );
@@ -194,7 +202,7 @@ const PaymentMethodSelector: React.FC<{ method: 'cod' | 'card'; selectedMethod: 
     );
 };
 
-export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOrderComplete, onNavigateToPaymentGateway }) => {
+export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOrderComplete, onNavigateToPaymentGateway, stores }) => {
     const [activeStep, setActiveStep] = useState(1);
     const [formData, setFormData] = useState<CustomerInfo>({
         email: 'ahmed.nafti@example.com',
@@ -212,7 +220,8 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
     const [termsAgreed, setTermsAgreed] = useState(false);
     const { cartItems, clearCart, cartTotal } = useCart();
     
-    const SHIPPING_COST = cartTotal >= 300 ? 0.000 : 7.000;
+    const isStorePickup = shippingOption.startsWith('store-');
+    const SHIPPING_COST = isStorePickup ? 0 : (cartTotal >= 300 ? 0.000 : 7.000);
     const FISCAL_STAMP = 1.000;
     const finalTotal = cartTotal + SHIPPING_COST + FISCAL_STAMP;
 
@@ -250,6 +259,12 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
             onNavigateToPaymentGateway(orderId, finalTotal, formData);
         }
     };
+
+    const pickupStores = stores.filter(s => s.isPickupPoint);
+
+    const selectedShippingTitle = shippingOption === 'transporteur-tunisie' 
+        ? 'Transporteur - Toute la Tunisie' 
+        : `Retrait en magasin - ${stores.find(s => `store-${s.id}` === shippingOption)?.city || ''}`;
 
     return (
         <div className="bg-gray-50 dark:bg-gray-950 min-h-screen">
@@ -325,12 +340,38 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
                             isCompleted={activeStep > 3} 
                             onHeaderClick={() => handleGoTo(3)} 
                             isDisabled={activeStep < 3}
-                            summary={<span>Transporteur - Toute la Tunisie</span>}
+                            summary={<span>{selectedShippingTitle}</span>}
                         >
                             <div className="space-y-3">
-                                <ShippingOptionCard id="retrait-sfax" title="Retrait en magasin - Sfax" description="Poudrière 1, Rue 18 Août (en face de Stoufa), Sfax | gratuit" selectedOption={shippingOption} onSelect={setShippingOption} />
-                                <ShippingOptionCard id="retrait-tunis" title="Retrait en magasin - Tunis" description="10 Rue Saint Augustin 1002 Tunis | gratuit" selectedOption={shippingOption} onSelect={setShippingOption} />
-                                <ShippingOptionCard id="transporteur-tunisie" title="Transporteur - Toute la Tunisie" description="Paiement à la livraison (Livraison gratuite à partir de 300 DT d'achat) | gratuit" selectedOption={shippingOption} onSelect={setShippingOption} />
+                                <ShippingOptionCard 
+                                    id="transporteur-tunisie" 
+                                    title="Transporteur - Toute la Tunisie" 
+                                    description="Paiement à la livraison (Livraison gratuite à partir de 300 DT d'achat)" 
+                                    selectedOption={shippingOption} 
+                                    onSelect={setShippingOption}
+                                    icon={<DeliveryTruckIcon className="w-5 h-5" />}
+                                    price={cartTotal >= 300 ? 'gratuit' : '7.000 DT'}
+                                />
+                                
+                                {pickupStores.length > 0 && (
+                                    <div className="mt-4">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 ml-1">Retrait en magasin (Gratuit)</h3>
+                                        <div className="space-y-3">
+                                            {pickupStores.map(store => (
+                                                <ShippingOptionCard 
+                                                    key={store.id}
+                                                    id={`store-${store.id}`} 
+                                                    title={`Retrait en magasin - ${store.city}`} 
+                                                    description={`${store.address} | ${store.openingHours}`}
+                                                    selectedOption={shippingOption} 
+                                                    onSelect={setShippingOption}
+                                                    icon={<StorefrontIcon className="w-5 h-5" />}
+                                                    price="gratuit"
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                              <div className="flex justify-end mt-6"><button onClick={handleNext} className="bg-red-600 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-700 transition-colors">Continuer</button></div>
                         </CheckoutStep>

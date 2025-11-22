@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useCart } from './CartContext';
 import type { CartItem, CustomerInfo } from '../types';
@@ -10,7 +9,7 @@ interface PaymentGatewayPageProps {
     total: number;
     customerInfo: CustomerInfo;
     onNavigateHome: () => void;
-    onOrderComplete: (cartItems: CartItem[], customerInfo: CustomerInfo) => void;
+    onOrderComplete: (cartItems: CartItem[], customerInfo: CustomerInfo, orderId: string) => void;
     onGoBack: () => void;
 }
 
@@ -37,8 +36,8 @@ export const PaymentGatewayPage: React.FC<PaymentGatewayPageProps> = ({ orderId,
 
     const handlePayment = (e: React.FormEvent) => {
         e.preventDefault();
-        // Simulate payment success
-        onOrderComplete(cartItems, customerInfo);
+        // Simulate payment success - Pass the orderId so App.tsx can use it for redirection
+        onOrderComplete(cartItems, customerInfo, orderId);
         clearCart();
     };
 

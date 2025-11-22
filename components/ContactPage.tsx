@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Breadcrumb } from './Breadcrumb';
-import { BuildingOfficeIcon, PhoneIcon, MailIcon, ClockIcon, PlusIcon, MinusIcon, FacebookIcon, TwitterIcon, InstagramIcon } from './IconComponents';
+import { BuildingOfficeIcon, PhoneIcon, MailIcon, ClockIcon, PlusIcon, MinusIcon, FacebookIcon, TwitterIcon, InstagramIcon, LocationIcon } from './IconComponents';
+import type { Store } from '../types';
 
 interface ContactPageProps {
     onNavigateHome: () => void;
+    stores: Store[];
 }
 
 const FAQItem: React.FC<{ question: string; children: React.ReactNode }> = ({ question, children }) => {
@@ -41,7 +43,7 @@ const InfoCard: React.FC<{ icon: React.ReactNode; title: string; content: React.
 );
 
 
-export const ContactPage: React.FC<ContactPageProps> = ({ onNavigateHome }) => {
+export const ContactPage: React.FC<ContactPageProps> = ({ onNavigateHome, stores }) => {
     const [formState, setFormState] = useState({ name: '', email: '', subject: '', message: '' });
     const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -123,8 +125,19 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigateHome }) => {
                             <div className="space-y-4">
                                <InfoCard icon={<PhoneIcon className="w-6 h-6"/>} title="Appelez-nous" content={<a href="tel:+216-55-263-522" className="hover:text-red-500 dark:hover:text-red-400 transition-colors">+216 55 263 522</a>} />
                                <InfoCard icon={<MailIcon className="w-6 h-6"/>} title="Envoyez un e-mail" content={<a href="mailto:contact@electroshop.com" className="hover:text-red-500 dark:hover:text-red-400 transition-colors">contact@electroshop.com</a>} />
-                               <InfoCard icon={<BuildingOfficeIcon className="w-6 h-6"/>} title="Visitez-nous" content="123 Rue de l'Électronique, Tunis, Tunisie" />
-                               <InfoCard icon={<ClockIcon className="w-6 h-6"/>} title="Horaires" content="Lun - Sam : 9h00 - 19h00" />
+                               
+                               <h4 className="font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-2 border-b dark:border-gray-700 pb-2">Visitez nos magasins</h4>
+                               <div className="max-h-64 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                                   {stores.map(store => (
+                                       <div key={store.id} className="flex items-start gap-3 text-sm">
+                                           <LocationIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                           <div>
+                                               <span className="font-bold text-gray-800 dark:text-gray-200">{store.name}</span>
+                                               <p className="text-gray-600 dark:text-gray-400 text-xs">{store.address}, {store.city}</p>
+                                           </div>
+                                       </div>
+                                   ))}
+                               </div>
                             </div>
                         </div>
                         <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl">

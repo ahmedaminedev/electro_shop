@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AdminSidebar } from './AdminSidebar';
 import { DashboardHomePage } from './DashboardHomePage';
@@ -8,9 +9,10 @@ import { ViewOrdersPage } from './ViewOrdersPage';
 import { ViewMessagesPage } from './ViewMessagesPage';
 import { ManageAdsPage } from './ManageAdsPage';
 import { ManagePromotionsPage } from './ManagePromotionsPage';
-import type { Product, Category, Pack, Order, ContactMessage, Advertisements, Promotion } from '../../types';
+import { ManageStoresPage } from './ManageStoresPage';
+import type { Product, Category, Pack, Order, ContactMessage, Advertisements, Promotion, Store } from '../../types';
 
-export type AdminPageName = 'dashboard' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'ads';
+export type AdminPageName = 'dashboard' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'ads' | 'stores';
 
 interface AdminPageProps {
     onNavigateHome: () => void;
@@ -28,6 +30,8 @@ interface AdminPageProps {
     setAdvertisementsData: React.Dispatch<React.SetStateAction<Advertisements>>;
     promotionsData: Promotion[];
     setPromotionsData: React.Dispatch<React.SetStateAction<Promotion[]>>;
+    storesData: Store[];
+    setStoresData: React.Dispatch<React.SetStateAction<Store[]>>;
 }
 
 export const AdminPage: React.FC<AdminPageProps> = (props) => {
@@ -66,6 +70,11 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                             allProducts={props.productsData}
                             allPacks={props.packsData}
                             allCategories={props.categoriesData}
+                        />;
+            case 'stores':
+                return <ManageStoresPage 
+                            stores={props.storesData}
+                            setStores={props.setStoresData}
                         />;
             case 'ads':
                 return <ManageAdsPage 
