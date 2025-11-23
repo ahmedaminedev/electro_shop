@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Pack, Product, Category } from '../../types';
 import { XMarkIcon, SearchIcon, ChevronDownIcon, ChevronUpIcon } from '../IconComponents';
+import { ImageInput } from '../ImageInput';
 
 interface PackFormModalProps {
     isOpen: boolean;
@@ -71,6 +73,10 @@ export const PackFormModal: React.FC<PackFormModalProps> = ({ isOpen, onClose, o
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
         setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
+    };
+
+    const handleImageChange = (value: string) => {
+        setFormData(prev => ({ ...prev, imageUrl: value }));
     };
 
     const handleProductSelect = (productId: number) => {
@@ -157,7 +163,7 @@ export const PackFormModal: React.FC<PackFormModalProps> = ({ isOpen, onClose, o
                     <div className="w-full md:w-2/5 space-y-4 overflow-y-auto pr-4 -mr-2">
                         <InputField name="name" label="Nom du pack" value={formData.name} onChange={handleChange} required />
                         <InputField name="description" label="Description" value={formData.description} onChange={handleChange} as="textarea" rows={4} />
-                        <InputField name="imageUrl" label="URL de l'image" value={formData.imageUrl} onChange={handleChange} required />
+                        <ImageInput label="Image du pack" value={formData.imageUrl} onChange={handleImageChange} required />
                         
                         <div className="p-4 border rounded-md dark:border-gray-600 bg-gray-100 dark:bg-gray-700/50 space-y-4">
                             <div className="flex justify-between items-center">

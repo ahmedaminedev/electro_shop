@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Store } from '../../types';
 import { XMarkIcon } from '../IconComponents';
+import { ImageInput } from '../ImageInput';
 
 interface StoreFormModalProps {
     isOpen: boolean;
@@ -65,6 +66,10 @@ export const StoreFormModal: React.FC<StoreFormModalProps> = ({ isOpen, onClose,
         }));
     };
 
+    const handleImageChange = (value: string) => {
+        setFormData(prev => ({ ...prev, imageUrl: value }));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
@@ -92,7 +97,7 @@ export const StoreFormModal: React.FC<StoreFormModalProps> = ({ isOpen, onClose,
                         <InputField name="email" label="Email" type="email" value={formData.email} onChange={handleChange} required />
                     </div>
                     <InputField name="openingHours" label="Horaires d'ouverture" value={formData.openingHours} onChange={handleChange} as="textarea" required />
-                    <InputField name="imageUrl" label="URL Image" value={formData.imageUrl} onChange={handleChange} required />
+                    <ImageInput label="Image du magasin" value={formData.imageUrl} onChange={handleImageChange} required />
                     <InputField name="mapUrl" label="URL Google Maps Embed (src)" value={formData.mapUrl} onChange={handleChange} />
                     
                     <div className="flex items-center mt-2">

@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import type { HeroSlide, DestockageAd, ImagePromoAd, AudioPromoAd, MediumPromoAd, Category, Pack } from '../../types';
 import { XMarkIcon, PlusIcon, TrashIcon } from '../IconComponents';
+import { ImageInput } from '../ImageInput';
 import type { AdSlot } from './ManageAdsPage';
 
 interface AdEditModalProps {
@@ -31,6 +33,12 @@ const HeroForm: React.FC<{ data: HeroSlide[], onChange: (newData: HeroSlide[]) =
         const { name, value } = e.target;
         const newSlides = [...data];
         newSlides[index] = { ...newSlides[index], [name]: value };
+        onChange(newSlides);
+    };
+
+    const handleImageChange = (value: string, index: number) => {
+        const newSlides = [...data];
+        newSlides[index] = { ...newSlides[index], bgImage: value };
         onChange(newSlides);
     };
 
@@ -66,7 +74,7 @@ const HeroForm: React.FC<{ data: HeroSlide[], onChange: (newData: HeroSlide[]) =
                     <FormField label="Titre" name="title" value={currentSlideData.title} onChange={e => handleSlideChange(e, activeSlide)} />
                     <FormField label="Sous-titre" name="subtitle" value={currentSlideData.subtitle} onChange={e => handleSlideChange(e, activeSlide)} />
                     <FormField label="Texte du bouton" name="buttonText" value={currentSlideData.buttonText} onChange={e => handleSlideChange(e, activeSlide)} />
-                    <FormField label="URL de l'image de fond" name="bgImage" value={currentSlideData.bgImage} onChange={e => handleSlideChange(e, activeSlide)} />
+                    <ImageInput label="Image de fond" value={currentSlideData.bgImage} onChange={val => handleImageChange(val, activeSlide)} />
                     <button type="button" onClick={() => removeSlide(activeSlide)} className="text-sm text-red-600 hover:underline flex items-center gap-1">
                         <TrashIcon className="w-4 h-4"/> Supprimer ce slide
                     </button>
@@ -86,7 +94,13 @@ const DestockageForm: React.FC<{ data: DestockageAd[], onChange: (newData: Desto
         onChange(newData);
     };
 
-    const handleImageChange = (adIndex: number, imgIndex: number, field: 'src' | 'alt', value: string) => {
+    const handleChefImageChange = (value: string, index: number) => {
+        const newData = [...data];
+        newData[index] = { ...newData[index], chefImage: value };
+        onChange(newData);
+    };
+
+    const handleProductImageChange = (adIndex: number, imgIndex: number, field: 'src' | 'alt', value: string) => {
         const newData = [...data];
         const newImages = [...newData[adIndex].images];
         newImages[imgIndex] = { ...newImages[imgIndex], [field]: value };
@@ -144,12 +158,12 @@ const DestockageForm: React.FC<{ data: DestockageAd[], onChange: (newData: Desto
                     
                     <h4 className="text-sm font-medium pt-4 border-t dark:border-gray-600">Images des produits</h4>
                     {currentAdData.images.map((img, index) => (
-                        <div key={index} className="grid grid-cols-2 gap-2 p-2 border rounded-md dark:border-gray-600">
-                            <FormField label={`Image ${index + 1} URL`} name={`src-${index}`} value={img.src} onChange={(e) => handleImageChange(activeAdIndex, index, 'src', e.target.value)} />
-                            <FormField label={`Image ${index + 1} Alt`} name={`alt-${index}`} value={img.alt} onChange={(e) => handleImageChange(activeAdIndex, index, 'alt', e.target.value)} />
+                        <div key={index} className="grid grid-cols-1 gap-2 p-2 border rounded-md dark:border-gray-600">
+                            <ImageInput label={`Image ${index + 1}`} value={img.src} onChange={(val) => handleProductImageChange(activeAdIndex, index, 'src', val)} />
+                            <FormField label={`Image ${index + 1} Alt`} name={`alt-${index}`} value={img.alt} onChange={(e) => handleProductImageChange(activeAdIndex, index, 'alt', e.target.value)} />
                         </div>
                     ))}
-                    <FormField label="URL Image Chef" name="chefImage" value={currentAdData.chefImage} onChange={e => handleFieldChange(e, activeAdIndex)} />
+                    <ImageInput label="Image Chef" value={currentAdData.chefImage} onChange={val => handleChefImageChange(val, activeAdIndex)} />
                      <button type="button" onClick={() => removeAd(activeAdIndex)} className="text-sm text-red-600 hover:underline flex items-center gap-1">
                         <TrashIcon className="w-4 h-4"/> Supprimer cette publicité
                     </button>
@@ -166,6 +180,12 @@ const AudioPromoForm: React.FC<{ data: AudioPromoAd[], onChange: (newData: Audio
         const { name, value, type } = e.target;
         const newAds = [...data];
         newAds[index] = { ...newAds[index], [name]: type === 'number' ? parseFloat(value) || 0 : value };
+        onChange(newAds);
+    };
+
+    const handleImageChange = (value: string, index: number) => {
+        const newAds = [...data];
+        newAds[index] = { ...newAds[index], image: value };
         onChange(newAds);
     };
 
@@ -201,7 +221,7 @@ const AudioPromoForm: React.FC<{ data: AudioPromoAd[], onChange: (newData: Audio
                     <FormField label="Titre" name="title" value={currentAdData.title} onChange={e => handleAdChange(e, activeAd)} />
                     <FormField label="Sous-titre 1" name="subtitle1" value={currentAdData.subtitle1} onChange={e => handleAdChange(e, activeAd)} />
                     <FormField label="Sous-titre 2" name="subtitle2" value={currentAdData.subtitle2} onChange={e => handleAdChange(e, activeAd)} />
-                    <FormField label="URL de l'image" name="image" value={currentAdData.image} onChange={e => handleAdChange(e, activeAd)} />
+                    <ImageInput label="Image" value={currentAdData.image} onChange={val => handleImageChange(val, activeAd)} />
                     <FormField label="Dégradé de fond (tailwind)" name="background" value={currentAdData.background} onChange={e => handleAdChange(e, activeAd)} />
                     <FormField label="Durée (secondes)" name="duration" type="number" value={currentAdData.duration} onChange={e => handleAdChange(e, activeAd)} />
                     <button type="button" onClick={() => removeAd(activeAd)} className="text-sm text-red-600 hover:underline flex items-center gap-1">
@@ -221,6 +241,12 @@ const ImagePromosForm: React.FC<{ data: ImagePromoAd[], onChange: (newData: Imag
         onChange(newAds);
     };
 
+    const handleImageChange = (value: string, index: number) => {
+        const newAds = [...data];
+        newAds[index] = { ...newAds[index], imageUrl: value };
+        onChange(newAds);
+    };
+
     const addAd = () => {
         const newAd = { id: Date.now(), imageUrl: "https://picsum.photos/seed/newpromo/400/400", altText: "Nouvelle promo", link: "#" };
         onChange([...data, newAd]);
@@ -237,7 +263,7 @@ const ImagePromosForm: React.FC<{ data: ImagePromoAd[], onChange: (newData: Imag
                 {data.map((ad, index) => (
                     <div key={ad.id} className="p-4 border rounded-md dark:border-gray-600 space-y-2 relative bg-gray-50 dark:bg-gray-700/50">
                         <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200">Image {index + 1}</h4>
-                        <FormField label="URL de l'image" name="imageUrl" value={ad.imageUrl} onChange={e => handleAdChange(e, index)} />
+                        <ImageInput label="Image" value={ad.imageUrl} onChange={val => handleImageChange(val, index)} />
                         <FormField label="Texte alternatif (pour SEO)" name="altText" value={ad.altText} onChange={e => handleAdChange(e, index)} />
                         <FormField label="Lien (URL)" name="link" value={ad.link} onChange={e => handleAdChange(e, index)} />
                         <button type="button" onClick={() => removeAd(index)} className="absolute top-2 right-2 p-1 text-red-500 hover:text-red-700 dark:hover:text-red-400 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50">
@@ -265,6 +291,10 @@ const PromoBannerForm: React.FC<{data: MediumPromoAd, onChange: (newData: Medium
              onChange({ ...data, [name]: value });
         }
     };
+
+    const handleImageChange = (value: string) => {
+        onChange({ ...data, image: value });
+    };
     
     const allCategoryNames = useMemo(() => {
          const names = allCategories.flatMap(c => 
@@ -278,7 +308,7 @@ const PromoBannerForm: React.FC<{data: MediumPromoAd, onChange: (newData: Medium
             <FormField label="Titre" name="title" value={data.title} onChange={handleChange} />
             <FormField label="Sous-titre" name="subtitle" value={data.subtitle} onChange={handleChange} />
             <FormField label="Texte du bouton" name="buttonText" value={data.buttonText} onChange={handleChange} />
-            <FormField label="URL de l'image" name="image" value={data.image} onChange={handleChange} />
+            <ImageInput label="Image" value={data.image} onChange={handleImageChange} />
             <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-600">
                  <div>
                     <label htmlFor="linkType" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type de lien</label>

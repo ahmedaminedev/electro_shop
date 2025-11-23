@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Product, Category } from '../../types';
 import { XMarkIcon, PlusIcon, TrashIcon } from '../IconComponents';
+import { ImageInput } from '../ImageInput';
 
 interface ProductFormModalProps {
     isOpen: boolean;
@@ -73,6 +75,10 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
         }
         setFormData(prev => ({ ...prev, [name]: processedValue }));
     };
+
+    const handleImageChange = (value: string) => {
+        setFormData(prev => ({ ...prev, imageUrl: value }));
+    };
     
     const handleSpecChange = (index: number, field: 'name' | 'value', value: string) => {
         const newSpecs = [...formData.specifications];
@@ -135,7 +141,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
                                 <InputField name="price" label="Prix Actuel (DT)" value={finalPrice.toFixed(3)} readOnly />
                             </div>
                             <InputField name="quantity" label="Quantité en stock" type="number" value={formData.quantity} onChange={handleChange} required />
-                            <InputField name="imageUrl" label="URL de l'image" value={formData.imageUrl} onChange={handleChange} required />
+                            <ImageInput label="Image du produit" value={formData.imageUrl} onChange={handleImageChange} required />
                             <InputField name="description" label="Description" value={formData.description} onChange={handleChange} as="textarea" />
                         </>
                     )}
