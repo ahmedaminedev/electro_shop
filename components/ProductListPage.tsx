@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import type { Product } from '../types';
-import { categories } from '../constants';
+import type { Product, Category } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { FiltersSidebar } from './FiltersSidebar';
 import { ProductCard } from './ProductCard';
@@ -20,6 +18,7 @@ interface ProductListPageProps {
     onNavigateToPacks: () => void;
     products: Product[];
     onNavigateToProductDetail: (productId: number) => void;
+    categories: Category[];
 }
 
 export const ProductListPage: React.FC<ProductListPageProps> = ({ 
@@ -31,7 +30,8 @@ export const ProductListPage: React.FC<ProductListPageProps> = ({
     onPreview,
     onNavigateToPacks,
     products: allProducts,
-    onNavigateToProductDetail
+    onNavigateToProductDetail,
+    categories
 }) => {
     const [initialProducts, setInitialProducts] = useState<Product[]>([]);
     const [sortOrder, setSortOrder] = useState('price-asc');

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TopBar } from './components/TopBar';
 import { Header } from './components/Header';
 import { NavBar } from './components/NavBar';
@@ -17,15 +16,15 @@ import { ContactPage } from './components/ContactPage';
 import { LoginPage } from './components/LoginPage';
 import { PromotionsPage } from './components/PromotionsPage';
 import { CheckoutPage } from './components/CheckoutPage';
-import type { Product, Pack, Category, Brand, Order, ContactMessage, CartItem, Advertisements, User, Promotion, CustomerInfo, Store } from './types';
-import { CartProvider } from './components/CartContext';
+import type { Product, Pack, Category, Order, ContactMessage, CartItem, Advertisements, User, Promotion, CustomerInfo, Store } from './types';
+import { CartProvider, useCart } from './components/CartContext';
 import { FavoritesProvider } from './components/FavoritesContext';
-import { ToastProvider, useToast } from './components/ToastContext'; // Import Toast
-import { CompareProvider } from './components/CompareContext'; // Import Compare
-import { ComparePage } from './components/ComparePage'; // Import Compare Page
+import { ToastProvider, useToast } from './components/ToastContext';
+import { CompareProvider } from './components/CompareContext';
+import { ComparePage } from './components/ComparePage';
 import { CartSidebar } from './components/CartSidebar';
 import { AdminPage } from './components/admin/AdminPage';
-import { allProducts, categories as initialCategories, packs as initialPacks, blogPosts, brands, orders as initialOrders, contactMessages as initialMessages, initialAdvertisements, mockUser, mockPromotions, initialStores } from './constants';
+import { categories as initialCategories, packs as initialPacks, contactMessages as initialMessages, initialAdvertisements, mockPromotions, initialStores, allProducts, mockUser, orders as mockOrders } from './constants';
 import { FavoritesPage } from './components/FavoritesPage';
 import { ProfilePage } from './components/ProfilePage';
 import { ProductDetailPage } from './components/ProductDetailPage';
@@ -34,7 +33,7 @@ import { PaymentGatewayPage } from './components/PaymentGatewayPage';
 import { OrderHistoryPage } from './components/OrderHistoryPage';
 import { OrderDetailPage } from './components/OrderDetailPage';
 import { StoresPage } from './components/StoresPage';
-
+import { api } from './utils/api';
 
 type View =
   | { name: 'home'; data: null }
@@ -55,8 +54,7 @@ type View =
   | { name: 'orderHistory'; data: null }
   | { name: 'orderDetail'; data: { orderId: string } }
   | { name: 'compare'; data: null }
-  | { name: 'stores'; data: null }; // Add compare view
-
+  | { name: 'stores'; data: null };
 
 const AppContent: React.FC = () => {
     const [view, setView] = useState<View>({ name: 'home', data: null });
@@ -64,19 +62,113 @@ const AppContent: React.FC = () => {
     const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [pendingRedirect, setPendingRedirect] = useState<View['name'] | null>(null); // State to track where to go after login
+    const [pendingRedirect, setPendingRedirect] = useState<View['name'] | null>(null);
     
-    const { addToast } = useToast(); // Use hook
+    const { addToast } = useToast();
+    // We need to access cart methods inside AppContent if we want to clear it here, 
+    // but CartProvider wraps AppContent. So we rely on CheckoutPage clearing logic or 
+    // we'd need to move clearCart logic. For now, Checkout calls clearCart.
 
-    // Centralized data management for admin CRUD
-    const [products, setProducts] = useState<Product[]>(allProducts);
+    // State for dynamic data
+    const [products, setProducts] = useState<Product[]>([]); 
     const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [packs, setPacks] = useState<Pack[]>(initialPacks);
-    const [orders, setOrders] = useState<Order[]>(initialOrders);
+    // Initialize orders as empty array to avoid showing mock data
+    const [orders, setOrders] = useState<Order[]>([]);
     const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
     const [advertisements, setAdvertisements] = useState<Advertisements>(initialAdvertisements);
     const [promotions, setPromotions] = useState<Promotion[]>(mockPromotions);
     const [stores, setStores] = useState<Store[]>(initialStores);
+
+    const fetchUserOrders = async (user: User) => {
+        try {
+            let fetchedOrders;
+            if (user.role === 'ADMIN') {
+                fetchedOrders = await api.getAllOrders();
+            } else {
+                fetchedOrders = await api.getMyOrders();
+            }
+            if (fetchedOrders) {
+                setOrders(fetchedOrders);
+            }
+        } catch (error) {
+            console.warn("Failed to fetch user orders from backend, using mock data.");
+            setOrders(mockOrders);
+        }
+    };
+
+    // Robust Data Fetching with Fallback
+    useEffect(() => {
+        const fetchAllData = async () => {
+            // Helper to fetch with silent fallback
+            const loadData = async <T,>(apiCall: () => Promise<T>, fallback: T, name: string): Promise<T> => {
+                try {
+                    const result = await apiCall();
+                    return result;
+                } catch (error) {
+                    console.warn(`Using offline data for ${name}`, error);
+                    return fallback;
+                }
+            };
+
+            try {
+                const [
+                    loadedProducts,
+                    loadedCategories,
+                    loadedPacks,
+                    loadedStores,
+                    loadedPromotions,
+                    loadedAds
+                ] = await Promise.all([
+                    loadData(api.getProducts, allProducts, 'products'),
+                    loadData(api.getCategories, initialCategories, 'categories'),
+                    loadData(api.getPacks, initialPacks, 'packs'),
+                    loadData(api.getStores, initialStores, 'stores'),
+                    loadData(api.getPromotions, mockPromotions, 'promotions'),
+                    loadData(api.getAdvertisements, initialAdvertisements, 'advertisements')
+                ]);
+
+                setProducts(loadedProducts);
+                setCategories(loadedCategories);
+                setPacks(loadedPacks);
+                setStores(loadedStores);
+                setPromotions(loadedPromotions);
+                // Only set ads if object is not empty
+                if (loadedAds && Object.keys(loadedAds).length > 0) {
+                    setAdvertisements(prev => ({...prev, ...loadedAds}));
+                }
+            } catch (e) {
+                setProducts(allProducts);
+            }
+        };
+
+        fetchAllData();
+
+        // Check login status
+        const checkAuth = async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const user = await api.getMe();
+                    setCurrentUser(user);
+                    setIsLoggedIn(true);
+                    fetchUserOrders(user);
+                } catch (e) {
+                    if (token === 'demo-token') {
+                        // Assuming demo user is the seeded client for persistence
+                        setCurrentUser(mockUser);
+                        setIsLoggedIn(true);
+                        fetchUserOrders(mockUser); 
+                    } else {
+                        localStorage.removeItem('token');
+                        setIsLoggedIn(false);
+                        setCurrentUser(null);
+                    }
+                }
+            }
+        };
+        checkAuth();
+    }, []);
 
     const handleNavigate = (newView: View) => {
         setView(newView);
@@ -92,18 +184,27 @@ const AppContent: React.FC = () => {
     const handleNavigateToContact = () => handleNavigate({ name: 'contact', data: null });
     const handleNavigateToLogin = () => handleNavigate({ name: 'login', data: null });
     
-    // Modified Checkout Navigation Logic
     const handleNavigateToCheckout = () => {
         if (isLoggedIn) {
             handleNavigate({ name: 'checkout', data: null });
         } else {
-            setPendingRedirect('checkout'); // Remember user wanted to checkout
+            setPendingRedirect('checkout');
             addToast("Veuillez vous connecter pour valider votre commande", "info");
             handleNavigate({ name: 'login', data: null });
         }
     };
 
-    const handleNavigateToAdmin = () => handleNavigate({ name: 'admin', data: null });
+    const handleNavigateToAdmin = () => {
+        if (isLoggedIn && currentUser?.role === 'ADMIN') {
+            handleNavigate({ name: 'admin', data: null });
+        } else {
+            addToast("Accès refusé. Droits d'administrateur requis.", "error");
+            if (!isLoggedIn) {
+                handleNavigateToLogin();
+            }
+        }
+    };
+    
     const handleNavigateToFavorites = () => handleNavigate({ name: 'favorites', data: null });
     const handleNavigateToProfile = () => handleNavigate({ name: 'profile', data: null });
     const handleNavigateToOrderHistory = () => handleNavigate({ name: 'orderHistory', data: null });
@@ -115,23 +216,47 @@ const AppContent: React.FC = () => {
     const handleNavigateToStores = () => handleNavigate({ name: 'stores', data: null });
 
 
-    const handleLoginSuccess = () => {
-        setIsLoggedIn(true);
-        setCurrentUser(mockUser);
-        addToast("Connexion réussie !", "success");
-        
-        // Check if there is a pending redirect (e.g., back to checkout)
-        if (pendingRedirect === 'checkout') {
-            handleNavigate({ name: 'checkout', data: null });
-            setPendingRedirect(null); // Clear the pending redirect
-        } else {
-            handleNavigateToProfile();
+    const handleLoginSuccess = async () => {
+        try {
+            const user = await api.getMe();
+            setCurrentUser(user);
+            setIsLoggedIn(true);
+            addToast(`Bienvenue, ${user.firstName} !`, "success");
+            
+            await fetchUserOrders(user);
+
+            if (pendingRedirect === 'checkout') {
+                handleNavigate({ name: 'checkout', data: null });
+                setPendingRedirect(null);
+            } else {
+                if (user.role === 'ADMIN') {
+                    handleNavigate({ name: 'admin', data: null });
+                } else {
+                    handleNavigateToProfile();
+                }
+            }
+        } catch (error) {
+            console.warn("Offline mode: API unavailable, using mock user.");
+            setCurrentUser(mockUser);
+            setIsLoggedIn(true);
+            addToast("Connexion (Mode Démo) réussie !", "success");
+            // Fetch mock orders
+            fetchUserOrders(mockUser);
+
+             if (pendingRedirect === 'checkout') {
+                handleNavigate({ name: 'checkout', data: null });
+                setPendingRedirect(null);
+            } else {
+                handleNavigateToProfile();
+            }
         }
     };
 
     const handleLogout = () => {
+        localStorage.removeItem('token');
         setIsLoggedIn(false);
         setCurrentUser(null);
+        setOrders([]); // Clear orders on logout
         addToast("Vous avez été déconnecté.", "info");
         handleNavigateHome();
     };
@@ -144,54 +269,14 @@ const AppContent: React.FC = () => {
         setPreviewProduct(null);
     };
 
-    const handleOrderComplete = (cartItems: CartItem[], customerInfo: CustomerInfo, paymentId?: string) => {
-        setProducts(currentProducts => {
-            const newProducts = [...currentProducts];
-            const productQuantityUpdates: { [id: number]: number } = {};
+    const handleOrderComplete = async (cartItems: CartItem[], customerInfo: CustomerInfo, paymentId?: string) => {
+        // Generate a unique ID if one isn't provided (PaymentGateway passes paymentId)
+        const finalOrderId = paymentId || `ES-${Date.now()}`;
 
-            const getProductIdsFromPack = (pack: Pack): number[] => {
-                let ids = [...pack.includedProductIds];
-                if (pack.includedPackIds) {
-                    pack.includedPackIds.forEach(subPackId => {
-                        const subPack = packs.find(p => p.id === subPackId);
-                        if (subPack) {
-                            ids = [...ids, ...getProductIdsFromPack(subPack)];
-                        }
-                    });
-                }
-                return ids;
-            }
-
-            for (const item of cartItems) {
-                if (item.id.startsWith('product-')) {
-                    const productId = parseInt(item.id.split('-')[1]);
-                    productQuantityUpdates[productId] = (productQuantityUpdates[productId] || 0) + item.quantity;
-                } else if (item.id.startsWith('pack-')) {
-                    const pack = item.originalItem as Pack;
-                    const productIdsInPack = getProductIdsFromPack(pack);
-                    for (const productId of productIdsInPack) {
-                        productQuantityUpdates[productId] = (productQuantityUpdates[productId] || 0) + item.quantity;
-                    }
-                }
-            }
-
-            return newProducts.map(product => {
-                if (productQuantityUpdates[product.id]) {
-                    return {
-                        ...product,
-                        quantity: Math.max(0, product.quantity - productQuantityUpdates[product.id])
-                    };
-                }
-                return product;
-            });
-        });
-
-        const finalOrderId = paymentId || `ES-${1025 + orders.length}`;
-
-        const newOrder: Order = {
+        const orderPayload = {
             id: finalOrderId,
             customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
-            date: new Date().toISOString().split('T')[0],
+            date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
             total: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
             status: 'En attente',
             itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
@@ -208,6 +293,7 @@ const AppContent: React.FC = () => {
                     price: cartItem.price,
                     brand: originalProduct?.brand || 'Pack',
                     category: originalProduct?.category || 'Packs',
+                    // Keep extra info if available, but ensure backend can handle it or ignore it
                     promo: originalProduct?.promo,
                     description: originalProduct?.description,
                 };
@@ -223,13 +309,62 @@ const AppContent: React.FC = () => {
             paymentMethod: paymentId ? 'Paiement par carte' : 'Paiement à la livraison',
         };
         
-        setOrders(prev => [newOrder, ...prev]);
-
-        addToast(`Merci pour votre commande ${finalOrderId} !`, "success");
-        handleNavigateToOrderDetail(finalOrderId);
+        try {
+            addToast("Enregistrement de la commande...", "info");
+            // Call backend API to create order
+            const savedOrder = await api.createOrder(orderPayload);
+            
+            // Only update state if backend save is successful
+            setOrders(prev => [savedOrder, ...prev]);
+            addToast(`Merci pour votre commande ${finalOrderId} !`, "success");
+            
+            // Navigation after successful order
+            handleNavigateToOrderDetail(finalOrderId);
+        } catch (error: any) {
+            console.error("Failed to create order on backend.", error);
+            
+            // Fallback logic for demo purposes ONLY if real API fails
+            // Ideally you show an error here in production
+            if (localStorage.getItem('token') === 'demo-token') {
+                 setOrders(prev => [orderPayload as Order, ...prev]);
+                 addToast(`Merci pour votre commande ${finalOrderId} ! (Mode Démo)`, "success");
+                 handleNavigateToOrderDetail(finalOrderId);
+            } else {
+                addToast("Erreur lors de la création de la commande. Veuillez réessayer.", "error");
+            }
+        }
     };
 
     const renderContent = () => {
+        if (view.name === 'admin') {
+            if (!isLoggedIn || currentUser?.role !== 'ADMIN') {
+                setTimeout(() => {
+                    addToast("Accès non autorisé.", "error");
+                    handleNavigateHome();
+                }, 0);
+                return null;
+            }
+            return <AdminPage 
+                        onNavigateHome={handleNavigateHome}
+                        productsData={products}
+                        setProductsData={setProducts}
+                        categoriesData={categories}
+                        setCategoriesData={setCategories}
+                        packsData={packs}
+                        setPacksData={setPacks}
+                        ordersData={orders}
+                        setOrdersData={setOrders}
+                        messagesData={messages}
+                        setMessagesData={setMessages}
+                        advertisementsData={advertisements}
+                        setAdvertisementsData={setAdvertisements}
+                        promotionsData={promotions}
+                        setPromotionsData={setPromotions}
+                        storesData={stores}
+                        setStoresData={setStores}
+                    />;
+        }
+
         switch (view.name) {
             case 'home':
                 return <HomePage 
@@ -242,6 +377,7 @@ const AppContent: React.FC = () => {
                     packs={packs}
                     advertisements={advertisements}
                     onNavigateToProductDetail={handleNavigateToProductDetail}
+                    categories={categories}
                 />;
             case 'productList':
                 return <ProductListPage 
@@ -254,6 +390,7 @@ const AppContent: React.FC = () => {
                     onNavigateToPacks={handleNavigateToPacks}
                     products={products}
                     onNavigateToProductDetail={handleNavigateToProductDetail}
+                    categories={categories}
                 />;
             case 'productDetail':
                 const product = products.find(p => p.id === view.data.productId);
@@ -292,6 +429,7 @@ const AppContent: React.FC = () => {
                     allPacks={packs}
                     onNavigateToPacks={handleNavigateToPacks}
                     onNavigateToPackDetail={handleNavigateToPackDetail}
+                    categories={categories}
                 />;
             case 'promotions':
                 return <PromotionsPage
@@ -373,26 +511,6 @@ const AppContent: React.FC = () => {
                 return <ComparePage onNavigateHome={handleNavigateHome} />;
             case 'stores':
                 return <StoresPage onNavigateHome={handleNavigateHome} stores={stores} />;
-            case 'admin':
-                return <AdminPage 
-                            onNavigateHome={handleNavigateHome}
-                            productsData={products}
-                            setProductsData={setProducts}
-                            categoriesData={categories}
-                            setCategoriesData={setCategories}
-                            packsData={packs}
-                            setPacksData={setPacks}
-                            ordersData={orders}
-                            setOrdersData={setOrders}
-                            messagesData={messages}
-                            setMessagesData={setMessages}
-                            advertisementsData={advertisements}
-                            setAdvertisementsData={setAdvertisements}
-                            promotionsData={promotions}
-                            setPromotionsData={setPromotions}
-                            storesData={stores}
-                            setStoresData={setStores}
-                        />;
             default:
                 return <HomePage 
                     onNavigate={handleNavigateToCategory} 
@@ -404,6 +522,7 @@ const AppContent: React.FC = () => {
                     packs={packs}
                     advertisements={advertisements}
                     onNavigateToProductDetail={handleNavigateToProductDetail}
+                    categories={categories}
                 />;
         }
     };
@@ -416,7 +535,11 @@ const AppContent: React.FC = () => {
                 </div>
             ) : (
                 <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
-                    <TopBar onNavigateToAdmin={handleNavigateToAdmin} onNavigateToStores={handleNavigateToStores}/>
+                    <TopBar 
+                        user={currentUser} 
+                        onNavigateToAdmin={handleNavigateToAdmin} 
+                        onNavigateToStores={handleNavigateToStores}
+                    />
                     <Header 
                         onNavigateToLogin={handleNavigateToLogin}
                         isLoggedIn={isLoggedIn}

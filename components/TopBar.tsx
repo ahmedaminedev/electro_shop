@@ -1,13 +1,15 @@
 
 import React from 'react';
 import { PhoneIcon, MailIcon, LocationIcon } from './IconComponents';
+import type { User } from '../types';
 
 interface TopBarProps {
+    user: User | null;
     onNavigateToAdmin: () => void;
     onNavigateToStores: () => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onNavigateToAdmin, onNavigateToStores }) => {
+export const TopBar: React.FC<TopBarProps> = ({ user, onNavigateToAdmin, onNavigateToStores }) => {
     return (
         <div className="bg-gray-800 dark:bg-gray-950 text-white text-xs">
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-8">
@@ -26,7 +28,13 @@ export const TopBar: React.FC<TopBarProps> = ({ onNavigateToAdmin, onNavigateToS
                         <LocationIcon className="w-4 h-4" />
                         <span>Nos Magasins</span>
                     </a>
-                    <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToAdmin(); }} className="hover:text-red-400 font-bold">Panneau d'administration</a>
+                    
+                    {user?.role === 'ADMIN' && (
+                        <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToAdmin(); }} className="hover:text-red-400 font-bold text-red-400">
+                            Panneau d'administration
+                        </a>
+                    )}
+                    
                     <a href="#" className="hover:text-red-400">Suivi de commande</a>
                     <a href="#" className="hover:text-red-400">Contactez-nous</a>
                 </div>

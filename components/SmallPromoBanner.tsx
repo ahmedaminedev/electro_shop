@@ -1,7 +1,8 @@
-import React from 'react';
-import type { SmallPromoAd } from '../types';
 
-const DiscountBanner: React.FC<{ banner: SmallPromoAd, isPreview?: boolean }> = ({ banner, isPreview }) => {
+import React from 'react';
+import type { SmallPromoAd, DiscountPromoAd, PriceStartPromoAd, FlashSalePromoAd } from '../types';
+
+const DiscountBanner: React.FC<{ banner: DiscountPromoAd, isPreview?: boolean }> = ({ banner, isPreview }) => {
     const WrapperComponent = isPreview ? 'div' : 'a';
     const wrapperProps = isPreview ? {} : { href: "#" };
     
@@ -21,7 +22,7 @@ const DiscountBanner: React.FC<{ banner: SmallPromoAd, isPreview?: boolean }> = 
     );
 };
 
-const PriceStartBanner: React.FC<{ banner: SmallPromoAd, isPreview?: boolean }> = ({ banner, isPreview }) => {
+const PriceStartBanner: React.FC<{ banner: PriceStartPromoAd, isPreview?: boolean }> = ({ banner, isPreview }) => {
     const WrapperComponent = isPreview ? 'div' : 'a';
     const wrapperProps = isPreview ? {} : { href: "#" };
 
@@ -46,7 +47,7 @@ const PriceStartBanner: React.FC<{ banner: SmallPromoAd, isPreview?: boolean }> 
     );
 };
 
-const FlashSaleBanner: React.FC<{ banner: SmallPromoAd, isPreview?: boolean }> = ({ banner, isPreview }) => {
+const FlashSaleBanner: React.FC<{ banner: FlashSalePromoAd, isPreview?: boolean }> = ({ banner, isPreview }) => {
     const WrapperComponent = isPreview ? 'div' : 'a';
     const wrapperProps = isPreview ? {} : { href: "#" };
 

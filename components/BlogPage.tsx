@@ -1,9 +1,8 @@
-
 import React, { useEffect, useMemo } from 'react';
-import { blogPosts } from '../constants';
 import type { BlogPost } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { CalendarIcon, UserIcon, TagIcon, SearchIcon } from './IconComponents';
+import { blogPosts } from '../constants';
 
 interface BlogPageProps {
     onNavigateHome: () => void;

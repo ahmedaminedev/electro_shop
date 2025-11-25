@@ -29,7 +29,7 @@ const FormField: React.FC<{ label: string; name: string; value: string | number;
 const HeroForm: React.FC<{ data: HeroSlide[], onChange: (newData: HeroSlide[]) => void }> = ({ data, onChange }) => {
     const [activeSlide, setActiveSlide] = useState(0);
 
-    const handleSlideChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const handleSlideChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
         const { name, value } = e.target;
         const newSlides = [...data];
         newSlides[index] = { ...newSlides[index], [name]: value };
@@ -87,7 +87,7 @@ const HeroForm: React.FC<{ data: HeroSlide[], onChange: (newData: HeroSlide[]) =
 const DestockageForm: React.FC<{ data: DestockageAd[], onChange: (newData: DestockageAd[]) => void }> = ({ data, onChange }) => {
     const [activeAdIndex, setActiveAdIndex] = useState(0);
 
-    const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
         const { name, value, type } = e.target;
         const newData = [...data];
         newData[index] = { ...newData[index], [name]: type === 'number' ? parseFloat(value) || 0 : value };
@@ -176,7 +176,7 @@ const DestockageForm: React.FC<{ data: DestockageAd[], onChange: (newData: Desto
 const AudioPromoForm: React.FC<{ data: AudioPromoAd[], onChange: (newData: AudioPromoAd[]) => void }> = ({ data, onChange }) => {
     const [activeAd, setActiveAd] = useState(0);
     
-    const handleAdChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const handleAdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
         const { name, value, type } = e.target;
         const newAds = [...data];
         newAds[index] = { ...newAds[index], [name]: type === 'number' ? parseFloat(value) || 0 : value };
@@ -234,7 +234,7 @@ const AudioPromoForm: React.FC<{ data: AudioPromoAd[], onChange: (newData: Audio
 };
 
 const ImagePromosForm: React.FC<{ data: ImagePromoAd[], onChange: (newData: ImagePromoAd[]) => void }> = ({ data, onChange }) => {
-    const handleAdChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const handleAdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
         const { name, value } = e.target;
         const newAds = [...data];
         newAds[index] = { ...newAds[index], [name]: value };
@@ -280,7 +280,7 @@ const ImagePromosForm: React.FC<{ data: ImagePromoAd[], onChange: (newData: Imag
 };
 
 const PromoBannerForm: React.FC<{data: MediumPromoAd, onChange: (newData: MediumPromoAd) => void, allCategories: Category[], allPacks: Pack[]}> = ({ data, onChange, allCategories, allPacks }) => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         let { name, value } = e.target;
         
         if(name === 'linkType' && value === 'pack' && allPacks.length > 0) {

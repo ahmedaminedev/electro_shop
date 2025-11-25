@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Product, Pack, Advertisements } from '../types';
+import type { Product, Pack, Advertisements, Category } from '../types';
 import { VerticalNav } from './VerticalNav';
 import { HeroSection } from './HeroSection';
 import { TrustBadges } from './TrustBadges';
@@ -10,7 +10,7 @@ import { PromoBanners } from './PromoBanners';
 import { SmallPromoBanners } from './SmallPromoBanners';
 import { ProductGridSection } from './ProductGridSection';
 import { BrandCarousel } from './BrandCarousel';
-import { categories, newArrivals, summerSelection, brands } from '../constants';
+import {  newArrivals, summerSelection, brands } from '../constants';
 
 interface HomePageProps {
     onNavigate: (categoryName: string) => void;
@@ -22,9 +22,10 @@ interface HomePageProps {
     packs: Pack[];
     advertisements: Advertisements;
     onNavigateToProductDetail: (productId: number) => void;
+    categories: Category[];
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview, onNavigateToPacks, products, packs, advertisements, onNavigateToProductDetail }) => {
+export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview, onNavigateToPacks, products, packs, advertisements, onNavigateToProductDetail, categories }) => {
     
     // This logic should be here to ensure it uses up-to-date product quantities
     const getProductById = (id: number) => products.find(p => p.id === id);

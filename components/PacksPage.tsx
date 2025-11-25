@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { categories } from '../constants';
-import type { Pack, Product } from '../types';
+import type { Pack, Product, Category } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { CartIcon, Squares2X2Icon, Bars3Icon, ChevronDownIcon } from './IconComponents';
 import { VerticalNav } from './VerticalNav';
@@ -17,6 +16,7 @@ interface PacksPageProps {
     allPacks: Pack[];
     onNavigateToPacks: () => void;
     onNavigateToPackDetail: (packId: number) => void;
+    categories: Category[];
 }
 
 // Helper function to check pack availability recursively
@@ -184,7 +184,7 @@ const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pac
     );
 };
 
-export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigateToCategory, isNavCollapsed, onToggleNav, packs, allProducts, allPacks, onNavigateToPacks, onNavigateToPackDetail }) => {
+export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigateToCategory, isNavCollapsed, onToggleNav, packs, allProducts, allPacks, onNavigateToPacks, onNavigateToPackDetail, categories }) => {
     const [sortOrder, setSortOrder] = useState('price-asc');
     const [viewMode, setViewMode] = useState('grid');
     const [filters, setFilters] = useState({

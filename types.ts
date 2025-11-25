@@ -120,6 +120,7 @@ export interface User {
   lastName: string;
   email: string;
   phone: string;
+  role?: 'CUSTOMER' | 'ADMIN';
   age?: number;
   addresses: Address[];
 }
@@ -171,21 +172,21 @@ export interface ImagePromoAd {
   link: string;
 }
 
-// FIX: Add missing 'SmallPromoAd' type definition to fix an import error in components/SmallPromoBanner.tsx.
-interface BaseSmallPromoAd {
+// FIX: Export specific types for SmallPromoBanner
+export interface BaseSmallPromoAd {
   id: number;
   bgGradient: string;
   image: string;
 }
 
-interface DiscountPromoAd extends BaseSmallPromoAd {
+export interface DiscountPromoAd extends BaseSmallPromoAd {
   type: 'discount';
   promoText: string;
   title: string;
   discount: string;
 }
 
-interface PriceStartPromoAd extends BaseSmallPromoAd {
+export interface PriceStartPromoAd extends BaseSmallPromoAd {
   type: 'price_start';
   title: string;
   features: string[];
@@ -194,7 +195,7 @@ interface PriceStartPromoAd extends BaseSmallPromoAd {
   priceUnit: string;
 }
 
-interface FlashSalePromoAd extends BaseSmallPromoAd {
+export interface FlashSalePromoAd extends BaseSmallPromoAd {
   type: 'flash_sale';
   flashTitle: string;
   title?: string;

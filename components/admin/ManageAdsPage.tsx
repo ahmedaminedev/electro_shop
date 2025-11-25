@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Advertisements, Product, Pack, Category } from '../../types';
 
@@ -94,7 +95,12 @@ export const ManageAdsPage: React.FC<ManageAdsPageProps> = ({ initialAds, onSave
                         <DestockageCarousel ads={currentAds.destockage} />
                     </EditableAdWrapper>
 
-                    <ProductCarousel title="Nouvelles Arrivées (Aperçu non-éditable)" products={newArrivalProducts} onPreview={() => {}} />
+                    <ProductCarousel 
+                        title="Nouvelles Arrivées (Aperçu non-éditable)" 
+                        products={newArrivalProducts} 
+                        onPreview={() => {}} 
+                        onNavigateToProductDetail={() => {}}
+                    />
 
                     <EditableAdWrapper slotName="Promo Audio" onEdit={() => handleOpenModal({ name: 'Carrousel Promo Audio', type: 'audioPromo', data: currentAds.audioPromo })}>
                         <AudioPromoBanner ads={currentAds.audioPromo} />
@@ -113,7 +119,12 @@ export const ManageAdsPage: React.FC<ManageAdsPageProps> = ({ initialAds, onSave
                         <SmallPromoBanners ads={currentAds.smallPromoBanners} isPreview />
                     </EditableAdWrapper>
 
-                    <ProductCarousel title="Sélection d'été (Aperçu non-éditable)" products={summerSelectionProducts} onPreview={() => {}} />
+                    <ProductCarousel 
+                        title="Sélection d'été (Aperçu non-éditable)" 
+                        products={summerSelectionProducts} 
+                        onPreview={() => {}} 
+                        onNavigateToProductDetail={() => {}}
+                    />
                 </div>
             </div>
 

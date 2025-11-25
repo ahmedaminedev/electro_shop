@@ -336,6 +336,7 @@ export const mockUser: User = {
     lastName: 'Doe',
     email: 'john.doe@email.com',
     phone: '+216 22 123 456',
+    role: 'CUSTOMER',
     age: 34,
     addresses: [
         { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true },
