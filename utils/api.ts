@@ -1,134 +1,117 @@
 
-export const API_URL = 'http://127.0.0.1:5000/api';
+import { allProducts, packs, categories, initialStores, mockPromotions, initialAdvertisements, blogPosts, contactMessages, sampleOrders, mockUser } from '../constants';
 
-export const getAuthHeaders = () => {
+// Use relative URL to leverage Vite proxy in development
+// This works in AI Studio (via the preview URL) and locally (via localhost:3000 -> proxy -> localhost:8080)
+const BACKEND_URL = ''; 
+
+const apiRequest = async (endpoint: string, method: string = 'GET', body?: any) => {
     const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const options: RequestInit = {
+        method,
+        headers,
+        credentials: 'include' // Important for sending cookies/cors
     };
+
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api${endpoint}`, options);
+
+        if (!response.ok) {
+            const errorData = {
+                status: response.status,
+                message: ''
+            };
+            
+            if (response.status === 401) {
+                // Auto logout on 401
+                localStorage.removeItem('token');
+            }
+
+            // Read the body as text first to avoid stream locking issues
+            const textBody = await response.text();
+            
+            try {
+                // Try to parse it as JSON
+                const errorJson = JSON.parse(textBody);
+                errorData.message = errorJson.message || `API error: ${response.status}`;
+            } catch (e) {
+                // Fallback to text if JSON parse fails (e.g. HTML error page)
+                errorData.message = textBody || `API error: ${response.status}`;
+            }
+            throw errorData;
+        }
+
+        if (response.status === 204) {
+            return null;
+        }
+        return await response.json();
+    } catch (error: any) {
+        console.error(`API Request failed: ${method} ${endpoint}`, error);
+        throw error;
+    }
 };
 
-const handleResponse = async (res: Response, errorMessage: string) => {
-    if (!res.ok) {
-        let errorMsg = errorMessage;
-        try {
-            const error = await res.json();
-            errorMsg = error.message || errorMessage;
-        } catch (e) {
-            // Response was likely not JSON (e.g. 500 HTML page or network error text)
-            errorMsg = `${errorMessage} (Status: ${res.status})`;
-        }
-        console.error(`API Error (${res.url}):`, errorMsg);
-        throw new Error(errorMsg);
+// Helper to wrap API calls with mock fallback
+const withMockFallback = async <T>(apiCall: () => Promise<T>, mockData: T): Promise<T> => {
+    try {
+        return await apiCall();
+    } catch (error) {
+        console.warn('Backend unavailable, using mock data.');
+        return mockData;
     }
-    return res.json();
 };
 
 export const api = {
     // Auth
-    login: async (credentials: any) => {
-        const res = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(credentials),
-        });
-        return handleResponse(res, 'Erreur de connexion');
-    },
-    register: async (userData: any) => {
-        const res = await fetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData),
-        });
-        return handleResponse(res, "Erreur d'inscription");
-    },
-    getMe: async () => {
-        const res = await fetch(`${API_URL}/auth/me`, {
-            headers: getAuthHeaders(),
-        });
-        return handleResponse(res, 'Utilisateur non trouvé');
-    },
+    login: (credentials: any) => apiRequest('/auth/login', 'POST', credentials),
+    register: (userData: any) => apiRequest('/auth/register', 'POST', userData),
+    getMe: () => withMockFallback(() => apiRequest('/auth/me'), mockUser),
+    logout: () => apiRequest('/auth/logout'),
 
     // Products
-    getProducts: async () => {
-        const res = await fetch(`${API_URL}/products`);
-        return handleResponse(res, 'Erreur chargement produits');
-    },
-    createProduct: async (product: any) => {
-        const res = await fetch(`${API_URL}/products`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(product),
-        });
-        return handleResponse(res, 'Erreur création produit');
-    },
-    updateProduct: async (id: number, product: any) => {
-        const res = await fetch(`${API_URL}/products/${id}`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(product),
-        });
-        return handleResponse(res, 'Erreur mise à jour produit');
-    },
-    deleteProduct: async (id: number) => {
-        const res = await fetch(`${API_URL}/products/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders(),
-        });
-        return handleResponse(res, 'Erreur suppression produit');
-    },
+    getProducts: () => withMockFallback(() => apiRequest('/products'), allProducts),
+    createProduct: (product: any) => apiRequest('/products', 'POST', product),
+    updateProduct: (id: number | string, product: any) => apiRequest(`/products/${id}`, 'PUT', product),
+    deleteProduct: (id: number | string) => apiRequest(`/products/${id}`, 'DELETE'),
 
     // Packs
-    getPacks: async () => {
-        const res = await fetch(`${API_URL}/packs`);
-        return handleResponse(res, 'Erreur chargement packs');
-    },
+    getPacks: () => withMockFallback(() => apiRequest('/packs'), packs),
 
     // Categories
-    getCategories: async () => {
-        const res = await fetch(`${API_URL}/categories`);
-        return handleResponse(res, 'Erreur chargement catégories');
-    },
+    getCategories: () => withMockFallback(() => apiRequest('/categories'), categories),
 
     // Stores
-    getStores: async () => {
-        const res = await fetch(`${API_URL}/stores`);
-        return handleResponse(res, 'Erreur chargement magasins');
-    },
+    getStores: () => withMockFallback(() => apiRequest('/stores'), initialStores),
 
     // Promotions
-    getPromotions: async () => {
-        const res = await fetch(`${API_URL}/promotions`);
-        return handleResponse(res, 'Erreur chargement promotions');
-    },
+    getPromotions: () => withMockFallback(() => apiRequest('/promotions'), mockPromotions),
 
     // Advertisements
-    getAdvertisements: async () => {
-        const res = await fetch(`${API_URL}/advertisements`);
-        return handleResponse(res, 'Erreur chargement publicités');
-    },
+    getAdvertisements: () => withMockFallback(() => apiRequest('/advertisements'), initialAdvertisements),
 
     // Orders
-    createOrder: async (order: any) => {
-        console.log(`POSTing order to ${API_URL}/orders`, order);
-        const res = await fetch(`${API_URL}/orders`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(order),
-        });
-        return handleResponse(res, 'Erreur création commande');
-    },
-    getMyOrders: async () => {
-        const res = await fetch(`${API_URL}/orders/myorders`, {
-            headers: getAuthHeaders(),
-        });
-        return handleResponse(res, 'Erreur chargement historique');
-    },
-    getAllOrders: async () => {
-        const res = await fetch(`${API_URL}/orders`, {
-            headers: getAuthHeaders(),
-        });
-        return handleResponse(res, 'Erreur chargement commandes');
-    }
+    createOrder: (order: any) => apiRequest('/orders', 'POST', order),
+    getMyOrders: () => withMockFallback(() => apiRequest('/orders/myorders'), sampleOrders),
+    getAllOrders: () => withMockFallback(() => apiRequest('/orders'), sampleOrders),
+
+    // Blog
+    getBlogPosts: () => withMockFallback(() => apiRequest('/blog'), blogPosts),
+    getBlogPostBySlug: (slug: string) => withMockFallback(() => apiRequest(`/blog/${slug}`), blogPosts.find(p => p.slug === slug)),
+
+    // Contact
+    sendMessage: (data: { name: string; email: string; subject: string; message: string }) => apiRequest('/contact', 'POST', data),
+    getMessages: () => withMockFallback(() => apiRequest('/contact'), contactMessages),
+
+    // Chat
+    getChatHistory: (userId: string) => apiRequest(`/chat/${userId}`),
+    getAllChats: () => apiRequest('/chat/all'),
 };

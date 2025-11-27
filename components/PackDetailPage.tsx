@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useEffect } from 'react';
 import type { Product, Pack } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { useCart } from './CartContext';
@@ -10,9 +11,8 @@ interface PackDetailPageProps {
     allProducts: Product[];
     allPacks: Pack[];
     onNavigateHome: () => void;
-    onNavigateToProductDetail: (productId: number) => void;
-    onNavigateToPackDetail: (packId: number) => void;
-    // FIX: Add missing onNavigateToPacks prop for breadcrumb navigation.
+    onNavigateToProductDetail: (productId: number | string) => void;
+    onNavigateToPackDetail: (packId: number | string) => void;
     onNavigateToPacks: () => void;
 }
 
@@ -65,6 +65,33 @@ export const PackDetailPage: React.FC<PackDetailPageProps> = ({ pack, allProduct
         return true;
     }, [packContents, allProducts]);
 
+    // SEO: Dynamic Title & Meta
+    useEffect(() => {
+        document.title = `${pack.name} | Pack Promo | Electro Shop`;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute('content', `Profitez du ${pack.name} et économisez ${savings.toFixed(0)} DT. Livraison rapide partout en Tunisie.`);
+        }
+    }, [pack, savings]);
+
+    // SEO: JSON-LD for Pack (Treated as Product)
+    const jsonLd = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": pack.name,
+        "image": pack.imageUrl,
+        "description": pack.description,
+        "sku": `PACK-${pack.id}`,
+        "offers": {
+            "@type": "Offer",
+            "url": window.location.href,
+            "priceCurrency": "TND",
+            "price": pack.price,
+            "availability": isAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "itemCondition": "https://schema.org/NewCondition"
+        }
+    };
+
     const handleAddToCart = () => {
         if (!isAvailable) return;
         addToCart(pack, quantity);
@@ -103,6 +130,7 @@ export const PackDetailPage: React.FC<PackDetailPageProps> = ({ pack, allProduct
 
     return (
         <div className="bg-gray-100 dark:bg-gray-950">
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: 'Les packs', onClick: onNavigateToPacks }, { name: pack.name }]} />
 
@@ -164,7 +192,7 @@ export const PackDetailPage: React.FC<PackDetailPageProps> = ({ pack, allProduct
                                 key={`${product.id}-${index}`} 
                                 className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors border dark:border-gray-700"
                             >
-                                <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-contain rounded-md bg-white"/>
+                                <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-contain rounded-md bg-white" loading="lazy" />
                                 <div className="flex-grow">
                                     <p className="font-semibold text-gray-800 dark:text-gray-100">{product.name}</p>
                                     {sourcePackName !== pack.name && <p className="text-xs text-gray-500 dark:text-gray-400">via le pack: {sourcePackName}</p>}

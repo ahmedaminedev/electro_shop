@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useEffect } from 'react';
 import type { Product } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { useCart } from './CartContext';
@@ -10,7 +11,7 @@ interface ProductDetailPageProps {
     product: Product;
     allProducts: Product[];
     onNavigateHome: () => void;
-    onNavigateToProductDetail: (productId: number) => void;
+    onNavigateToProductDetail: (productId: number | string) => void;
     onPreview: (product: Product) => void;
 }
 
@@ -34,12 +35,43 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, a
     const [activeTab, setActiveTab] = useState<Tab>('description');
     const { addToCart, openCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
-    const isFav = isFavorite(product.id);
+    const isFav = isFavorite(product.id as number);
     const isOutOfStock = product.quantity === 0;
 
     const similarProducts = useMemo(() => 
         allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 10),
     [allProducts, product]);
+
+    // SEO Strategy: Dynamic Title and Meta Description
+    useEffect(() => {
+        document.title = `${product.name} | Electro Shop`;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute('content', product.description?.substring(0, 160) || `Achetez ${product.name} au meilleur prix en Tunisie chez Electro Shop.`);
+        }
+    }, [product]);
+
+    // SEO Strategy: JSON-LD Structured Data
+    const jsonLd = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": product.name,
+        "image": product.imageUrl,
+        "description": product.description,
+        "brand": {
+            "@type": "Brand",
+            "name": product.brand
+        },
+        "sku": product.id.toString(),
+        "offers": {
+            "@type": "Offer",
+            "url": window.location.href,
+            "priceCurrency": "TND",
+            "price": product.price,
+            "availability": isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition"
+        }
+    };
 
     const handleAddToCart = () => {
         if (isOutOfStock) return;
@@ -55,6 +87,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, a
 
     return (
         <div className="bg-gray-100 dark:bg-gray-950">
+            {/* Structured Data Injection */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: product.category }, { name: product.name }]} />
 
@@ -106,7 +141,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, a
                                     <CartIcon className="w-6 h-6" />
                                     <span>{isOutOfStock ? 'Épuisé' : 'Ajouter au panier'}</span>
                                 </button>
-                                <button onClick={() => toggleFavorite(product.id)} className={`p-3 rounded-full transition-colors ${isFav ? 'bg-red-100 text-red-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-100 hover:text-red-500'}`}>
+                                <button onClick={() => toggleFavorite(product.id as number)} className={`p-3 rounded-full transition-colors ${isFav ? 'bg-red-100 text-red-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-100 hover:text-red-500'}`}>
                                     <HeartIcon className="w-6 h-6" solid={isFav} />
                                 </button>
                             </div>

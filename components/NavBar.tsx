@@ -7,6 +7,7 @@ interface NavBarProps {
     onNavigateToPacks: () => void;
     onNavigateToPromotions: () => void;
     onNavigateToBlog: () => void;
+    onNavigateToNews: () => void;
     onNavigateToContact: () => void;
 }
 
@@ -15,6 +16,7 @@ export const NavBar: React.FC<NavBarProps> = ({
     onNavigateToPacks,
     onNavigateToPromotions,
     onNavigateToBlog, 
+    onNavigateToNews,
     onNavigateToContact 
 }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

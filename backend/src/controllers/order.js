@@ -15,9 +15,14 @@ exports.addOrderItems = catchAsync(async (req, res) => {
     paymentMethod
   } = req.body;
 
+  // Validation Backend
   if (!items || items.length === 0) {
     return res.status(400).json({ message: 'Aucun article dans la commande' });
   } 
+
+  if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.postalCode) {
+      return res.status(400).json({ message: "L'adresse de livraison est incomplète." });
+  }
   
   // CRITICAL: Ensure user is attached from the protect middleware
   if (!req.user || !req.user._id) {
@@ -51,6 +56,7 @@ exports.addOrderItems = catchAsync(async (req, res) => {
   }
 });
 
+// Cette méthode récupère uniquement les commandes de l'utilisateur connecté (req.user._id)
 exports.getMyOrders = catchAsync(async (req, res) => {
   if (!req.user) return res.status(401).json({ message: 'Non authentifié' });
   

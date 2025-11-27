@@ -6,10 +6,11 @@ import { ThemeToggle } from './ThemeToggle';
 import { useCart } from './CartContext';
 import { useFavorites } from './FavoritesContext';
 import { useCompare } from './CompareContext';
-import type { Product, Pack, Category, SearchResult, SearchResultItem } from '../types';
+import type { Product, Pack, Category, SearchResult, SearchResultItem, User } from '../types';
 import { SearchResultsDropdown } from './SearchResultsDropdown';
 
 interface HeaderProps {
+    user: User | null;
     onNavigateToLogin: () => void;
     isLoggedIn: boolean;
     onLogout: () => void;
@@ -38,6 +39,7 @@ const getProductIdsFromPack = (pack: Pack, allPacks: Pack[]): number[] => {
 };
 
 export const Header: React.FC<HeaderProps> = ({ 
+    user,
     onNavigateToLogin, 
     isLoggedIn, 
     onLogout, 
@@ -190,26 +192,32 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="flex items-center space-x-4 md:space-x-6">
                     <ThemeToggle />
                     
-                    {/* Compare Button */}
-                    <button onClick={onNavigateToCompare} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500" aria-label="Comparer">
-                        <ScaleIcon className="w-6 h-6" />
-                        <span className="hidden xl:block">Comparer</span>
-                        {compareList.length > 0 && (
-                            <span className="absolute -top-2 -right-3 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                {compareList.length}
-                            </span>
-                        )}
-                    </button>
+                    {/* Compare Button - Only visible if logged in */}
+                    {isLoggedIn && (
+                        <button onClick={onNavigateToCompare} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500" aria-label="Comparer">
+                            <ScaleIcon className="w-6 h-6" />
+                            <span className="hidden xl:block">Comparer</span>
+                            {compareList.length > 0 && (
+                                <span className="absolute -top-2 -right-3 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {compareList.length}
+                                </span>
+                            )}
+                        </button>
+                    )}
 
-                     <button onClick={onNavigateToFavorites} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
-                        <HeartIcon className="w-6 h-6" />
-                        <span className="hidden xl:block">Favoris</span>
-                        {favoritesCount > 0 && (
-                            <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                {favoritesCount}
-                            </span>
-                        )}
-                    </button>
+                    {/* Favorites Button - Only visible if logged in */}
+                    {isLoggedIn && (
+                         <button onClick={onNavigateToFavorites} className="relative flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
+                            <HeartIcon className="w-6 h-6" />
+                            <span className="hidden xl:block">Favoris</span>
+                            {favoritesCount > 0 && (
+                                <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {favoritesCount}
+                                </span>
+                            )}
+                        </button>
+                    )}
+
                     <div className="relative">
                         {isLoggedIn ? (
                              <button onMouseEnter={() => setIsProfileMenuOpen(true)} onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500">
@@ -228,7 +236,9 @@ export const Header: React.FC<HeaderProps> = ({
                                 onMouseLeave={() => setIsProfileMenuOpen(false)}
                             >
                                 <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToProfile(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mon Profil</a>
-                                <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToOrderHistory(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mes Commandes</a>
+                                {user?.role !== 'ADMIN' && (
+                                    <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToOrderHistory(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mes Commandes</a>
+                                )}
                                 <a href="#" onClick={(e) => { e.preventDefault(); onLogout(); setIsProfileMenuOpen(false); }} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Déconnexion</a>
                             </div>
                         )}

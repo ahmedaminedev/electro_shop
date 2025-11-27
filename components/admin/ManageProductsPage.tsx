@@ -5,6 +5,7 @@ import { PencilIcon, TrashIcon, PlusIcon, SearchIcon } from '../IconComponents';
 import { ProductFormModal } from './ProductFormModal';
 import { api } from '../../utils/api';
 import { useToast } from '../ToastContext';
+import { CustomAlert } from '../CustomAlert';
 
 interface ManageProductsPageProps {
     products: Product[];
@@ -47,6 +48,12 @@ export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products
     const [filterCategory, setFilterCategory] = useState('all');
     const [sortOption, setSortOption] = useState('name-asc');
     const [currentPage, setCurrentPage] = useState(1);
+    
+    // States for CustomAlert
+    const [alertState, setAlertState] = useState<{ isOpen: boolean; title: string; message: string; type: 'success' | 'error' | 'warning' | 'info'; showCancel?: boolean; onConfirm?: () => void }>({
+        isOpen: false, title: '', message: '', type: 'info'
+    });
+
     const PRODUCTS_PER_PAGE = 12;
     const { addToast } = useToast();
 
@@ -54,7 +61,13 @@ export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products
         try {
             const created = await api.createProduct(newProduct);
             setProducts(prev => [...prev, created]);
-            addToast("Produit créé avec succès", "success");
+            setAlertState({
+                isOpen: true,
+                title: "Succès",
+                message: "Le produit a été créé avec succès.",
+                type: "success",
+                onConfirm: () => setAlertState(prev => ({...prev, isOpen: false}))
+            });
         } catch (e) {
             addToast("Erreur lors de la création", "error");
         }
@@ -64,21 +77,43 @@ export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products
         try {
             const updated = await api.updateProduct(updatedProduct.id, updatedProduct);
             setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
-            addToast("Produit mis à jour", "success");
+            setAlertState({
+                isOpen: true,
+                title: "Succès",
+                message: "Le produit a été mis à jour.",
+                type: "success",
+                onConfirm: () => setAlertState(prev => ({...prev, isOpen: false}))
+            });
         } catch (e) {
             addToast("Erreur lors de la mise à jour", "error");
         }
     };
     
+    const confirmDeleteProduct = (productId: number) => {
+        setAlertState({
+            isOpen: true,
+            title: "Confirmer la suppression",
+            message: "Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.",
+            type: "warning",
+            showCancel: true,
+            onConfirm: () => handleDeleteProduct(productId)
+        });
+    };
+
     const handleDeleteProduct = async (productId: number) => {
-        if(window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
-            try {
-                await api.deleteProduct(productId);
-                setProducts(prev => prev.filter(p => p.id !== productId));
-                addToast("Produit supprimé", "info");
-            } catch (e) {
-                addToast("Erreur lors de la suppression", "error");
-            }
+        setAlertState(prev => ({ ...prev, isOpen: false })); // Close confirmation modal
+        try {
+            await api.deleteProduct(productId);
+            setProducts(prev => prev.filter(p => p.id !== productId));
+            setAlertState({
+                isOpen: true,
+                title: "Supprimé",
+                message: "Le produit a été supprimé avec succès.",
+                type: "success",
+                onConfirm: () => setAlertState(prev => ({...prev, isOpen: false}))
+            });
+        } catch (e) {
+            addToast("Erreur lors de la suppression", "error");
         }
     };
     
@@ -141,7 +176,7 @@ export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products
             {paginatedProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {paginatedProducts.map(product => (
-                        <AdminProductCard key={product.id} product={product} onEdit={() => openEditModal(product)} onDelete={() => handleDeleteProduct(product.id)} />
+                        <AdminProductCard key={product.id} product={product} onEdit={() => openEditModal(product)} onDelete={() => confirmDeleteProduct(product.id)} />
                     ))}
                 </div>
             ) : (
@@ -170,6 +205,17 @@ export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products
                     categories={categories}
                 />
             )}
+
+            {/* Global Custom Alert for Product Actions */}
+            <CustomAlert 
+                isOpen={alertState.isOpen}
+                onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
+                title={alertState.title}
+                message={alertState.message}
+                type={alertState.type}
+                showCancelButton={alertState.showCancel}
+                onConfirm={alertState.onConfirm}
+            />
         </div>
     );
 };

@@ -10,7 +10,7 @@ import { useToast } from './ToastContext';
 interface ProductCardProps {
     product: Product;
     onPreview: (product: Product) => void;
-    onNavigateToProductDetail: (productId: number) => void;
+    onNavigateToProductDetail: (productId: number | string) => void;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, onNavigateToProductDetail }) => {
@@ -20,8 +20,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
     const { addToast } = useToast();
     
     const isOutOfStock = product.quantity === 0;
-    const isFav = isFavorite(product.id);
-    const isComp = isComparing(product.id);
+    const isFav = isFavorite(product.id as number);
+    const isComp = isComparing(product.id as number);
 
     const handleAddToCart = () => {
         if (isOutOfStock) return;
@@ -37,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
 
     const handleToggleCompare = () => {
         if (isComp) {
-            removeFromCompare(product.id);
+            removeFromCompare(product.id as number);
             addToast("Retiré du comparateur", "info");
         } else {
             addToCompare(product);
@@ -51,6 +51,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
                     <img 
                         src={product.imageUrl} 
                         alt={product.name} 
+                        loading="lazy"
                         className={`w-full h-56 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 ${isOutOfStock ? 'filter grayscale' : ''}`}
                     />
                 </a>
@@ -72,7 +73,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
                 )}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
                     <button 
-                        onClick={() => toggleFavorite(product.id)} 
+                        onClick={() => toggleFavorite(product.id as number)} 
                         className={`p-2 rounded-full transition-colors shadow-sm ${isFav ? 'bg-red-100 text-red-600' : 'bg-white/70 text-gray-600 hover:bg-white hover:text-red-500'}`} 
                         aria-label="Ajouter aux favoris"
                     >

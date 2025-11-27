@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useCart } from './CartContext';
+import { useToast } from './ToastContext'; // Added Toast hook
 import { 
     DeliveryTruckIcon, 
     LockIcon,
@@ -219,6 +220,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
     const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card'>('card');
     const [termsAgreed, setTermsAgreed] = useState(false);
     const { cartItems, clearCart, cartTotal } = useCart();
+    const { addToast } = useToast(); // Utilisation du Hook Toast
     
     const isStorePickup = shippingOption.startsWith('store-');
     const SHIPPING_COST = isStorePickup ? 0 : (cartTotal >= 300 ? 0.000 : 7.000);
@@ -230,8 +232,46 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleNext = () => {
-        // Here you would add validation for the current step's fields
+    const validateStep1 = () => {
+        if (!formData.email || !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            addToast("Email invalide. Veuillez vérifier votre adresse email.", "error");
+            return false;
+        }
+        if (!formData.firstName.trim()) {
+            addToast("Le prénom est obligatoire.", "error");
+            return false;
+        }
+        if (!formData.lastName.trim()) {
+            addToast("Le nom est obligatoire.", "error");
+            return false;
+        }
+        return true;
+    };
+
+    const validateStep2 = () => {
+        if (!formData.address.trim()) {
+            addToast("L'adresse est obligatoire.", "error");
+            return false;
+        }
+        if (!formData.city.trim()) {
+            addToast("La ville est obligatoire.", "error");
+            return false;
+        }
+        if (!formData.postalCode.trim()) {
+            addToast("Le code postal est obligatoire.", "error");
+            return false;
+        }
+        // Validation Téléphone Tunisien (8 chiffres)
+        if (!formData.phone || !/^\d{8}$/.test(formData.phone.replace(/\s/g, ''))) {
+            addToast("Téléphone invalide. Il faut 8 chiffres.", "error");
+            return false;
+        }
+        return true;
+    };
+
+    const handleNext = (step: number) => {
+        if (step === 1 && !validateStep1()) return;
+        if (step === 2 && !validateStep2()) return;
         setActiveStep(prev => Math.min(prev + 1, 4));
     };
 
@@ -242,12 +282,14 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
     };
 
     const handleConfirmOrder = () => {
+        if (!validateStep1() || !validateStep2()) return;
+
         if (!termsAgreed) {
-            alert("Veuillez accepter les conditions générales de vente.");
+            addToast("Veuillez accepter les conditions générales de vente.", "warning");
             return;
         }
         if (cartItems.length === 0) {
-            alert("Votre panier est vide.");
+            addToast("Votre panier est vide.", "warning");
             return;
         }
 
@@ -306,7 +348,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
                                     <FormInputWithIcon name="lastName" label="Nom" icon={<div />} value={formData.lastName} onChange={handleInputChange} />
                                 </div>
                             </div>
-                            <div className="flex justify-end mt-6"><button onClick={handleNext} className="bg-red-600 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-700 transition-colors">Continuer</button></div>
+                            <div className="flex justify-end mt-6"><button onClick={() => handleNext(1)} className="bg-red-600 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-700 transition-colors">Continuer</button></div>
                         </CheckoutStep>
                         
                         <CheckoutStep 
@@ -318,19 +360,15 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
                             isDisabled={activeStep < 2}
                             summary={<span>{formData.address}, {formData.city}</span>}
                         >
-                             <div className="p-4 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg flex items-start gap-3">
-                                <div className="w-6 h-6 rounded-full border-2 border-yellow-500 flex items-center justify-center mt-1 flex-shrink-0"><div className="w-3 h-3 bg-yellow-500 rounded-full"></div></div>
-                                <div>
-                                    <p className="font-bold text-yellow-800 dark:text-yellow-200">Mon adresse</p>
-                                    <p className="text-sm text-yellow-700 dark:text-yellow-300">{`${formData.firstName} ${formData.lastName}`}<br/>{formData.address}<br/>{`${formData.postalCode} ${formData.city}`}<br/>{formData.country}<br/>{formData.phone}</p>
-                                    <div className="mt-2 flex gap-4 text-sm font-semibold">
-                                        <button className="text-blue-600 hover:underline">Modifier</button>
-                                        <button className="text-red-600 hover:underline">Supprimer</button>
-                                    </div>
+                             <div className="space-y-4">
+                                <FormInputWithIcon name="address" label="Adresse complète (Rue, Bâtiment...)" icon={<LocationIcon className="w-5 h-5"/>} value={formData.address} onChange={handleInputChange} />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormInputWithIcon name="city" label="Ville" icon={<div />} value={formData.city} onChange={handleInputChange} />
+                                    <FormInputWithIcon name="postalCode" label="Code Postal" icon={<div />} value={formData.postalCode} onChange={handleInputChange} />
                                 </div>
-                            </div>
-                            <a href="#" className="mt-4 inline-block font-semibold text-red-600 hover:underline">+ ajouter une nouvelle adresse</a>
-                             <div className="flex justify-end mt-6"><button onClick={handleNext} className="bg-red-600 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-700 transition-colors">Continuer</button></div>
+                                <FormInputWithIcon name="phone" label="Téléphone (8 chiffres)" icon={<PhoneIcon className="w-5 h-5"/>} value={formData.phone} onChange={handleInputChange} />
+                             </div>
+                             <div className="flex justify-end mt-6"><button onClick={() => handleNext(2)} className="bg-red-600 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-700 transition-colors">Continuer</button></div>
                         </CheckoutStep>
                         
                         <CheckoutStep 
@@ -373,7 +411,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
                                     </div>
                                 )}
                             </div>
-                             <div className="flex justify-end mt-6"><button onClick={handleNext} className="bg-red-600 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-700 transition-colors">Continuer</button></div>
+                             <div className="flex justify-end mt-6"><button onClick={() => handleNext(3)} className="bg-red-600 text-white font-semibold py-2.5 px-6 rounded-md hover:bg-red-700 transition-colors">Continuer</button></div>
                         </CheckoutStep>
 
                         <CheckoutStep 

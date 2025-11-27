@@ -1,5 +1,6 @@
-import React from 'react';
-import type { Product, Pack, Advertisements, Category } from '../types';
+
+import React, { useMemo } from 'react';
+import type { Product, Pack, Advertisements, Category, Brand } from '../types';
 import { VerticalNav } from './VerticalNav';
 import { HeroSection } from './HeroSection';
 import { TrustBadges } from './TrustBadges';
@@ -10,7 +11,6 @@ import { PromoBanners } from './PromoBanners';
 import { SmallPromoBanners } from './SmallPromoBanners';
 import { ProductGridSection } from './ProductGridSection';
 import { BrandCarousel } from './BrandCarousel';
-import {  newArrivals, summerSelection, brands } from '../constants';
 
 interface HomePageProps {
     onNavigate: (categoryName: string) => void;
@@ -21,16 +21,40 @@ interface HomePageProps {
     products: Product[];
     packs: Pack[];
     advertisements: Advertisements;
-    onNavigateToProductDetail: (productId: number) => void;
+    onNavigateToProductDetail: (productId: number | string) => void;
     categories: Category[];
+    brands: Brand[];
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, onToggleNav, onPreview, onNavigateToPacks, products, packs, advertisements, onNavigateToProductDetail, categories }) => {
+export const HomePage: React.FC<HomePageProps> = ({ 
+    onNavigate, 
+    isNavCollapsed, 
+    onToggleNav, 
+    onPreview, 
+    onNavigateToPacks, 
+    products, 
+    packs, 
+    advertisements, 
+    onNavigateToProductDetail, 
+    categories, 
+    brands 
+}) => {
     
-    // This logic should be here to ensure it uses up-to-date product quantities
-    const getProductById = (id: number) => products.find(p => p.id === id);
-    const newArrivalProducts = newArrivals.map(p => getProductById(p.id)).filter((p): p is Product => Boolean(p));
-    const summerSelectionProducts = summerSelection.map(p => getProductById(p.id)).filter((p): p is Product => Boolean(p));
+    // Calcul dynamique des sélections (Nouveautés = derniers produits)
+    const newArrivalProducts = useMemo(() => {
+        return products.length > 0 ? products.slice(0, 8) : [];
+    }, [products]);
+
+    // Calcul dynamique des sélections (Été = produits avec mots clés spécifiques)
+    const summerSelectionProducts = useMemo(() => {
+        const summerItems = products.filter(p => 
+            p.category.toLowerCase().includes('climat') || 
+            p.name.toLowerCase().includes('climat') || 
+            p.category.toLowerCase().includes('froid') ||
+            p.category.toLowerCase().includes('ventilateur')
+        );
+        return summerItems.length > 0 ? summerItems.slice(0, 8) : products.slice(8, 16);
+    }, [products]);
     
     return (
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
@@ -48,16 +72,36 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, isNavCollapsed, 
                     <HeroSection slides={advertisements.heroSlides} />
                     <TrustBadges />
                     <DestockageCarousel ads={advertisements.destockage} />
-                    <ProductCarousel title="Nouvelles Arrivées" products={newArrivalProducts} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
+                    
+                    {newArrivalProducts.length > 0 && (
+                        <ProductCarousel 
+                            title="Nouvelles Arrivées" 
+                            products={newArrivalProducts} 
+                            onPreview={onPreview} 
+                            onNavigateToProductDetail={onNavigateToProductDetail} 
+                        />
+                    )}
+                    
                     <AudioPromoBanner ads={advertisements.audioPromo} />
+                    
                     <PromoBanners 
                         banners={advertisements.promoBanners}
                         allProducts={products}
                         allPacks={packs}
                         onPreview={onPreview}
                     />
+                    
                     <SmallPromoBanners ads={advertisements.smallPromoBanners} />
-                    <ProductCarousel title="Sélection d'été" products={summerSelectionProducts} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
+                    
+                    {summerSelectionProducts.length > 0 && (
+                        <ProductCarousel 
+                            title="Sélection d'été" 
+                            products={summerSelectionProducts} 
+                            onPreview={onPreview} 
+                            onNavigateToProductDetail={onNavigateToProductDetail} 
+                        />
+                    )}
+                    
                     <ProductGridSection allProducts={products} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
                     <BrandCarousel brands={brands} />
                 </main>

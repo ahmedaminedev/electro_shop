@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { Product, Category } from '../../types';
 import { XMarkIcon, PlusIcon, TrashIcon } from '../IconComponents';
 import { ImageInput } from '../ImageInput';
+import { useToast } from '../ToastContext'; // Using Toast for validation errors
 
 interface ProductFormModalProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface ProductFormModalProps {
 type Specification = { name: string; value: string; };
 
 export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, onSave, product, categories }) => {
+    const { addToast } = useToast();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         name: '',
@@ -94,8 +96,35 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
         setFormData(prev => ({...prev, specifications: prev.specifications.filter((_, i) => i !== index)}));
     };
 
+    const validateForm = () => {
+        if (!formData.name.trim()) {
+            addToast("Le nom du produit est obligatoire.", "error");
+            return false;
+        }
+        if (formData.oldPrice <= 0) {
+            addToast("Le prix original doit être supérieur à 0.", "error");
+            return false;
+        }
+        if (formData.quantity < 0) {
+            addToast("La quantité ne peut pas être négative.", "error");
+            return false;
+        }
+        if (!formData.category) {
+            addToast("Veuillez sélectionner une catégorie.", "error");
+            return false;
+        }
+        if (!formData.imageUrl) {
+            addToast("L'image du produit est obligatoire.", "error");
+            return false;
+        }
+        return true;
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!validateForm()) return;
+
         const productData: Omit<Product, 'id'> = {
             name: formData.name,
             brand: formData.brand,

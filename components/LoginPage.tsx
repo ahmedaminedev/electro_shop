@@ -51,19 +51,33 @@ const SocialLoginButtons = () => (
 const SignInForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const { addToast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!email.trim() || !password.trim()) {
+            addToast("Veuillez remplir tous les champs.", "warning");
+            return;
+        }
+
+        setIsLoading(true);
+        
         try {
             const data = await api.login({ email, password });
-            localStorage.setItem('token', data.token);
-            onLoginSuccess();
+            if (data && data.token) {
+                localStorage.setItem('token', data.token);
+                onLoginSuccess();
+            } else {
+                throw new Error("Jeton d'authentification manquant.");
+            }
         } catch (error: any) {
-            // Offline fallback for demo
-            console.warn("Backend inaccessible, enabling demo mode.", error);
-            localStorage.setItem('token', 'demo-token');
-            onLoginSuccess();
+            console.error('[LOGIN] Erreur :', error);
+            addToast(error.message || "Erreur de connexion. Vérifiez vos identifiants.", "error");
+            // IMPORTANT: Ne PAS appeler onLoginSuccess() ici pour éviter la redirection
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -78,8 +92,12 @@ const SignInForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }
             <InputField id="signin-email" type="email" placeholder="Email" icon={MailIcon} value={email} onChange={e => setEmail(e.target.value)} />
             <InputField id="signin-password" type="password" placeholder="Mot de passe" icon={LockIcon} value={password} onChange={e => setPassword(e.target.value)} />
             <a href="#" className="block text-center text-sm text-gray-500 dark:text-gray-400 hover:underline my-4">Mot de passe oublié ?</a>
-            <button type="submit" className="w-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full py-3 uppercase tracking-wider hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-[0.98] active:brightness-95">
-                Se Connecter
+            <button 
+                type="submit" 
+                disabled={isLoading}
+                className={`w-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full py-3 uppercase tracking-wider hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-[0.98] active:brightness-95 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            >
+                {isLoading ? 'Connexion...' : 'Se Connecter'}
             </button>
         </form>
     );
@@ -87,6 +105,7 @@ const SignInForm: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }
 
 const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '' });
+    const [isLoading, setIsLoading] = useState(false);
     const { addToast } = useToast();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,17 +114,28 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+            addToast("Veuillez remplir tous les champs.", "warning");
+            return;
+        }
+
+        setIsLoading(true);
+        
         try {
             const data = await api.register(formData);
-            localStorage.setItem('token', data.token);
-            addToast("Compte créé avec succès", "success");
-            onSuccess();
+            if (data && data.token) {
+                localStorage.setItem('token', data.token);
+                addToast("Compte créé avec succès", "success");
+                onSuccess();
+            } else {
+                 throw new Error("Jeton d'authentification manquant.");
+            }
         } catch (error: any) {
-            // Offline fallback for demo
-            console.warn("Backend inaccessible, enabling demo mode.", error);
-            localStorage.setItem('token', 'demo-token');
-            addToast("Compte créé (Mode Démo)", "success");
-            onSuccess();
+            console.error('[REGISTER] Erreur :', error);
+            addToast(error.message || "Erreur lors de la création du compte.", "error");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -123,8 +153,12 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
             </div>
             <InputField id="signup-email" type="email" placeholder="Email" icon={MailIcon} value={formData.email} onChange={handleChange} />
             <InputField id="signup-password" type="password" placeholder="Mot de passe" icon={LockIcon} value={formData.password} onChange={handleChange} />
-            <button type="submit" className="w-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full py-3 uppercase tracking-wider hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-[0.98] active:brightness-95">
-                S'inscrire
+            <button 
+                type="submit" 
+                disabled={isLoading}
+                className={`w-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full py-3 uppercase tracking-wider hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-[0.98] active:brightness-95 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            >
+                {isLoading ? 'Inscription...' : 'S\'inscrire'}
             </button>
         </form>
     );

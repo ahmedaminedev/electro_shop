@@ -29,9 +29,9 @@ export const TopBar: React.FC<TopBarProps> = ({ user, onNavigateToAdmin, onNavig
                         <span>Nos Magasins</span>
                     </a>
                     
-                    {user?.role === 'ADMIN' && (
-                        <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToAdmin(); }} className="hover:text-red-400 font-bold text-red-400">
-                            Panneau d'administration
+                    {user && user.role === 'ADMIN' && (
+                        <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToAdmin(); }} className="hover:text-red-400 font-bold text-red-400 transition-colors">
+                            Dashboard Admin
                         </a>
                     )}
                     

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Breadcrumb } from './Breadcrumb';
 import { BuildingOfficeIcon, PhoneIcon, MailIcon, ClockIcon, PlusIcon, MinusIcon, FacebookIcon, TwitterIcon, InstagramIcon, LocationIcon } from './IconComponents';
 import type { Store } from '../types';
+import { useToast } from './ToastContext'; // Import Toast context
 
 interface ContactPageProps {
     onNavigateHome: () => void;
@@ -46,6 +47,7 @@ const InfoCard: React.FC<{ icon: React.ReactNode; title: string; content: React.
 export const ContactPage: React.FC<ContactPageProps> = ({ onNavigateHome, stores }) => {
     const [formState, setFormState] = useState({ name: '', email: '', subject: '', message: '' });
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const { addToast } = useToast();
 
     useEffect(() => {
         document.title = `Contactez-nous - Electro Shop`;
@@ -57,9 +59,29 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigateHome, stores
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validation Stricte
+        if (!formState.name.trim()) {
+            addToast("Le nom est obligatoire.", "error");
+            return;
+        }
+        if (!formState.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
+            addToast("Format d'email invalide.", "error");
+            return;
+        }
+        if (!formState.subject.trim()) {
+            addToast("Veuillez sélectionner un sujet.", "error");
+            return;
+        }
+        if (!formState.message.trim()) {
+            addToast("Le message ne peut pas être vide.", "error");
+            return;
+        }
+
         console.log('Form submitted:', formState);
         setIsSubmitted(true);
         setFormState({ name: '', email: '', subject: '', message: '' });
+        addToast("Message envoyé avec succès !", "success");
     };
 
     return (

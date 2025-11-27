@@ -10,12 +10,14 @@ import { ViewMessagesPage } from './ViewMessagesPage';
 import { ManageAdsPage } from './ManageAdsPage';
 import { ManagePromotionsPage } from './ManagePromotionsPage';
 import { ManageStoresPage } from './ManageStoresPage';
+import { AdminChat } from './AdminChat';
 import type { Product, Category, Pack, Order, ContactMessage, Advertisements, Promotion, Store } from '../../types';
 
-export type AdminPageName = 'dashboard' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'ads' | 'stores';
+export type AdminPageName = 'dashboard' | 'chat' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'ads' | 'stores';
 
 interface AdminPageProps {
     onNavigateHome: () => void;
+    onLogout: () => void;
     productsData: Product[];
     setProductsData: React.Dispatch<React.SetStateAction<Product[]>>;
     categoriesData: Category[];
@@ -41,6 +43,8 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
         switch (activePage) {
             case 'dashboard':
                 return <DashboardHomePage orders={props.ordersData} products={props.productsData} messages={props.messagesData}/>;
+            case 'chat':
+                return <AdminChat />;
             case 'products':
                 return <ManageProductsPage 
                             products={props.productsData} 
@@ -91,7 +95,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
 
     return (
         <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
-            <AdminSidebar activePage={activePage} setActivePage={setActivePage} onNavigateHome={props.onNavigateHome} />
+            <AdminSidebar activePage={activePage} setActivePage={setActivePage} onNavigateHome={props.onNavigateHome} onLogout={props.onLogout} />
             <main className="flex-1 p-8 overflow-y-auto">
                 {renderActivePage()}
             </main>

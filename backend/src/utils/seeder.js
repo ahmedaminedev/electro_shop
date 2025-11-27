@@ -14,18 +14,18 @@ const { allProducts, categories, packs, stores, initialAdvertisements, promotion
 const seedData = async () => {
   try {
     // 1. Users (Admin & Client)
-    const adminExists = await User.findOne({ email: 'admin@electroshop.com' });
-    if (!adminExists) {
-      await User.create({
-        firstName: 'Super',
-        lastName: 'Admin',
-        email: 'admin@electroshop.com',
-        password: 'password123',
-        role: 'ADMIN',
-        phone: '00000000'
-      });
-      console.log('Admin créé');
-    }
+    // Force delete admin to ensure clean password hash generation
+    await User.deleteOne({ email: 'admin@electroshop.com' });
+    
+    await User.create({
+      firstName: 'Super',
+      lastName: 'Admin',
+      email: 'admin@electroshop.com',
+      password: 'password123',
+      role: 'ADMIN',
+      phone: '00000000'
+    });
+    console.log('Admin recréé (Email: admin@electroshop.com, MDP: password123)');
 
     let clientUser = await User.findOne({ email: 'client@electroshop.com' });
     if (!clientUser) {
@@ -65,7 +65,7 @@ const seedData = async () => {
     const packCount = await Pack.countDocuments();
     if (packCount === 0) {
         await Pack.insertMany(packs);
-        console.log('Packs importés');
+        console.log('Packs importées');
     }
 
     // 5. Stores

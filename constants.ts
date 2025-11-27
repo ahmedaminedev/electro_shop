@@ -1,5 +1,27 @@
 
-import type { Product, Category, Brand, Pack, BlogPost, Order, ContactMessage, Advertisements, User, Promotion, Store } from './types';
+import type { Advertisements, BlogPost, Product, Category, Pack, Store, Promotion, Order, ContactMessage, User } from './types';
+
+export const mockUser: User | null = {
+    id: 999,
+    firstName: 'Invité',
+    lastName: 'Demo',
+    email: 'demo@electroshop.com',
+    phone: '12345678',
+    role: 'CUSTOMER',
+    addresses: [
+        { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true }
+    ]
+};
+
+export const mockAdmin: User | null = {
+    id: 1,
+    firstName: 'Super',
+    lastName: 'Admin',
+    email: 'admin@electroshop.com',
+    phone: '00000000',
+    role: 'ADMIN',
+    addresses: []
+};
 
 export const allProducts: Product[] = [
     { id: 1, name: 'Pack encastrable de 2 Pièces de la marque AUXSTAR', brand: 'AUXSTAR', price: 899, oldPrice: 1299, imageUrl: 'https://picsum.photos/id/10/400/400', discount: 30, category: 'Pack encastrable', promo: true, description: 'Un pack complet pour équiper votre cuisine avec style et efficacité. Profitez de la qualité AUXSTAR pour des résultats de cuisson parfaits.', quantity: 10 },
@@ -34,22 +56,6 @@ export const allProducts: Product[] = [
     { id: 30, name: 'Bouilloire électrique 1.7L BIOLUX', brand: 'BIOLUX', price: 220, category: 'Petit électroménagers cuisine', imageUrl: 'https://picsum.photos/seed/bouilloire_pack/400/400', quantity: 35 },
     { id: 31, name: 'Réfrigérateur combiné 350L ARISTON', brand: 'ARISTON', price: 2450, category: 'Réfrigérateur combiné', material: 'Silver', imageUrl: 'https://picsum.photos/seed/frigo_pack/400/400', quantity: 6, specifications: [{ name: 'Volume total (L)', value: '350' },{ name: 'Type de froid', value: 'No Frost' },{ name: 'Classe énergétique', value: 'A+' },{ name: 'Couleur', value: 'Silver' },{ name: 'Porte réversible', value: 'Oui' }] }
 ];
-
-export const getProductsByCategory = (category: string) => {
-    // This is a mock function. In a real application, you would fetch this from an API.
-    const categoryProducts = allProducts.filter(p => p.category === category || (category === 'Lave-linge frontal' && p.name.toLowerCase().includes('lave')));
-    
-    if (categoryProducts.length > 0) return categoryProducts;
-    
-    // Fallback for demo purposes
-    if(category.toLowerCase().includes('raclette')) return allProducts.filter(p => p.category === 'Appareil à raclette');
-    
-    return allProducts.slice(0, 10).map(p => ({...p, name: `${category} - ${p.name}`}));
-};
-
-
-export const newArrivals: Product[] = allProducts.slice(3, 8);
-export const summerSelection: Product[] = allProducts.slice(8, 12);
 
 export const categories: Category[] = [
     { name: 'Pack électroménager' },
@@ -214,21 +220,6 @@ export const categories: Category[] = [
     { name: 'Hygiène et soin' },
 ];
 
-export const brands: Brand[] = [
-    { name: 'ARISTON', productCount: 2, logoUrl: 'https://via.placeholder.com/150x60?text=ARISTON' },
-    { name: 'AUXSTAR', productCount: 2, logoUrl: 'https://via.placeholder.com/150x60?text=AUXSTAR' },
-    { name: 'BIOLUX', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=BIOLUX' },
-    { name: 'BRANDT', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=BRANDT' },
-    { name: 'CANDY', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=CANDY' },
-    { name: 'GREE', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=GREE' },
-    { name: 'LG', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=LG' },
-    { name: 'MIDEA', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=MIDEA' },
-    { name: 'NEWSTAR', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=NEWSTAR' },
-    { name: 'STARONE', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=STARONE' },
-    { name: 'TELEFUNKEN', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=TELEFUNKEN' },
-    { name: 'WHIRLPOOL', productCount: 1, logoUrl: 'https://via.placeholder.com/150x60?text=WHIRLPOOL' },
-];
-
 export const packs: Pack[] = [
     { 
         id: 1, 
@@ -277,7 +268,69 @@ export const packs: Pack[] = [
     }
 ];
 
-// FIX: Add blogPosts data to be exported and used in BlogPage and BlogPostPage
+export const initialStores: Store[] = [
+    {
+        id: 1,
+        name: "Electro Shop Tunis",
+        address: "10 Rue Saint Augustin",
+        city: "Tunis",
+        postalCode: "1002",
+        phone: "+216 71 123 456",
+        email: "tunis@electroshop.tn",
+        openingHours: "Lun - Sam: 08h30 - 19h00",
+        imageUrl: "https://picsum.photos/seed/store1/600/400",
+        isPickupPoint: true,
+        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3194.327286327346!2d10.181531315272312!3d36.80649487994732!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12fd34730e3703d3%3A0x6b8f703080e8230!2sTunis!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
+    },
+    {
+        id: 2,
+        name: "Electro Shop Sfax",
+        address: "Poudrière 1, Rue 18 Août (en face de Stoufa)",
+        city: "Sfax",
+        postalCode: "3000",
+        phone: "+216 74 987 654",
+        email: "sfax@electroshop.tn",
+        openingHours: "Lun - Sam: 08h00 - 19h30",
+        imageUrl: "https://picsum.photos/seed/store2/600/400",
+        isPickupPoint: true,
+        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3278.123456789012!2d10.76012345678901!3d34.74012345678901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x13002c1234567890%3A0x1234567890abcdef!2sSfax!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
+    },
+    {
+        id: 3,
+        name: "Electro Shop Sousse",
+        address: "Avenue Habib Bourguiba",
+        city: "Sousse",
+        postalCode: "4000",
+        phone: "+216 73 456 789",
+        email: "sousse@electroshop.tn",
+        openingHours: "Lun - Sam: 09h00 - 20h00",
+        imageUrl: "https://picsum.photos/seed/store3/600/400",
+        isPickupPoint: true,
+        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3235.123456789012!2d10.64012345678901!3d35.82512345678901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1302751234567890%3A0xabcdef1234567890!2sSousse!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
+    }
+];
+
+export const mockPromotions: Promotion[] = [
+    {
+        id: 1,
+        name: "Vente Flash Lave-vaisselle",
+        discountPercentage: 15,
+        startDate: "2024-07-01",
+        endDate: "2024-07-10",
+        productIds: [4, 5, 6, 7, 8],
+        packIds: [],
+    },
+    {
+        id: 2,
+        name: "Promo Cuisine d'été",
+        discountPercentage: 20,
+        startDate: "2024-06-15",
+        endDate: "2025-08-15",
+        productIds: [],
+        packIds: [1],
+    }
+];
+
 export const blogPosts: BlogPost[] = [
     {
         id: 1,
@@ -330,21 +383,13 @@ export const blogPosts: BlogPost[] = [
     }
 ];
 
-export const mockUser: User = {
-    id: 1,
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@email.com',
-    phone: '+216 22 123 456',
-    role: 'CUSTOMER',
-    age: 34,
-    addresses: [
-        { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true },
-        { id: 2, type: 'Travail', street: '456 Avenue Habib Bourguiba', city: 'Tunis', postalCode: '1001', isDefault: false },
-    ]
-};
+export const contactMessages: ContactMessage[] = [
+    { id: 1, name: 'Linda Jouini', email: 'linda.j@email.com', subject: 'Question sur un produit', message: 'Bonjour, je voudrais savoir si le Lave vaisselle Pose libre WHIRLPOOL est disponible en blanc. Merci.', date: '2023-10-27', read: false },
+    { id: 2, name: 'Sami Khelifi', email: 'sami.k@email.com', subject: 'Suivi de commande', message: 'Pouvez-vous me donner des nouvelles de ma commande ES-1023 ?', date: '2023-10-26', read: false },
+    { id: 3, name: 'Nour Hammami', email: 'nour.h@email.com', subject: 'Service après-vente', message: 'Mon climatiseur NEWSTAR ne refroidit plus correctement, que dois-je faire ? Il est encore sous garantie.', date: '2023-10-26', read: true },
+];
 
-export const orders: Order[] = [
+export const sampleOrders: Order[] = [
     { 
         id: 'ES-1024', 
         customerName: 'Karim Gharbi', 
@@ -352,8 +397,8 @@ export const orders: Order[] = [
         total: 1099, 
         status: 'Livrée', 
         itemCount: 1,
-        items: [{ ...allProducts.find(p => p.id === 3)!, productId: 3, quantity: 1, price: 1099 }],
-        shippingAddress: mockUser.addresses[0],
+        items: [{ ...allProducts.find(p => p.id === 3) as any, productId: 3, quantity: 1, price: 1099 }],
+        shippingAddress: { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true },
         paymentMethod: 'Paiement par carte'
     },
     { 
@@ -363,8 +408,8 @@ export const orders: Order[] = [
         total: 2389, 
         status: 'Expédiée', 
         itemCount: 1,
-        items: [{ ...allProducts.find(p => p.id === 4)!, productId: 4, quantity: 1, price: 2389 }],
-        shippingAddress: mockUser.addresses[1],
+        items: [{ ...allProducts.find(p => p.id === 4) as any, productId: 4, quantity: 1, price: 2389 }],
+        shippingAddress: { id: 2, type: 'Travail', street: '456 Avenue Habib Bourguiba', city: 'Tunis', postalCode: '1001', isDefault: false },
         paymentMethod: 'Paiement par carte'
     },
     { 
@@ -375,115 +420,12 @@ export const orders: Order[] = [
         status: 'En attente', 
         itemCount: 3,
         items: [
-            { ...allProducts.find(p => p.id === 15)!, productId: 15, quantity: 1, price: 145 },
-            { ...allProducts.find(p => p.id === 16)!, productId: 16, quantity: 2, price: 149 }
+            { ...allProducts.find(p => p.id === 15) as any, productId: 15, quantity: 1, price: 145 },
+            { ...allProducts.find(p => p.id === 16) as any, productId: 16, quantity: 2, price: 149 }
         ],
-        shippingAddress: mockUser.addresses[0],
+        shippingAddress: { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true },
         paymentMethod: 'Paiement à la livraison'
     },
-    { 
-        id: 'ES-1021', 
-        customerName: 'Fatma Bouaziz', 
-        date: '2023-10-24', 
-        total: 1239, 
-        status: 'Livrée', 
-        itemCount: 1,
-        items: [{ ...allProducts.find(p => p.id === 9)!, productId: 9, quantity: 1, price: 1239 }],
-        shippingAddress: mockUser.addresses[0],
-        paymentMethod: 'Paiement par carte'
-    },
-    { 
-        id: 'ES-1020', 
-        customerName: 'Youssef Jlassi', 
-        date: '2023-10-22', 
-        total: 1988, 
-        status: 'Annulée', 
-        itemCount: 2,
-        items: [
-            { ...allProducts.find(p => p.id === 2)!, productId: 2, quantity: 1, price: 999 },
-            { ...allProducts.find(p => p.id === 6)!, productId: 6, quantity: 1, price: 989 }
-        ],
-        shippingAddress: mockUser.addresses[1],
-        paymentMethod: 'Paiement par carte'
-    },
-];
-
-export const contactMessages: ContactMessage[] = [
-    { id: 1, name: 'Linda Jouini', email: 'linda.j@email.com', subject: 'Question sur un produit', message: 'Bonjour, je voudrais savoir si le Lave vaisselle Pose libre WHIRLPOOL est disponible en blanc. Merci.', date: '2023-10-27', read: false },
-    { id: 2, name: 'Sami Khelifi', email: 'sami.k@email.com', subject: 'Suivi de commande', message: 'Pouvez-vous me donner des nouvelles de ma commande ES-1023 ?', date: '2023-10-26', read: false },
-    { id: 3, name: 'Nour Hammami', email: 'nour.h@email.com', subject: 'Service après-vente', message: 'Mon climatiseur NEWSTAR ne refroidit plus correctement, que dois-je faire ? Il est encore sous garantie.', date: '2023-10-26', read: true },
-];
-
-export const mockPromotions: Promotion[] = [
-    {
-        id: 1,
-        name: "Vente Flash Lave-vaisselle",
-        discountPercentage: 15,
-        startDate: "2024-07-01",
-        endDate: "2024-07-10",
-        productIds: [4, 5, 6, 7, 8],
-        packIds: [],
-    },
-    {
-        id: 2,
-        name: "Promo Cuisine d'été",
-        discountPercentage: 20,
-        startDate: "2024-06-15",
-        endDate: "2025-08-15",
-        productIds: [],
-        packIds: [1],
-    },
-    {
-        id: 3,
-        name: "Offre Spéciale Raclette",
-        discountPercentage: 10,
-        startDate: "2023-12-01",
-        endDate: "2023-12-31",
-        productIds: [15, 16, 17, 18, 19, 20, 21, 22],
-        packIds: [],
-    }
-];
-
-export const initialStores: Store[] = [
-    {
-        id: 1,
-        name: "Electro Shop Tunis",
-        address: "10 Rue Saint Augustin",
-        city: "Tunis",
-        postalCode: "1002",
-        phone: "+216 71 123 456",
-        email: "tunis@electroshop.tn",
-        openingHours: "Lun - Sam: 08h30 - 19h00",
-        imageUrl: "https://picsum.photos/seed/store1/600/400",
-        isPickupPoint: true,
-        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3194.327286327346!2d10.181531315272312!3d36.80649487994732!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12fd34730e3703d3%3A0x6b8f703080e8230!2sTunis!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
-    },
-    {
-        id: 2,
-        name: "Electro Shop Sfax",
-        address: "Poudrière 1, Rue 18 Août (en face de Stoufa)",
-        city: "Sfax",
-        postalCode: "3000",
-        phone: "+216 74 987 654",
-        email: "sfax@electroshop.tn",
-        openingHours: "Lun - Sam: 08h00 - 19h30",
-        imageUrl: "https://picsum.photos/seed/store2/600/400",
-        isPickupPoint: true,
-        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3278.123456789012!2d10.76012345678901!3d34.74012345678901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x13002c1234567890%3A0x1234567890abcdef!2sSfax!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
-    },
-    {
-        id: 3,
-        name: "Electro Shop Sousse",
-        address: "Avenue Habib Bourguiba",
-        city: "Sousse",
-        postalCode: "4000",
-        phone: "+216 73 456 789",
-        email: "sousse@electroshop.tn",
-        openingHours: "Lun - Sam: 09h00 - 20h00",
-        imageUrl: "https://picsum.photos/seed/store3/600/400",
-        isPickupPoint: true,
-        mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3235.123456789012!2d10.64012345678901!3d35.82512345678901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1302751234567890%3A0xabcdef1234567890!2sSousse!5e0!3m2!1sen!2stn!4v1634567890123!5m2!1sen!2stn"
-    }
 ];
 
 export const initialAdvertisements: Advertisements = {
