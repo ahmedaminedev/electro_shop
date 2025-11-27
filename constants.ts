@@ -1,18 +1,6 @@
 
 import type { Advertisements, BlogPost, Product, Category, Pack, Store, Promotion, Order, ContactMessage, User } from './types';
 
-export const mockUser: User | null = {
-    id: 999,
-    firstName: 'Invité',
-    lastName: 'Demo',
-    email: 'demo@electroshop.com',
-    phone: '12345678',
-    role: 'CUSTOMER',
-    addresses: [
-        { id: 1, type: 'Domicile', street: '123 Rue de la Liberté', city: 'Tunis', postalCode: '1002', isDefault: true }
-    ]
-};
-
 export const mockAdmin: User | null = {
     id: 1,
     firstName: 'Super',

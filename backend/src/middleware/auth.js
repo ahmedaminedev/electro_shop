@@ -1,47 +1,36 @@
-
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 
+const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "votre_secret_jwt_tres_long_et_securise_123456";
+
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
 
-  // 1. Check for token in cookies (Preferred for security)
-  if (req.cookies.token) {
-    token = req.cookies.token;
-  } 
-  // 2. Fallback to Authorization header (Bearer token)
-  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  // On privilégie le Bearer Token dans le header Authorization pour l'Access Token
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }
+  // Optionnel : Support cookie si vous décidez de stocker l'access token en cookie aussi (mais ici on utilise localStorage pour l'access)
+  // else if (req.cookies.accessToken) { token = req.cookies.accessToken; }
 
-  // Cleaning token string if it contains "null" or "undefined" as string
-  if (token === 'null' || token === 'undefined') {
-      token = null;
-  }
-
-  if (!token) {
-    return res.status(401).json({ message: 'Non autorisé, vous devez être connecté.' });
+  if (!token || token === 'null' || token === 'undefined') {
+    return res.status(401).json({ message: 'Non autorisé, token manquant.' });
   }
 
   try {
-    // 3. Verify Token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "votre_secret_jwt_tres_long_et_securise_123456");
+    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
 
-    // 4. Check if user still exists
     req.user = await User.findById(decoded.id).select('-password');
     
     if (!req.user) {
-        res.cookie('token', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
-        return res.status(401).json({ message: 'Le propriétaire de ce token n\'existe plus.' });
+        return res.status(401).json({ message: 'Utilisateur non trouvé.' });
     }
 
     next();
   } catch (error) {
-    console.error('Auth Middleware Error:', error.message);
-    // Clear invalid cookie if present to prevent loops
-    res.cookie('token', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
-    return res.status(401).json({ message: 'Session invalide ou expirée.' });
+    // Si le token est expiré, le client recevra 401 et déclenchera la logique de refresh via api.ts
+    return res.status(401).json({ message: 'Token invalide ou expiré.' });
   }
 });
 

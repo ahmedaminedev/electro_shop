@@ -18,6 +18,7 @@ import { ProductPreviewModal } from './components/ProductPreviewModal';
 // Pages
 import { HomePage } from './components/HomePage';
 import { LoginPage } from './components/LoginPage';
+import { ResetPasswordPage } from './components/ResetPasswordPage';
 import { ProfilePage } from './components/ProfilePage';
 import { ProductListPage } from './components/ProductListPage';
 import { ProductDetailPage } from './components/ProductDetailPage';
@@ -35,6 +36,8 @@ import { StoresPage } from './components/StoresPage';
 import { ComparePage } from './components/ComparePage';
 import { FavoritesPage } from './components/FavoritesPage';
 import { AdminPage } from './components/admin/AdminPage';
+import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
+import { DataDeletionPage } from './components/DataDeletionPage';
 
 // Utils & Data
 import { api } from './utils/api';
@@ -49,6 +52,7 @@ const AppContent: React.FC = () => {
     const [selectedPackId, setSelectedPackId] = useState<number | null>(null);
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const [selectedBlogPostSlug, setSelectedBlogPostSlug] = useState<string | null>(null);
+    const [resetToken, setResetToken] = useState<string | null>(null); 
     
     // Data State
     const [user, setUser] = useState<User | null>(null);
@@ -64,6 +68,46 @@ const AppContent: React.FC = () => {
     const [isNavCollapsed, setIsNavCollapsed] = useState(false);
     const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
     const { addToast } = useToast();
+
+    // Check URL for OAuth Tokens or Reset Tokens or Status Messages on Mount
+    useEffect(() => {
+        const checkUrlParams = async () => {
+            const hash = window.location.hash;
+            
+            // Check for OAuth Token (Login Success)
+            if (hash.includes('accessToken=')) {
+                const urlParams = new URLSearchParams(hash.split('?')[1]);
+                const token = urlParams.get('accessToken');
+                if (token) {
+                    localStorage.setItem('token', token);
+                    window.history.replaceState(null, '', window.location.pathname);
+                    await handleLoginSuccess();
+                }
+            }
+            // Check for Reset Token
+            else if (hash.includes('reset-password')) {
+                const urlParams = new URLSearchParams(hash.split('?')[1]);
+                const token = urlParams.get('token');
+                if (token) {
+                    setResetToken(token);
+                    setCurrentPage('reset-password');
+                }
+            }
+            // Check for specific redirection flags from OAuth (Register Success / Error)
+            else if (hash.includes('success=registered') || hash.includes('error=')) {
+                // Rediriger vers la page login qui gérera l'affichage du Toast
+                setCurrentPage('login');
+            }
+            // Page Routing based on Hash
+            else if (hash.includes('privacy-policy')) {
+                setCurrentPage('privacy-policy');
+            }
+            else if (hash.includes('data-deletion')) {
+                setCurrentPage('data-deletion');
+            }
+        };
+        checkUrlParams();
+    }, []);
 
     // Initial Data Loading
     useEffect(() => {
@@ -81,25 +125,25 @@ const AppContent: React.FC = () => {
                 setPacks(packsData);
                 setCategories(categoriesData);
                 setStores(storesData);
-                // Merge ads with defaults to ensure structure
                 setAdvertisements({...initialAdvertisements, ...adsData}); 
 
-                // Check User Session
-                try {
-                    const userData = await api.getMe();
-                    if (userData) setUser(userData);
-                } catch (e) {
-                    // Not logged in - silent fail
+                const token = localStorage.getItem('token');
+                if (token) {
+                    try {
+                        const userData = await api.getMe();
+                        if (userData) setUser(userData);
+                    } catch (e) {
+                        localStorage.removeItem('token');
+                        setUser(null);
+                    }
                 }
             } catch (error) {
                 console.error("Error loading initial data:", error);
-                addToast("Erreur lors du chargement des données.", "error");
             }
         };
         loadData();
-    }, [addToast]);
+    }, []);
 
-    // Load user-specific data when user changes
     useEffect(() => {
         if (user) {
             api.getMyOrders().then(setOrders).catch(console.error);
@@ -120,7 +164,6 @@ const AppContent: React.FC = () => {
     const navigateToContact = () => setCurrentPage('contact');
     const navigateToLogin = () => setCurrentPage('login');
     const navigateToProfile = () => setCurrentPage('profile');
-    const navigateToCart = () => {}; // Cart is sidebar, but checkout is page
     const navigateToCheckout = () => setCurrentPage('checkout');
     const navigateToOrderHistory = () => setCurrentPage('order-history');
     const navigateToOrderDetail = (id: string) => { setSelectedOrderId(id); setCurrentPage('order-detail'); };
@@ -128,6 +171,8 @@ const AppContent: React.FC = () => {
     const navigateToCompare = () => setCurrentPage('compare');
     const navigateToFavorites = () => setCurrentPage('favorites');
     const navigateToAdmin = () => setCurrentPage('admin');
+    const navigateToPrivacyPolicy = () => setCurrentPage('privacy-policy');
+    const navigateToDataDeletion = () => setCurrentPage('data-deletion');
 
     const handleLoginSuccess = async () => {
         try {
@@ -144,8 +189,8 @@ const AppContent: React.FC = () => {
         await api.logout();
         setUser(null);
         localStorage.removeItem('token');
-        navigateToHome();
-        addToast("Vous avez été déconnecté.", "info");
+        setCurrentPage('login'); // Rediriger vers la page login
+        addToast("Vous avez été déconnecté avec succès.", "info");
     };
 
     const handleOrderComplete = async (cartItems: CartItem[], customerInfo: CustomerInfo, paymentId?: string) => {
@@ -183,24 +228,39 @@ const AppContent: React.FC = () => {
         }
     };
 
-    // --- Render Current Page ---
     const renderPage = () => {
         if (currentPage === 'admin' && user?.role === 'ADMIN') {
             return (
                 <AdminPage 
                     onNavigateHome={navigateToHome}
                     onLogout={handleLogout}
-                    // Pass data and setters for admin management
                     productsData={products} setProductsData={setProducts}
                     categoriesData={categories} setCategoriesData={setCategories}
                     packsData={packs} setPacksData={setPacks}
-                    ordersData={orders} setOrdersData={setOrders} // In real app, admin fetches ALL orders
-                    messagesData={[]} setMessagesData={() => {}} // Need to fetch messages for admin
+                    ordersData={orders} setOrdersData={setOrders} 
+                    messagesData={[]} setMessagesData={() => {}} 
                     advertisementsData={advertisements} setAdvertisementsData={setAdvertisements}
                     promotionsData={promotionsData} setPromotionsData={setPromotionsData}
                     storesData={stores} setStoresData={setStores}
                 />
             );
+        }
+
+        if (currentPage === 'reset-password') {
+            return (
+                <ResetPasswordPage 
+                    onNavigateHome={navigateToHome}
+                    token={resetToken || ''}
+                />
+            );
+        }
+
+        if (currentPage === 'privacy-policy') {
+            return <PrivacyPolicyPage onNavigateHome={navigateToHome} />;
+        }
+
+        if (currentPage === 'data-deletion') {
+            return <DataDeletionPage onNavigateHome={navigateToHome} />;
         }
 
         return (
@@ -243,7 +303,7 @@ const AppContent: React.FC = () => {
                             advertisements={advertisements}
                             onNavigateToProductDetail={navigateToProductDetail}
                             categories={categories}
-                            brands={[]} // Brands could be derived from products
+                            brands={[]} 
                         />
                     )}
                     {currentPage === 'product-list' && (
@@ -334,8 +394,6 @@ const AppContent: React.FC = () => {
                             onNavigateHome={navigateToHome}
                             onOrderComplete={handleOrderComplete}
                             onNavigateToPaymentGateway={(orderId, total, customerInfo) => {
-                                // In a real app, we'd pass this data via context or URL state
-                                // For now, we simulate navigation
                                 setCurrentPage('payment');
                             }}
                             stores={stores}
@@ -344,7 +402,7 @@ const AppContent: React.FC = () => {
                     {currentPage === 'payment' && (
                         <PaymentGatewayPage 
                             orderId={`ES-${Date.now()}`} 
-                            total={0} // Total would come from context
+                            total={0} 
                             customerInfo={{} as any} 
                             onNavigateHome={navigateToHome}
                             onOrderComplete={handleOrderComplete}
@@ -384,7 +442,10 @@ const AppContent: React.FC = () => {
                     )}
                 </main>
 
-                <Footer />
+                <Footer 
+                    onNavigateToPrivacy={navigateToPrivacyPolicy}
+                    onNavigateToDataDeletion={navigateToDataDeletion}
+                />
                 {(!user || user.role !== 'ADMIN') && <SupportWidget user={user} />}
                 <ScrollToTopButton />
                 <CartSidebar 

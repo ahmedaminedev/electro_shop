@@ -1,6 +1,12 @@
+
 import React from 'react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+    onNavigateToPrivacy?: () => void;
+    onNavigateToDataDeletion?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToDataDeletion }) => {
     return (
         <footer className="bg-gray-800 dark:bg-black/50 text-white mt-12">
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -15,7 +21,24 @@ export const Footer: React.FC = () => {
                             <li><a href="#" className="text-gray-400 hover:text-white">Qui sommes-nous ?</a></li>
                             <li><a href="#" className="text-gray-400 hover:text-white">Nos magasins</a></li>
                             <li><a href="#" className="text-gray-400 hover:text-white">Conditions de vente</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white">Politique de confidentialité</a></li>
+                            <li>
+                                <a 
+                                    href="#/privacy-policy" 
+                                    onClick={(e) => { e.preventDefault(); onNavigateToPrivacy?.(); }} 
+                                    className="text-gray-400 hover:text-white"
+                                >
+                                    Politique de confidentialité
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="#/data-deletion" 
+                                    onClick={(e) => { e.preventDefault(); onNavigateToDataDeletion?.(); }} 
+                                    className="text-gray-400 hover:text-white"
+                                >
+                                    Suppression des données
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <div>
