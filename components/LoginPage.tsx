@@ -121,7 +121,7 @@ const SocialLoginButtons = ({ action }: { action: 'login' | 'register' }) => {
     );
 };
 
-const SignInForm: React.FC<{ onLoginSuccess: () => void; onForgotPassword: () => void }> = ({ onLoginSuccess, onForgotPassword }) => {
+const SignInForm: React.FC<{ onLoginSuccess: () => void; onForgotPassword: () => void; idPrefix?: string }> = ({ onLoginSuccess, onForgotPassword, idPrefix = 'signin' }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -139,8 +139,9 @@ const SignInForm: React.FC<{ onLoginSuccess: () => void; onForgotPassword: () =>
         
         try {
             const data = await api.login({ email, password });
-            if (data && data.token) {
-                localStorage.setItem('token', data.token);
+            // CORRECTION: Le backend renvoie 'accessToken', pas 'token'
+            if (data && (data.accessToken || data.token)) {
+                localStorage.setItem('token', data.accessToken || data.token);
                 onLoginSuccess();
             } else {
                 throw new Error("Jeton d'authentification manquant.");
@@ -161,8 +162,8 @@ const SignInForm: React.FC<{ onLoginSuccess: () => void; onForgotPassword: () =>
                 <span className="flex-shrink mx-4 text-gray-500 dark:text-gray-400 text-xs">ou</span>
                 <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
             </div>
-            <InputField id="signin-email" type="email" placeholder="Email" icon={MailIcon} value={email} onChange={e => setEmail(e.target.value)} />
-            <InputField id="signin-password" type="password" placeholder="Mot de passe" icon={LockIcon} value={password} onChange={e => setPassword(e.target.value)} />
+            <InputField id={`${idPrefix}-email`} type="email" placeholder="Email" icon={MailIcon} value={email} onChange={e => setEmail(e.target.value)} />
+            <InputField id={`${idPrefix}-password`} type="password" placeholder="Mot de passe" icon={LockIcon} value={password} onChange={e => setPassword(e.target.value)} />
             <a href="#" onClick={(e) => { e.preventDefault(); onForgotPassword(); }} className="block text-center text-sm text-gray-500 dark:text-gray-400 hover:underline my-4">Mot de passe oublié ?</a>
             <button 
                 type="submit" 
@@ -175,13 +176,15 @@ const SignInForm: React.FC<{ onLoginSuccess: () => void; onForgotPassword: () =>
     );
 };
 
-const SignUpForm: React.FC<{ switchToLogin: () => void }> = ({ switchToLogin }) => {
+const SignUpForm: React.FC<{ switchToLogin: () => void; idPrefix?: string }> = ({ switchToLogin, idPrefix = 'signup' }) => {
     const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '' });
     const [isLoading, setIsLoading] = useState(false);
     const { addToast } = useToast();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.id.replace('signup-', '')]: e.target.value });
+        // Le split permet de retirer le préfixe pour récupérer le nom du champ réel (ex: 'signup-email' -> 'email')
+        const fieldName = e.target.id.replace(`${idPrefix}-`, '');
+        setFormData({ ...formData, [fieldName]: e.target.value });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -196,9 +199,8 @@ const SignUpForm: React.FC<{ switchToLogin: () => void }> = ({ switchToLogin }) 
         
         try {
             await api.register(formData);
-            // PAS DE TOKEN ICI. Le backend renvoie 201 avec message seulement.
             addToast("Inscription réussie ! Veuillez vous connecter.", "success");
-            switchToLogin(); // Basculer vers le formulaire de connexion
+            switchToLogin();
         } catch (error: any) {
             console.error('[REGISTER] Erreur :', error);
             addToast(error.message || "Erreur lors de la création du compte.", "error");
@@ -216,11 +218,11 @@ const SignUpForm: React.FC<{ switchToLogin: () => void }> = ({ switchToLogin }) 
                 <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
             </div>
             <div className="flex gap-2">
-                <InputField id="signup-firstName" type="text" placeholder="Prénom" icon={UserIcon} value={formData.firstName} onChange={handleChange} />
-                <InputField id="signup-lastName" type="text" placeholder="Nom" icon={UserIcon} value={formData.lastName} onChange={handleChange} />
+                <InputField id={`${idPrefix}-firstName`} type="text" placeholder="Prénom" icon={UserIcon} value={formData.firstName} onChange={handleChange} />
+                <InputField id={`${idPrefix}-lastName`} type="text" placeholder="Nom" icon={UserIcon} value={formData.lastName} onChange={handleChange} />
             </div>
-            <InputField id="signup-email" type="email" placeholder="Email" icon={MailIcon} value={formData.email} onChange={handleChange} />
-            <InputField id="signup-password" type="password" placeholder="Mot de passe" icon={LockIcon} value={formData.password} onChange={handleChange} />
+            <InputField id={`${idPrefix}-email`} type="email" placeholder="Email" icon={MailIcon} value={formData.email} onChange={handleChange} />
+            <InputField id={`${idPrefix}-password`} type="password" placeholder="Mot de passe" icon={LockIcon} value={formData.password} onChange={handleChange} />
             <button 
                 type="submit" 
                 disabled={isLoading}
@@ -247,17 +249,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome, onLoginSuc
 
             if (success === 'registered') {
                 addToast("Inscription réussie ! Veuillez maintenant vous connecter pour accéder à votre espace.", "success");
-                setIsSignUpActive(false); // Force switch to login view
+                setIsSignUpActive(false); 
             }
 
             if (error === 'user_not_found') {
                 addToast("Aucun compte trouvé avec cet email. Veuillez d'abord vous inscrire.", "error");
-                setIsSignUpActive(true); // Force switch to register view
+                setIsSignUpActive(true); 
             }
 
             if (error === 'user_exists') {
                 addToast("Un compte existe déjà avec cet email. Veuillez vous connecter.", "info");
-                setIsSignUpActive(false); // Force switch to login view
+                setIsSignUpActive(false); 
             }
 
             if (error === 'auth_failed') {
@@ -276,14 +278,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome, onLoginSuc
         <div className="relative py-16 sm:py-24 bg-cover bg-center font-sans" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=2768&auto=format&fit=crop')" }}>
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
             <div className="relative max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+                
+                {/* Desktop View */}
                 <div className="relative w-full max-w-3xl min-h-[620px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden hidden md:block">
                     <div className={`absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center p-8 text-center transition-all duration-700 ease-in-out transform opacity-0 z-10 bg-gradient-to-br from-stone-100 to-stone-200 dark:from-slate-800 dark:to-slate-900 ${isSignUpActive ? 'translate-x-full opacity-100 z-20' : ''}`}>
                         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Créer un compte</h1>
-                        <SignUpForm switchToLogin={() => setIsSignUpActive(false)} />
+                        <SignUpForm switchToLogin={() => setIsSignUpActive(false)} idPrefix="desktop-signup" />
                     </div>
                     <div className={`absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center p-8 text-center transition-all duration-700 ease-in-out transform bg-gradient-to-br from-stone-100 to-stone-200 dark:from-slate-800 dark:to-slate-900 ${isSignUpActive ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100 z-20'}`}>
                         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Se connecter</h1>
-                        <SignInForm onLoginSuccess={onLoginSuccess} onForgotPassword={() => setIsForgotModalOpen(true)} />
+                        <SignInForm onLoginSuccess={onLoginSuccess} onForgotPassword={() => setIsForgotModalOpen(true)} idPrefix="desktop-signin" />
                     </div>
                     <div className={`absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 ease-in-out z-50 ${isSignUpActive ? '-translate-x-full' : 'translate-x-0'}`}>
                         <div className={`relative -left-full h-full w-[200%] transition-transform duration-700 ease-in-out transform ${isSignUpActive ? 'translate-x-1/2' : 'translate-x-0'}`}>
@@ -304,17 +308,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateHome, onLoginSuc
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile View */}
                 <div className="w-full max-w-md bg-gradient-to-br from-stone-100 to-stone-200 dark:from-slate-800 dark:to-slate-900 backdrop-blur-sm p-8 rounded-2xl shadow-2xl md:hidden">
                     {!isSignUpActive ? (
                         <>
                             <h1 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">Se connecter</h1>
-                            <SignInForm onLoginSuccess={onLoginSuccess} onForgotPassword={() => setIsForgotModalOpen(true)} />
+                            <SignInForm onLoginSuccess={onLoginSuccess} onForgotPassword={() => setIsForgotModalOpen(true)} idPrefix="mobile-signin" />
                             <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">Pas encore de compte ? <button onClick={() => setIsSignUpActive(true)} className="font-semibold text-red-600 hover:underline">S'inscrire</button></p>
                         </>
                     ) : (
                         <>
                             <h1 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">Créer un compte</h1>
-                            <SignUpForm switchToLogin={() => setIsSignUpActive(false)} />
+                            <SignUpForm switchToLogin={() => setIsSignUpActive(false)} idPrefix="mobile-signup" />
                             <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">Déjà un compte ? <button onClick={() => setIsSignUpActive(false)} className="font-semibold text-red-600 hover:underline">Se connecter</button></p>
                         </>
                     )}
