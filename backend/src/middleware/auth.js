@@ -1,3 +1,4 @@
+
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
@@ -24,11 +25,13 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.user = await User.findById(decoded.id).select('-password');
     
     if (!req.user) {
+        console.error(`[AUTH ERROR] User not found for ID from token: ${decoded.id}`);
         return res.status(401).json({ message: 'Utilisateur non trouvé.' });
     }
 
     next();
   } catch (error) {
+    console.error(`[AUTH ERROR] Token verification failed: ${error.message}`);
     // Si le token est expiré, le client recevra 401 et déclenchera la logique de refresh via api.ts
     return res.status(401).json({ message: 'Token invalide ou expiré.' });
   }

@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode, useMemo, useCallback } from 'react';
+
+import React, { createContext, useState, useContext, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import type { CartItem, Cartable } from '../types';
 
 interface CartContextType {
@@ -17,8 +18,26 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+        try {
+            const stored = localStorage.getItem('electroShopCart');
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            console.error("Failed to load cart from local storage", e);
+            return [];
+        }
+    });
+    
     const [isCartOpen, setIsCartOpen] = useState(false);
+
+    // Persist cart to local storage whenever it changes
+    useEffect(() => {
+        try {
+            localStorage.setItem('electroShopCart', JSON.stringify(cartItems));
+        } catch (e) {
+            console.error("Failed to save cart to local storage", e);
+        }
+    }, [cartItems]);
 
     const openCart = useCallback(() => setIsCartOpen(true), []);
     const closeCart = useCallback(() => setIsCartOpen(false), []);
@@ -65,6 +84,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const clearCart = useCallback(() => {
         setCartItems([]);
+        localStorage.removeItem('electroShopCart');
     }, []);
 
     const itemCount = useMemo(() => {

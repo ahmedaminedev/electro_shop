@@ -17,6 +17,7 @@ const advertisementRoutes = require('./routes/advertisements');
 const blogRoutes = require('./routes/blog');
 const contactRoutes = require('./routes/contact');
 const chatRoutes = require('./routes/chat');
+const paymentRoutes = require('./routes/payment'); // Ajout
 
 // Config Passport
 require('./config/passport')(passport);
@@ -70,6 +71,7 @@ app.use('/api/advertisements', advertisementRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/payment', paymentRoutes); // Enregistrement
 
 app.get('/', (req, res) => {
     res.send('API is running...');

@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from './CartContext';
-import { useToast } from './ToastContext'; // Added Toast hook
+import { useToast } from './ToastContext';
 import { 
     DeliveryTruckIcon, 
     LockIcon,
@@ -17,6 +17,7 @@ import {
     StorefrontIcon
 } from './IconComponents';
 import type { CartItem, CustomerInfo, Store } from '../types';
+import { api } from '../utils/api';
 
 interface CheckoutPageProps {
     onNavigateHome: () => void;
@@ -119,7 +120,7 @@ const OrderSummary: React.FC<{ shippingCost: number; fiscalStamp: number }> = ({
                 </div>
 
                 <div className={`mt-6 ${isExpandedOnMobile ? 'block' : 'hidden'} lg:block`}>
-                    <div className="space-y-4 max-h-64 overflow-y-auto pr-3 border-b border-gray-200 dark:border-gray-700 pb-4 pt-3">
+                    <div className="space-y-4 max-h-64 overflow-y-auto pr-3 border-b border-gray-200 dark:border-gray-700 pb-4 pt-3 custom-scrollbar">
                         {cartItems.map(item => (
                             <div key={item.id} className="flex items-start gap-4">
                                 <div className="relative">
@@ -203,24 +204,26 @@ const PaymentMethodSelector: React.FC<{ method: 'cod' | 'card'; selectedMethod: 
     );
 };
 
-export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOrderComplete, onNavigateToPaymentGateway, stores }) => {
+export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOrderComplete, stores }) => {
     const [activeStep, setActiveStep] = useState(1);
     const [formData, setFormData] = useState<CustomerInfo>({
-        email: 'ahmed.nafti@example.com',
-        firstName: 'ahmed',
-        lastName: 'nafti',
-        address: '14 rue grenadier ezzahra',
+        email: '',
+        firstName: '',
+        lastName: '',
+        address: '',
         address2: '',
-        postalCode: '2034',
-        city: 'ezzahra ben arous',
+        postalCode: '',
+        city: '',
         country: 'Tunisia',
-        phone: '92702533',
+        phone: '',
     });
     const [shippingOption, setShippingOption] = useState('transporteur-tunisie');
     const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card'>('card');
     const [termsAgreed, setTermsAgreed] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false); 
+    
     const { cartItems, clearCart, cartTotal } = useCart();
-    const { addToast } = useToast(); // Utilisation du Hook Toast
+    const { addToast } = useToast(); 
     
     const isStorePickup = shippingOption.startsWith('store-');
     const SHIPPING_COST = isStorePickup ? 0 : (cartTotal >= 300 ? 0.000 : 7.000);
@@ -261,7 +264,6 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
             addToast("Le code postal est obligatoire.", "error");
             return false;
         }
-        // Validation Téléphone Tunisien (8 chiffres)
         if (!formData.phone || !/^\d{8}$/.test(formData.phone.replace(/\s/g, ''))) {
             addToast("Téléphone invalide. Il faut 8 chiffres.", "error");
             return false;
@@ -281,7 +283,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
         }
     };
 
-    const handleConfirmOrder = () => {
+    const handleConfirmOrder = async () => {
         if (!validateStep1() || !validateStep2()) return;
 
         if (!termsAgreed) {
@@ -293,12 +295,73 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
             return;
         }
 
-        if (paymentMethod === 'cod') {
-            onOrderComplete(cartItems, formData);
-            clearCart();
-        } else if (paymentMethod === 'card') {
+        setIsProcessing(true);
+
+        try {
+            // 1. Validation de stock et Création de commande
+            // Nous créons la commande en statut "En attente" pour réserver le stock
             const orderId = 'ES' + Date.now().toString().slice(-8).toUpperCase();
-            onNavigateToPaymentGateway(orderId, finalTotal, formData);
+            
+            const newOrder = {
+                id: orderId,
+                customerName: `${formData.firstName} ${formData.lastName}`,
+                date: new Date().toISOString(),
+                total: finalTotal,
+                status: 'En attente',
+                itemCount: cartItems.reduce((acc, item) => acc + item.quantity, 0),
+                items: cartItems.map(item => ({
+                    productId: parseInt(item.id.split('-')[1]),
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    imageUrl: item.imageUrl
+                })),
+                shippingAddress: {
+                    type: 'Domicile',
+                    street: formData.address,
+                    city: formData.city,
+                    postalCode: formData.postalCode,
+                    isDefault: true
+                },
+                paymentMethod: paymentMethod === 'card' ? 'Carte Bancaire (Paymee)' : 'Paiement à la livraison'
+            };
+
+            // Appel API pour créer la commande (et vérifier le stock)
+            await api.createOrder(newOrder);
+
+            // 2. Gestion du paiement
+            if (paymentMethod === 'cod') {
+                // Paiement à la livraison : Succès immédiat
+                clearCart();
+                // Utilisation de la redirection standard via App.tsx
+                window.location.href = `/?payment=success&orderId=${orderId}`;
+            } else if (paymentMethod === 'card') {
+                // Paiement Paymee
+                const response = await api.initiatePayment({
+                    orderId: orderId,
+                    amount: finalTotal,
+                    customerInfo: formData
+                });
+
+                if (response && response.payment_url) {
+                    window.location.href = response.payment_url;
+                } else {
+                    throw new Error("Impossible d'obtenir le lien de paiement.");
+                }
+            }
+
+        } catch (error: any) {
+            console.error("Erreur Checkout:", error);
+            
+            let errorMessage = "Erreur lors de la validation de la commande.";
+            if (error.message && typeof error.message === 'string') {
+                 errorMessage = error.message;
+            } else if (error.message && error.message.message) {
+                 errorMessage = error.message.message;
+            }
+            
+            addToast(errorMessage, "error");
+            setIsProcessing(false);
         }
     };
 
@@ -317,21 +380,22 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
                 }
                 .animate-fadeInDown { animation: fadeInDown 0.5s ease-out forwards; }
             `}</style>
+            
             <a 
                 href="#" 
                 onClick={(e) => { e.preventDefault(); onNavigateHome(); }} 
-                className="fixed bottom-6 left-6 bg-red-600 w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-red-700 transition-colors duration-300 z-50"
+                className="fixed bottom-24 lg:bottom-6 left-6 bg-gray-600/80 w-12 h-12 lg:w-16 lg:h-16 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-gray-700 transition-colors duration-300 z-40 backdrop-blur-sm"
                 aria-label="Retourner à la boutique"
             >
-                <HomeIcon className="w-8 h-8" />
+                <HomeIcon className="w-6 h-6 lg:w-8 lg:h-8" />
             </a>
 
-            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24">
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-32 lg:pb-24">
                 <div className="text-center mb-12">
                      <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">Finaliser ma commande</h1>
                 </div>
                 <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-12">
-                    <main className="w-full lg:w-3/5 space-y-4">
+                    <main className="w-full lg:w-3/5 space-y-4 relative">
                         <CheckoutStep 
                             stepNumber={1} 
                             title="Informations Personnelles" 
@@ -427,8 +491,8 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
                                     method="card"
                                     selectedMethod={paymentMethod}
                                     onSelect={setPaymentMethod}
-                                    title="Paiement par carte bancaire"
-                                    description="Payez par carte bancaire en toute sécurité pour vos achats en ligne."
+                                    title="Payer en ligne (Paymee)"
+                                    description="Paiement sécurisé par carte bancaire ou E-Dinar via Paymee.tn"
                                     icons={
                                         <div className="flex items-center gap-1.5">
                                             <VisaIcon className="h-6" />
@@ -450,16 +514,22 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigateHome, onOr
                                     J'ai lu les <a href="#" className="font-medium text-red-600 hover:underline">conditions générales de vente</a> et j'y adhère sans réserve.
                                 </label>
                             </div>
-                             <div className="flex justify-end pt-6">
-                                <button 
-                                    onClick={handleConfirmOrder}
-                                    disabled={!termsAgreed}
-                                    className="w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-8 rounded-lg text-base hover:bg-red-700 transition-all duration-300 shadow-lg shadow-red-500/30 flex items-center justify-center gap-3 transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none"
-                                >
-                                    <LockIcon className="w-5 h-5" />
-                                    {paymentMethod === 'card' ? `Payer ${finalTotal.toFixed(3).replace('.',',')} DT` : 'Valider ma commande'}
-                                </button>
+                             
+                             {/* Mobile Sticky Button Container - Optimized for Mobile UX */}
+                             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-900 border-t dark:border-gray-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:static lg:bg-transparent lg:border-none lg:shadow-none lg:p-0 z-50 lg:z-auto">
+                                 <div className="flex justify-end">
+                                    <button 
+                                        onClick={handleConfirmOrder}
+                                        disabled={!termsAgreed || isProcessing}
+                                        className="w-full lg:w-auto bg-red-600 text-white font-bold py-4 lg:py-3.5 px-8 rounded-lg text-base hover:bg-red-700 transition-all duration-300 shadow-lg shadow-red-500/30 flex items-center justify-center gap-3 transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none"
+                                    >
+                                        <LockIcon className="w-5 h-5" />
+                                        {isProcessing ? 'Traitement...' : (paymentMethod === 'card' ? `Payer ${finalTotal.toFixed(3).replace('.',',')} DT` : 'Valider ma commande')}
+                                    </button>
+                                </div>
                             </div>
+                            {/* Spacer for mobile to prevent content from being hidden behind sticky button */}
+                            <div className="h-24 lg:hidden"></div>
                         </CheckoutStep>
 
                     </main>

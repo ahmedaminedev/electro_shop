@@ -23,7 +23,9 @@ const apiRequest = async (endpoint: string, method: string = 'GET', body?: any, 
     let token = localStorage.getItem('token');
     
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    if (token) {
+    
+    // Check strict pour éviter d'envoyer "Bearer undefined" ou "Bearer null"
+    if (token && token !== 'undefined' && token !== 'null') {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
@@ -171,6 +173,9 @@ export const api = {
     createOrder: (order: any) => apiRequest('/orders', 'POST', order),
     getMyOrders: () => withMockFallback(() => apiRequest('/orders/myorders'), sampleOrders),
     getAllOrders: () => withMockFallback(() => apiRequest('/orders'), sampleOrders),
+
+    // Payment
+    initiatePayment: (data: { orderId: string; amount: number; customerInfo: any }) => apiRequest('/payment/create', 'POST', data),
 
     // Blog
     getBlogPosts: () => withMockFallback(() => apiRequest('/blog'), blogPosts),

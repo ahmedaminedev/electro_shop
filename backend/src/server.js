@@ -1,14 +1,14 @@
 
-const app = require('./app');
 const dotenv = require('dotenv');
+// Load env vars immediately
+dotenv.config();
+
+const app = require('./app');
 const connectDB = require('./config/db');
 const seedData = require('./utils/seeder');
 const http = require('http');
 const { Server } = require('socket.io');
 const Chat = require('./models/Chat');
-
-// Load env vars
-dotenv.config();
 
 // Connect to Database
 connectDB();

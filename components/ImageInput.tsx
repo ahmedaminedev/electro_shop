@@ -12,21 +12,67 @@ interface ImageInputProps {
 export const ImageInput: React.FC<ImageInputProps> = ({ label, value, onChange, required = false }) => {
     const [mode, setMode] = useState<'url' | 'file'>('url');
     const [dragActive, setDragActive] = useState(false);
+    const [isCompressing, setIsCompressing] = useState(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         processFile(file);
     };
 
-    const processFile = (file?: File) => {
-        if (file) {
+    // Client-side Image Compression & Resizing
+    const compressImage = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                if (typeof reader.result === 'string') {
-                    onChange(reader.result);
-                }
-            };
             reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // Resize to reasonable max width for e-commerce
+                    const scaleSize = MAX_WIDTH / img.width;
+                    const width = (scaleSize < 1) ? MAX_WIDTH : img.width;
+                    const height = (scaleSize < 1) ? img.height * scaleSize : img.height;
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+                    
+                    // Compress to JPEG with 0.7 quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    resolve(dataUrl);
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    };
+
+    const processFile = async (file?: File) => {
+        if (file) {
+            setIsCompressing(true);
+            try {
+                // If it's an image, compress it. Else read as is.
+                if (file.type.startsWith('image/')) {
+                    const compressedBase64 = await compressImage(file);
+                    onChange(compressedBase64);
+                } else {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        if (typeof reader.result === 'string') {
+                            onChange(reader.result);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } catch (error) {
+                console.error("Error processing image", error);
+                alert("Erreur lors du traitement de l'image.");
+            } finally {
+                setIsCompressing(false);
+            }
         }
     };
 
@@ -114,13 +160,24 @@ export const ImageInput: React.FC<ImageInputProps> = ({ label, value, onChange, 
                         accept="image/*"
                         onChange={handleFileChange}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        disabled={isCompressing}
                     />
                     <div className="flex flex-col items-center justify-center space-y-2">
-                        <CloudArrowUpIcon className="w-8 h-8 text-gray-400" />
+                        {isCompressing ? (
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                        ) : (
+                            <CloudArrowUpIcon className="w-8 h-8 text-gray-400" />
+                        )}
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            <span className="font-semibold text-red-600">Cliquez pour importer</span> ou glissez-déposez
+                            {isCompressing ? (
+                                <span className="font-semibold text-red-600">Optimisation en cours...</span>
+                            ) : (
+                                <>
+                                    <span className="font-semibold text-red-600">Cliquez pour importer</span> ou glissez-déposez
+                                </>
+                            )}
                         </p>
-                        <p className="text-xs text-gray-400">PNG, JPG, GIF jusqu'à 5MB</p>
+                        <p className="text-xs text-gray-400">Image optimisée automatiquement (JPEG, 800px)</p>
                     </div>
                 </div>
             )}

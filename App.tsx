@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { ThemeProvider } from './components/ThemeContext';
 import { ToastProvider, useToast } from './components/ToastContext';
-import { CartProvider } from './components/CartContext';
+import { CartProvider, useCart } from './components/CartContext';
 import { FavoritesProvider } from './components/FavoritesContext';
 import { CompareProvider } from './components/CompareContext';
 
@@ -15,34 +15,41 @@ import { SupportWidget } from './components/SupportWidget';
 import { CartSidebar } from './components/CartSidebar';
 import { ProductPreviewModal } from './components/ProductPreviewModal';
 
-// Pages
-import { HomePage } from './components/HomePage';
-import { LoginPage } from './components/LoginPage';
-import { ResetPasswordPage } from './components/ResetPasswordPage';
-import { ProfilePage } from './components/ProfilePage';
-import { ProductListPage } from './components/ProductListPage';
-import { ProductDetailPage } from './components/ProductDetailPage';
-import { PacksPage } from './components/PacksPage';
-import { PackDetailPage } from './components/PackDetailPage';
-import { PromotionsPage } from './components/PromotionsPage';
-import { BlogPage } from './components/BlogPage';
-import { BlogPostPage } from './components/BlogPostPage';
-import { ContactPage } from './components/ContactPage';
-import { CheckoutPage } from './components/CheckoutPage';
-import { PaymentGatewayPage } from './components/PaymentGatewayPage';
-import { OrderHistoryPage } from './components/OrderHistoryPage';
-import { OrderDetailPage } from './components/OrderDetailPage';
-import { StoresPage } from './components/StoresPage';
-import { ComparePage } from './components/ComparePage';
-import { FavoritesPage } from './components/FavoritesPage';
-import { AdminPage } from './components/admin/AdminPage';
-import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
-import { DataDeletionPage } from './components/DataDeletionPage';
-
 // Utils & Data
 import { api } from './utils/api';
 import type { User, Product, Category, Pack, Order, CartItem, CustomerInfo } from './types';
 import { initialAdvertisements } from './constants';
+
+// --- LAZY LOADING DES PAGES ---
+// Cela permet de ne charger le code JavaScript d'une page que lorsque l'utilisateur la visite
+const HomePage = React.lazy(() => import('./components/HomePage').then(module => ({ default: module.HomePage })));
+const LoginPage = React.lazy(() => import('./components/LoginPage').then(module => ({ default: module.LoginPage })));
+const ResetPasswordPage = React.lazy(() => import('./components/ResetPasswordPage').then(module => ({ default: module.ResetPasswordPage })));
+const ProfilePage = React.lazy(() => import('./components/ProfilePage').then(module => ({ default: module.ProfilePage })));
+const ProductListPage = React.lazy(() => import('./components/ProductListPage').then(module => ({ default: module.ProductListPage })));
+const ProductDetailPage = React.lazy(() => import('./components/ProductDetailPage').then(module => ({ default: module.ProductDetailPage })));
+const PacksPage = React.lazy(() => import('./components/PacksPage').then(module => ({ default: module.PacksPage })));
+const PackDetailPage = React.lazy(() => import('./components/PackDetailPage').then(module => ({ default: module.PackDetailPage })));
+const PromotionsPage = React.lazy(() => import('./components/PromotionsPage').then(module => ({ default: module.PromotionsPage })));
+const BlogPage = React.lazy(() => import('./components/BlogPage').then(module => ({ default: module.BlogPage })));
+const BlogPostPage = React.lazy(() => import('./components/BlogPostPage').then(module => ({ default: module.BlogPostPage })));
+const ContactPage = React.lazy(() => import('./components/ContactPage').then(module => ({ default: module.ContactPage })));
+const CheckoutPage = React.lazy(() => import('./components/CheckoutPage').then(module => ({ default: module.CheckoutPage })));
+const OrderHistoryPage = React.lazy(() => import('./components/OrderHistoryPage').then(module => ({ default: module.OrderHistoryPage })));
+const OrderDetailPage = React.lazy(() => import('./components/OrderDetailPage').then(module => ({ default: module.OrderDetailPage })));
+const StoresPage = React.lazy(() => import('./components/StoresPage').then(module => ({ default: module.StoresPage })));
+const ComparePage = React.lazy(() => import('./components/ComparePage').then(module => ({ default: module.ComparePage })));
+const FavoritesPage = React.lazy(() => import('./components/FavoritesPage').then(module => ({ default: module.FavoritesPage })));
+const AdminPage = React.lazy(() => import('./components/admin/AdminPage').then(module => ({ default: module.AdminPage })));
+const PrivacyPolicyPage = React.lazy(() => import('./components/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })));
+const DataDeletionPage = React.lazy(() => import('./components/DataDeletionPage').then(module => ({ default: module.DataDeletionPage })));
+
+// Loading Component
+const PageLoader = () => (
+    <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
+    </div>
+);
 
 const AppContent: React.FC = () => {
     // Navigation State
@@ -68,37 +75,56 @@ const AppContent: React.FC = () => {
     const [isNavCollapsed, setIsNavCollapsed] = useState(false);
     const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
     const { addToast } = useToast();
+    const { clearCart } = useCart(); 
 
-    // Check URL for OAuth Tokens or Reset Tokens or Status Messages on Mount
+    // Check URL for OAuth Tokens or Reset Tokens
     useEffect(() => {
         const checkUrlParams = async () => {
             const hash = window.location.hash;
+            const search = window.location.search; 
             
-            // Check for OAuth Token (Login Success)
+            const params = new URLSearchParams(search || hash.split('?')[1]);
+
             if (hash.includes('accessToken=')) {
-                const urlParams = new URLSearchParams(hash.split('?')[1]);
-                const token = urlParams.get('accessToken');
+                const token = params.get('accessToken');
                 if (token) {
                     localStorage.setItem('token', token);
                     window.history.replaceState(null, '', window.location.pathname);
                     await handleLoginSuccess();
                 }
             }
-            // Check for Reset Token
             else if (hash.includes('reset-password')) {
-                const urlParams = new URLSearchParams(hash.split('?')[1]);
-                const token = urlParams.get('token');
+                const token = params.get('token');
                 if (token) {
                     setResetToken(token);
                     setCurrentPage('reset-password');
                 }
             }
-            // Check for specific redirection flags from OAuth (Register Success / Error)
             else if (hash.includes('success=registered') || hash.includes('error=')) {
-                // Rediriger vers la page login qui gérera l'affichage du Toast
                 setCurrentPage('login');
             }
-            // Page Routing based on Hash
+            else if (params.get('payment') === 'success') {
+                const orderId = params.get('orderId');
+                clearCart();
+                addToast("Paiement réussi ! Votre commande est confirmée.", "success");
+                
+                if(user) {
+                    api.getMyOrders().then(setOrders);
+                }
+                
+                if (orderId) {
+                    setSelectedOrderId(orderId);
+                    setCurrentPage('order-detail');
+                } else {
+                    setCurrentPage('order-history');
+                }
+                window.history.replaceState(null, '', window.location.pathname);
+            }
+            else if (params.get('payment') === 'cancelled') {
+                addToast("Paiement annulé.", "error");
+                setCurrentPage('checkout'); 
+                window.history.replaceState(null, '', window.location.pathname);
+            }
             else if (hash.includes('privacy-policy')) {
                 setCurrentPage('privacy-policy');
             }
@@ -107,7 +133,7 @@ const AppContent: React.FC = () => {
             }
         };
         checkUrlParams();
-    }, []);
+    }, [user, clearCart, addToast]); 
 
     // Initial Data Loading
     useEffect(() => {
@@ -189,11 +215,13 @@ const AppContent: React.FC = () => {
         await api.logout();
         setUser(null);
         localStorage.removeItem('token');
-        setCurrentPage('login'); // Rediriger vers la page login
+        setCurrentPage('login'); 
         addToast("Vous avez été déconnecté avec succès.", "info");
     };
 
     const handleOrderComplete = async (cartItems: CartItem[], customerInfo: CustomerInfo, paymentId?: string) => {
+        // Cette fonction est maintenant principalement utilisée pour le paiement à la livraison
+        // Pour le paiement en ligne, la création se fait dans CheckoutPage avant la redirection
         const newOrder = {
             id: paymentId || `ES-${Date.now()}`,
             customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
@@ -223,46 +251,41 @@ const AppContent: React.FC = () => {
             setOrders(prev => [newOrder as any, ...prev]);
             setCurrentPage('order-history');
             addToast("Commande enregistrée avec succès !", "success");
-        } catch (error) {
-            addToast("Erreur lors de l'enregistrement de la commande.", "error");
+        } catch (error: any) {
+            addToast(error.message || "Erreur lors de l'enregistrement de la commande.", "error");
         }
     };
 
     const renderPage = () => {
+        // 1. Pages "Standalone" (sans layout standard)
         if (currentPage === 'admin' && user?.role === 'ADMIN') {
             return (
-                <AdminPage 
-                    onNavigateHome={navigateToHome}
-                    onLogout={handleLogout}
-                    productsData={products} setProductsData={setProducts}
-                    categoriesData={categories} setCategoriesData={setCategories}
-                    packsData={packs} setPacksData={setPacks}
-                    ordersData={orders} setOrdersData={setOrders} 
-                    messagesData={[]} setMessagesData={() => {}} 
-                    advertisementsData={advertisements} setAdvertisementsData={setAdvertisements}
-                    promotionsData={promotionsData} setPromotionsData={setPromotionsData}
-                    storesData={stores} setStoresData={setStores}
-                />
+                <Suspense fallback={<PageLoader />}>
+                    <AdminPage 
+                        onNavigateHome={navigateToHome}
+                        onLogout={handleLogout}
+                        productsData={products} setProductsData={setProducts}
+                        categoriesData={categories} setCategoriesData={setCategories}
+                        packsData={packs} setPacksData={setPacks}
+                        ordersData={orders} setOrdersData={setOrders} 
+                        messagesData={[]} setMessagesData={() => {}} 
+                        advertisementsData={advertisements} setAdvertisementsData={setAdvertisements}
+                        promotionsData={promotionsData} setPromotionsData={setPromotionsData}
+                        storesData={stores} setStoresData={setStores}
+                    />
+                </Suspense>
             );
         }
 
         if (currentPage === 'reset-password') {
             return (
-                <ResetPasswordPage 
-                    onNavigateHome={navigateToHome}
-                    token={resetToken || ''}
-                />
+                <Suspense fallback={<PageLoader />}>
+                    <ResetPasswordPage onNavigateHome={navigateToHome} token={resetToken || ''} />
+                </Suspense>
             );
         }
 
-        if (currentPage === 'privacy-policy') {
-            return <PrivacyPolicyPage onNavigateHome={navigateToHome} />;
-        }
-
-        if (currentPage === 'data-deletion') {
-            return <DataDeletionPage onNavigateHome={navigateToHome} />;
-        }
-
+        // 2. Layout Standard
         return (
             <div className="flex flex-col min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
                 <TopBar user={user} onNavigateToAdmin={navigateToAdmin} onNavigateToStores={navigateToStores} />
@@ -291,155 +314,147 @@ const AppContent: React.FC = () => {
                 />
                 
                 <main className="flex-grow">
-                    {currentPage === 'home' && (
-                        <HomePage 
-                            onNavigate={navigateToCategory}
-                            isNavCollapsed={isNavCollapsed}
-                            onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
-                            onPreview={setPreviewProduct}
-                            onNavigateToPacks={navigateToPacks}
-                            products={products}
-                            packs={packs}
-                            advertisements={advertisements}
-                            onNavigateToProductDetail={navigateToProductDetail}
-                            categories={categories}
-                            brands={[]} 
-                        />
-                    )}
-                    {currentPage === 'product-list' && (
-                        <ProductListPage 
-                            categoryName={selectedCategory}
-                            onNavigateHome={navigateToHome}
-                            onNavigateToCategory={navigateToCategory}
-                            isNavCollapsed={isNavCollapsed}
-                            onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
-                            onPreview={setPreviewProduct}
-                            onNavigateToPacks={navigateToPacks}
-                            products={products}
-                            onNavigateToProductDetail={navigateToProductDetail}
-                            categories={categories}
-                        />
-                    )}
-                    {currentPage === 'product-detail' && selectedProductId && (
-                        <ProductDetailPage 
-                            product={products.find(p => p.id === selectedProductId) || products[0]} 
-                            allProducts={products}
-                            onNavigateHome={navigateToHome}
-                            onNavigateToProductDetail={navigateToProductDetail}
-                            onPreview={setPreviewProduct}
-                        />
-                    )}
-                    {currentPage === 'packs' && (
-                        <PacksPage 
-                            onNavigateHome={navigateToHome}
-                            onNavigateToCategory={navigateToCategory}
-                            isNavCollapsed={isNavCollapsed}
-                            onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
-                            packs={packs}
-                            allProducts={products}
-                            allPacks={packs}
-                            onNavigateToPacks={navigateToPacks}
-                            onNavigateToPackDetail={navigateToPackDetail}
-                            categories={categories}
-                        />
-                    )}
-                    {currentPage === 'pack-detail' && selectedPackId && (
-                        <PackDetailPage 
-                            pack={packs.find(p => p.id === selectedPackId) || packs[0]}
-                            allProducts={products}
-                            allPacks={packs}
-                            onNavigateHome={navigateToHome}
-                            onNavigateToProductDetail={navigateToProductDetail}
-                            onNavigateToPackDetail={navigateToPackDetail}
-                            onNavigateToPacks={navigateToPacks}
-                        />
-                    )}
-                    {currentPage === 'login' && (
-                        <LoginPage 
-                            onNavigateHome={navigateToHome} 
-                            onLoginSuccess={handleLoginSuccess} 
-                        />
-                    )}
-                    {currentPage === 'profile' && user && (
-                        <ProfilePage 
-                            user={user} 
-                            onNavigateHome={navigateToHome} 
-                            onUpdateUser={(updatedUser) => setUser(updatedUser)} 
-                        />
-                    )}
-                    {currentPage === 'contact' && (
-                        <ContactPage onNavigateHome={navigateToHome} stores={stores} />
-                    )}
-                    {currentPage === 'promotions' && (
-                        <PromotionsPage 
-                            onNavigateHome={navigateToHome} 
-                            onNavigateToCategory={navigateToCategory}
-                            onPreview={setPreviewProduct}
-                            products={products}
-                            onNavigateToProductDetail={navigateToProductDetail}
-                        />
-                    )}
-                    {currentPage === 'blog' && (
-                        <BlogPage onNavigateHome={navigateToHome} onSelectPost={navigateToBlogPost} />
-                    )}
-                    {currentPage === 'blog-post' && selectedBlogPostSlug && (
-                        <BlogPostPage 
-                            slug={selectedBlogPostSlug} 
-                            onNavigateHome={navigateToHome} 
-                            onNavigateToBlog={navigateToBlog} 
-                        />
-                    )}
-                    {currentPage === 'checkout' && (
-                        <CheckoutPage 
-                            onNavigateHome={navigateToHome}
-                            onOrderComplete={handleOrderComplete}
-                            onNavigateToPaymentGateway={(orderId, total, customerInfo) => {
-                                setCurrentPage('payment');
-                            }}
-                            stores={stores}
-                        />
-                    )}
-                    {currentPage === 'payment' && (
-                        <PaymentGatewayPage 
-                            orderId={`ES-${Date.now()}`} 
-                            total={0} 
-                            customerInfo={{} as any} 
-                            onNavigateHome={navigateToHome}
-                            onOrderComplete={handleOrderComplete}
-                            onGoBack={navigateToCheckout}
-                        />
-                    )}
-                    {currentPage === 'order-history' && (
-                        <OrderHistoryPage 
-                            orders={orders}
-                            onNavigateHome={navigateToHome}
-                            onNavigateToProfile={navigateToProfile}
-                            onNavigateToOrderDetail={navigateToOrderDetail}
-                        />
-                    )}
-                    {currentPage === 'order-detail' && selectedOrderId && (
-                        <OrderDetailPage 
-                            order={orders.find(o => o.id === selectedOrderId) || orders[0]}
-                            allProducts={products}
-                            onNavigateHome={navigateToHome}
-                            onNavigateToOrderHistory={navigateToOrderHistory}
-                            onNavigateToProductDetail={navigateToProductDetail}
-                        />
-                    )}
-                    {currentPage === 'stores' && (
-                        <StoresPage onNavigateHome={navigateToHome} stores={stores} />
-                    )}
-                    {currentPage === 'compare' && (
-                        <ComparePage onNavigateHome={navigateToHome} />
-                    )}
-                    {currentPage === 'favorites' && (
-                        <FavoritesPage 
-                            onNavigateHome={navigateToHome} 
-                            onPreview={setPreviewProduct}
-                            allProducts={products}
-                            onNavigateToProductDetail={navigateToProductDetail}
-                        />
-                    )}
+                    <Suspense fallback={<PageLoader />}>
+                        {currentPage === 'home' && (
+                            <HomePage 
+                                onNavigate={navigateToCategory}
+                                isNavCollapsed={isNavCollapsed}
+                                onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
+                                onPreview={setPreviewProduct}
+                                onNavigateToPacks={navigateToPacks}
+                                products={products}
+                                packs={packs}
+                                advertisements={advertisements}
+                                onNavigateToProductDetail={navigateToProductDetail}
+                                categories={categories}
+                                brands={[]} 
+                            />
+                        )}
+                        {currentPage === 'product-list' && (
+                            <ProductListPage 
+                                categoryName={selectedCategory}
+                                onNavigateHome={navigateToHome}
+                                onNavigateToCategory={navigateToCategory}
+                                isNavCollapsed={isNavCollapsed}
+                                onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
+                                onPreview={setPreviewProduct}
+                                onNavigateToPacks={navigateToPacks}
+                                products={products}
+                                onNavigateToProductDetail={navigateToProductDetail}
+                                categories={categories}
+                            />
+                        )}
+                        {currentPage === 'product-detail' && selectedProductId && (
+                            <ProductDetailPage 
+                                product={products.find(p => p.id === selectedProductId) || products[0]} 
+                                allProducts={products}
+                                onNavigateHome={navigateToHome}
+                                onNavigateToProductDetail={navigateToProductDetail}
+                                onPreview={setPreviewProduct}
+                            />
+                        )}
+                        {currentPage === 'packs' && (
+                            <PacksPage 
+                                onNavigateHome={navigateToHome}
+                                onNavigateToCategory={navigateToCategory}
+                                isNavCollapsed={isNavCollapsed}
+                                onToggleNav={() => setIsNavCollapsed(!isNavCollapsed)}
+                                packs={packs}
+                                allProducts={products}
+                                allPacks={packs}
+                                onNavigateToPacks={navigateToPacks}
+                                onNavigateToPackDetail={navigateToPackDetail}
+                                categories={categories}
+                            />
+                        )}
+                        {currentPage === 'pack-detail' && selectedPackId && (
+                            <PackDetailPage 
+                                pack={packs.find(p => p.id === selectedPackId) || packs[0]}
+                                allProducts={products}
+                                allPacks={packs}
+                                onNavigateHome={navigateToHome}
+                                onNavigateToProductDetail={navigateToProductDetail}
+                                onNavigateToPackDetail={navigateToPackDetail}
+                                onNavigateToPacks={navigateToPacks}
+                            />
+                        )}
+                        {currentPage === 'login' && (
+                            <LoginPage 
+                                onNavigateHome={navigateToHome} 
+                                onLoginSuccess={handleLoginSuccess} 
+                            />
+                        )}
+                        {currentPage === 'profile' && user && (
+                            <ProfilePage 
+                                user={user} 
+                                onNavigateHome={navigateToHome} 
+                                onUpdateUser={(updatedUser) => setUser(updatedUser)} 
+                            />
+                        )}
+                        {currentPage === 'contact' && (
+                            <ContactPage onNavigateHome={navigateToHome} stores={stores} />
+                        )}
+                        {currentPage === 'promotions' && (
+                            <PromotionsPage 
+                                onNavigateHome={navigateToHome} 
+                                onNavigateToCategory={navigateToCategory}
+                                onPreview={setPreviewProduct}
+                                products={products}
+                                onNavigateToProductDetail={navigateToProductDetail}
+                            />
+                        )}
+                        {currentPage === 'blog' && (
+                            <BlogPage onNavigateHome={navigateToHome} onSelectPost={navigateToBlogPost} />
+                        )}
+                        {currentPage === 'blog-post' && selectedBlogPostSlug && (
+                            <BlogPostPage 
+                                slug={selectedBlogPostSlug} 
+                                onNavigateHome={navigateToHome} 
+                                onNavigateToBlog={navigateToBlog} 
+                            />
+                        )}
+                        {currentPage === 'checkout' && (
+                            <CheckoutPage 
+                                onNavigateHome={navigateToHome}
+                                onOrderComplete={handleOrderComplete}
+                                onNavigateToPaymentGateway={() => {}}
+                                stores={stores}
+                            />
+                        )}
+                        {currentPage === 'order-history' && (
+                            <OrderHistoryPage 
+                                orders={orders}
+                                onNavigateHome={navigateToHome}
+                                onNavigateToProfile={navigateToProfile}
+                                onNavigateToOrderDetail={navigateToOrderDetail}
+                            />
+                        )}
+                        {currentPage === 'order-detail' && selectedOrderId && (
+                            <OrderDetailPage 
+                                order={orders.find(o => o.id === selectedOrderId) || orders[0]}
+                                allProducts={products}
+                                onNavigateHome={navigateToHome}
+                                onNavigateToOrderHistory={navigateToOrderHistory}
+                                onNavigateToProductDetail={navigateToProductDetail}
+                            />
+                        )}
+                        {currentPage === 'stores' && (
+                            <StoresPage onNavigateHome={navigateToHome} stores={stores} />
+                        )}
+                        {currentPage === 'compare' && (
+                            <ComparePage onNavigateHome={navigateToHome} />
+                        )}
+                        {currentPage === 'favorites' && (
+                            <FavoritesPage 
+                                onNavigateHome={navigateToHome} 
+                                onPreview={setPreviewProduct}
+                                allProducts={products}
+                                onNavigateToProductDetail={navigateToProductDetail}
+                            />
+                        )}
+                        {currentPage === 'privacy-policy' && <PrivacyPolicyPage onNavigateHome={navigateToHome} />}
+                        {currentPage === 'data-deletion' && <DataDeletionPage onNavigateHome={navigateToHome} />}
+                    </Suspense>
                 </main>
 
                 <Footer 
