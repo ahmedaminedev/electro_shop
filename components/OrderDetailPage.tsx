@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import type { Order, Product, Address } from '../../types';
+import type { Order, Product, Address } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { useCart } from './CartContext';
 // FIX: Changed TruckIcon to DeliveryTruckIcon as that is the exported name.
