@@ -2,8 +2,9 @@
 const catchAsync = require('../utils/catchAsync');
 
 // --- CONFIGURATION PAYMEE ---
-// Bascule automatique : Sandbox en développement, Production si NODE_ENV='production'
-const USE_SANDBOX = process.env.NODE_ENV !== 'production';
+// Pour ce déploiement de test, on force le mode SANDBOX même si NODE_ENV est 'production'
+// Cela permet d'utiliser votre clé API de test sur le serveur Azure.
+const USE_SANDBOX = true; 
 
 // NOTE: Assurez-vous d'avoir une clé valide dans .env pour la production
 const PAYMEE_API_KEY = process.env.PAYMEE_API_KEY || "8b5dccaa6f411f856cfab0fedbe2fa2ab437f8ba";
@@ -36,18 +37,15 @@ exports.initiatePayment = catchAsync(async (req, res) => {
     // 3. URLs de redirection
     let baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
     
-    // FIX: Paymee exige HTTPS pour return_url et cancel_url, même en Sandbox.
-    // Si on est en http (localhost), on force https dans la requête envoyée à Paymee.
-    // L'utilisateur devra accepter le certificat auto-signé ou "unsafe" au retour si pas de vrai SSL.
-    if (baseUrl.startsWith("http://") && !baseUrl.includes("https://")) {
-        baseUrl = baseUrl.replace("http://", "https://");
-    }
+    // NOTE IMPORTANTE : Sur le serveur Azure sans SSL (http://IP), nous ne devons PAS forcer https://
+    // Sinon le retour de paiement échouera (Page introuvable / Connexion refusée).
+    // Paymee Sandbox accepte généralement les URLs HTTP.
     
     // On utilise des query params standards pour éviter les problèmes avec les hash (#) dans les redirections serveur
     const returnUrl = `${baseUrl}/?payment=success&orderId=${orderId}`;
     const cancelUrl = `${baseUrl}/?payment=cancelled`;
     
-    // Webhook URL (doit être valide, google.com passe la validation regex simple en dev)
+    // Webhook URL
     const webhookUrl = (process.env.NODE_ENV === 'production' && process.env.BACKEND_URL)
         ? `${process.env.BACKEND_URL}/api/payment/webhook` 
         : "https://google.com";
@@ -68,6 +66,7 @@ exports.initiatePayment = catchAsync(async (req, res) => {
     console.log(`\n--- [PAYMEE REQUEST] ---`);
     console.log(`Mode: ${USE_SANDBOX ? 'SANDBOX' : 'LIVE'}`);
     console.log("URL:", PAYMEE_URL);
+    console.log("Return URL:", returnUrl);
     
     try {
         const response = await fetch(PAYMEE_URL, {
@@ -115,6 +114,5 @@ exports.handleWebhook = catchAsync(async (req, res) => {
     const { payment_status, order_id } = req.body;
     console.log(`[WEBHOOK PAYMEE] Commande ${order_id} - Statut: ${payment_status}`);
     // TODO: Mettre à jour le statut de la commande en base de données si nécessaire
-    // ex: Order.findOneAndUpdate({ id: order_id }, { status: payment_status ? 'Payée' : 'Annulée' });
     res.status(200).send('OK');
 });

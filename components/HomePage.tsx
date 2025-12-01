@@ -57,9 +57,10 @@ export const HomePage: React.FC<HomePageProps> = ({
     }, [products]);
     
     return (
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-            <div className="flex flex-col lg:flex-row gap-8">
-                <aside className={`relative z-20 shrink-0 transition-all duration-300 ${isNavCollapsed ? 'lg:w-20' : 'lg:w-1/4 xl:w-1/5'}`}>
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-8">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                {/* Sidebar - Visible on Mobile too, controlled by isNavCollapsed inside VerticalNav */}
+                <aside className={`relative z-20 shrink-0 transition-all duration-300 w-full ${isNavCollapsed ? 'lg:w-20' : 'lg:w-1/4 xl:w-1/5'}`}>
                     <VerticalNav
                         categories={categories}
                         isCollapsed={isNavCollapsed}
@@ -68,6 +69,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                         onNavigateToPacks={onNavigateToPacks}
                     />
                 </aside>
+                
                 <main className="flex-1 min-w-0 relative z-10">
                     <HeroSection slides={advertisements.heroSlides} />
                     <TrustBadges />
