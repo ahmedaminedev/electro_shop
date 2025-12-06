@@ -111,16 +111,19 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isLoggedIn, onNavigate
                                 <div className="mt-6 mb-4">
                                     <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-3">Vous aimerez aussi</h3>
                                     <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
-                                        {suggestedProducts.map(product => (
-                                            <div key={product.id} className="flex-shrink-0 w-32 bg-white dark:bg-gray-700 rounded-lg p-2 border border-gray-200 dark:border-gray-600 flex flex-col">
-                                                <img src={product.imageUrl} alt={product.name} className="w-full h-24 object-contain mb-2" />
-                                                <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 mb-1">{product.name}</p>
-                                                <p className="text-xs font-bold text-red-600 mb-2">{product.price.toFixed(0)} DT</p>
-                                                <button onClick={() => handleAddSuggested(product)} className="mt-auto text-xs bg-gray-100 dark:bg-gray-600 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-800 dark:text-gray-200 hover:text-red-600 font-semibold py-1 px-2 rounded transition-colors">
-                                                    Ajouter
-                                                </button>
-                                            </div>
-                                        ))}
+                                        {suggestedProducts.map(product => {
+                                            const displayImage = (product.images && product.images.length > 0) ? product.images[0] : product.imageUrl;
+                                            return (
+                                                <div key={product.id} className="flex-shrink-0 w-32 bg-white dark:bg-gray-700 rounded-lg p-2 border border-gray-200 dark:border-gray-600 flex flex-col">
+                                                    <img src={displayImage} alt={product.name} className="w-full h-24 object-contain mb-2" />
+                                                    <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 mb-1">{product.name}</p>
+                                                    <p className="text-xs font-bold text-red-600 mb-2">{product.price.toFixed(0)} DT</p>
+                                                    <button onClick={() => handleAddSuggested(product)} className="mt-auto text-xs bg-gray-100 dark:bg-gray-600 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-800 dark:text-gray-200 hover:text-red-600 font-semibold py-1 px-2 rounded transition-colors">
+                                                        Ajouter
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}

@@ -19,9 +19,14 @@ exports.getProductById = catchAsync(async (req, res) => {
 exports.createProduct = catchAsync(async (req, res) => {
   const productData = req.body;
   
-  // Auto-generate numeric ID if missing (using timestamp is simple and effective for this scale)
+  // Auto-generate numeric ID if missing
   if (!productData.id) {
       productData.id = Date.now();
+  }
+
+  // Ensure imageUrl is set from the first image of the gallery if available
+  if (productData.images && productData.images.length > 0 && !productData.imageUrl) {
+      productData.imageUrl = productData.images[0];
   }
 
   const product = new Product(productData);
@@ -32,6 +37,11 @@ exports.createProduct = catchAsync(async (req, res) => {
 exports.updateProduct = catchAsync(async (req, res) => {
   const product = await Product.findOne({ id: req.params.id });
   if (product) {
+    // Logic to keep imageUrl consistent
+    if (req.body.images && req.body.images.length > 0) {
+        req.body.imageUrl = req.body.images[0];
+    }
+    
     Object.assign(product, req.body);
     const updatedProduct = await product.save();
     res.json(updatedProduct);

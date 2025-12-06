@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 
-const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "6acc0879d90d908d9e2d830adaac1fe4a7d04a74406b2cc068ffcd8f4b5f92de";
+const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "votre_secret_jwt_tres_long_et_securise_123456";
 
 exports.protect = catchAsync(async (req, res, next) => {
   let token;

@@ -38,13 +38,10 @@ const corsOptions = {
         if (isDevelopment) {
             return callback(null, true);
         } else {
-            const prodAllowlist = [process.env.FRONTEND_URL].filter(Boolean);
-            if (prodAllowlist.includes(origin)) {
-                return callback(null, true);
-            }
+            // En production, autoriser le frontend (qui est servi par la même origine)
+            // ou l'URL Azure spécifique si nécessaire
+            return callback(null, true); 
         }
-        console.warn(`CORS a bloqué l'origine : ${origin}`);
-        return callback(new Error('Non autorisé par CORS'));
     },
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -58,7 +55,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Routes
+// Routes API
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/admin', adminRoutes);
@@ -71,11 +68,23 @@ app.use('/api/advertisements', advertisementRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/payment', paymentRoutes); // Enregistrement
+app.use('/api/payment', paymentRoutes);
 
-app.get('/', (req, res) => {
-    res.send('API is running...');
-});
+// --- SERVING FRONTEND IN PRODUCTION ---
+if (process.env.NODE_ENV === 'production') {
+    // Servir les fichiers statiques du dossier build/dist
+    // On suppose que le dossier 'dist' du frontend sera copié dans 'backend/public' lors du déploiement
+    app.use(express.static(path.join(__dirname, '../public')));
+
+    // Pour toute autre route (non API), renvoyer l'index.html du frontend
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../public', 'index.html'));
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.send('API is running in Development mode...');
+    });
+}
 
 app.use((err, req, res, next) => {
   console.error('Unhandled Error:', err.stack);

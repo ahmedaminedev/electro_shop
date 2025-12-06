@@ -5,7 +5,8 @@ export interface Product {
   brand: string;
   price: number;
   oldPrice?: number;
-  imageUrl: string;
+  imageUrl: string; // Gardé pour rétrocompatibilité (sera l'image principale)
+  images: string[]; // Nouveau champ pour la galerie
   discount?: number;
   category: string;
   promo?: boolean;

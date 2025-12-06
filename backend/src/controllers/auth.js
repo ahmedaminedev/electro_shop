@@ -7,7 +7,7 @@ const sendEmail = require('../utils/sendEmail');
 const catchAsync = require('../utils/catchAsync');
 
 // Configuration
-const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "6acc0879d90d908d9e2d830adaac1fe4a7d04a74406b2cc068ffcd8f4b5f92de";
+const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "votre_secret_jwt_tres_long_et_securise_123456";
 const ACCESS_TOKEN_EXPIRE = '15m'; 
 const REFRESH_TOKEN_DAYS = 7;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';

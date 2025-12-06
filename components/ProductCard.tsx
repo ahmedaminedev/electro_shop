@@ -23,6 +23,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
     const isFav = isFavorite(product.id as number);
     const isComp = isComparing(product.id as number);
 
+    // Use first image of gallery, fallback to imageUrl
+    const displayImage = (product.images && product.images.length > 0) ? product.images[0] : product.imageUrl;
+
     const handleAddToCart = () => {
         if (isOutOfStock) return;
         addToCart(product);
@@ -47,9 +50,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg group overflow-hidden transition-all duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700">
             <div className="relative overflow-hidden">
                 <a href="#" onClick={handleProductClick} className="block">
-                    {/* Responsive Image Height: h-48 on mobile, h-56 on desktop */}
                     <img 
-                        src={product.imageUrl} 
+                        src={displayImage} 
                         alt={product.name} 
                         loading="lazy"
                         className={`w-full h-48 sm:h-56 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 ${isOutOfStock ? 'filter grayscale' : ''}`}

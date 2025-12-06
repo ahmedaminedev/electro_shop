@@ -6,6 +6,7 @@ import { useCart } from './CartContext';
 import { useFavorites } from './FavoritesContext';
 import { PlusIcon, MinusIcon, CartIcon, HeartIcon, DeliveryTruckIcon, GuaranteeIcon, SecurePaymentIcon } from './IconComponents';
 import { ProductCarousel } from './ProductCarousel';
+import { ProductGallery } from './ProductGallery';
 
 interface ProductDetailPageProps {
     product: Product;
@@ -38,40 +39,20 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, a
     const isFav = isFavorite(product.id as number);
     const isOutOfStock = product.quantity === 0;
 
+    // Backward compatibility: use array if present, else fallback to single url
+    const productImages = useMemo(() => {
+        if (product.images && product.images.length > 0) return product.images;
+        return product.imageUrl ? [product.imageUrl] : [];
+    }, [product]);
+
     const similarProducts = useMemo(() => 
         allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 10),
     [allProducts, product]);
 
-    // SEO Strategy: Dynamic Title and Meta Description
     useEffect(() => {
         document.title = `${product.name} | Electro Shop`;
-        const metaDesc = document.querySelector('meta[name="description"]');
-        if (metaDesc) {
-            metaDesc.setAttribute('content', product.description?.substring(0, 160) || `Achetez ${product.name} au meilleur prix en Tunisie chez Electro Shop.`);
-        }
+        window.scrollTo(0,0);
     }, [product]);
-
-    // SEO Strategy: JSON-LD Structured Data
-    const jsonLd = {
-        "@context": "https://schema.org/",
-        "@type": "Product",
-        "name": product.name,
-        "image": product.imageUrl,
-        "description": product.description,
-        "brand": {
-            "@type": "Brand",
-            "name": product.brand
-        },
-        "sku": product.id.toString(),
-        "offers": {
-            "@type": "Offer",
-            "url": window.location.href,
-            "priceCurrency": "TND",
-            "price": product.price,
-            "availability": isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
-            "itemCondition": "https://schema.org/NewCondition"
-        }
-    };
 
     const handleAddToCart = () => {
         if (isOutOfStock) return;
@@ -79,7 +60,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, a
         openCart();
     };
 
-    const reviews = [ // Mock reviews
+    const reviews = [
         { id: 1, author: "Karim G.", rating: 5, text: "Excellent produit, conforme à la description. Livraison rapide et service client au top. Je recommande vivement !", date: "2023-10-15" },
         { id: 2, author: "Amina B.S.", rating: 4, text: "Très bon rapport qualité-prix. L'appareil fonctionne parfaitement. Seul petit bémol, le câble d'alimentation est un peu court.", date: "2023-10-12" },
         { id: 3, author: "Mehdi T.", rating: 5, text: "Super achat ! Le design est moderne et il s'intègre parfaitement dans ma cuisine. Facile à utiliser.", date: "2023-10-10" },
@@ -87,17 +68,14 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, a
 
     return (
         <div className="bg-gray-100 dark:bg-gray-950">
-            {/* Structured Data Injection */}
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: product.category }, { name: product.name }]} />
 
                 <main className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 sm:p-8 mt-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                        {/* Left: Image Gallery */}
-                        <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-700/50 rounded-lg p-4">
-                            <img src={product.imageUrl} alt={product.name} className="max-h-[500px] object-contain" />
+                        {/* Left: Professional Gallery */}
+                        <div className="h-full">
+                            <ProductGallery images={productImages} productName={product.name} />
                         </div>
 
                         {/* Right: Product Info & Actions */}
@@ -132,16 +110,16 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, a
                             <p className="mt-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{product.description?.substring(0, 150)}...</p>
 
                             <div className="mt-8 flex items-center gap-6">
-                                <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-full">
-                                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-l-full" aria-label="Diminuer la quantité"><MinusIcon className="w-5 h-5" /></button>
+                                <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-700">
+                                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-l-full transition-colors" aria-label="Diminuer"><MinusIcon className="w-5 h-5" /></button>
                                     <span className="w-12 text-center text-lg font-bold">{quantity}</span>
-                                    <button onClick={() => setQuantity(q => q + 1)} className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-r-full" aria-label="Augmenter la quantité"><PlusIcon className="w-5 h-5" /></button>
+                                    <button onClick={() => setQuantity(q => q + 1)} className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-r-full transition-colors" aria-label="Augmenter"><PlusIcon className="w-5 h-5" /></button>
                                 </div>
-                                <button onClick={handleAddToCart} disabled={isOutOfStock} className="flex-1 bg-red-600 text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 text-lg disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                <button onClick={handleAddToCart} disabled={isOutOfStock} className="flex-1 bg-red-600 text-white font-bold py-3.5 px-6 rounded-full flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 text-lg disabled:bg-gray-400 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 shadow-lg">
                                     <CartIcon className="w-6 h-6" />
                                     <span>{isOutOfStock ? 'Épuisé' : 'Ajouter au panier'}</span>
                                 </button>
-                                <button onClick={() => toggleFavorite(product.id as number)} className={`p-3 rounded-full transition-colors ${isFav ? 'bg-red-100 text-red-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-100 hover:text-red-500'}`}>
+                                <button onClick={() => toggleFavorite(product.id as number)} className={`p-3.5 rounded-full transition-colors shadow-md ${isFav ? 'bg-red-100 text-red-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-100 hover:text-red-500'}`}>
                                     <HeartIcon className="w-6 h-6" solid={isFav} />
                                 </button>
                             </div>

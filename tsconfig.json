@@ -10,17 +10,18 @@
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
-
-    // SUPPRIME ÇA → C'EST LA CAUSE DE L'ERREUR
-    // "types": ["node"],
-
+    "types": [
+      "node"
+    ],
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true

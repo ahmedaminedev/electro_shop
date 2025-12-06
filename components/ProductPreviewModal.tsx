@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import type { Product } from '../types';
 import { XMarkIcon, CartIcon, PlusIcon, MinusIcon, HeartIcon } from './IconComponents';
@@ -44,6 +43,8 @@ export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ produc
     }
     
     const isFav = isFavorite(product.id);
+    // Use first image of gallery, fallback to imageUrl
+    const displayImage = (product.images && product.images.length > 0) ? product.images[0] : product.imageUrl;
 
     const handleIncrement = () => setQuantity(q => q + 1);
     const handleDecrement = () => setQuantity(q => (q > 1 ? q - 1 : 1));
@@ -80,7 +81,7 @@ export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ produc
                     {/* Image Gallery */}
                     <div className="flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
                         <img 
-                            src={product.imageUrl} 
+                            src={displayImage} 
                             alt={product.name} 
                             className="w-full max-w-sm max-h-96 object-contain" 
                         />
