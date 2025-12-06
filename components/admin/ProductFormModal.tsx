@@ -159,145 +159,166 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div className="relative w-full max-w-7xl bg-white dark:bg-gray-800 rounded-lg shadow-xl max-h-[95vh] flex flex-col">
-                <div className="flex justify-between items-center p-4 border-b dark:border-gray-700 flex-shrink-0">
-                    <h2 id="modal-title" className="text-xl font-bold">{product ? 'Modifier le produit' : 'Ajouter un produit'} (Étape {step}/2)</h2>
-                    <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><XMarkIcon className="w-6 h-6"/></button>
+            {/* Enlarged Modal Container to 95vw/90vh for better preview space */}
+            <div className="relative w-[95vw] h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl flex flex-col overflow-hidden">
+                
+                {/* Header */}
+                <div className="flex justify-between items-center p-4 border-b dark:border-gray-700 flex-shrink-0 bg-white dark:bg-gray-800 z-20">
+                    <h2 id="modal-title" className="text-xl font-bold text-gray-900 dark:text-white">{product ? 'Modifier le produit' : 'Ajouter un produit'} (Étape {step}/2)</h2>
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"><XMarkIcon className="w-6 h-6"/></button>
                 </div>
                 
                 <div className="flex flex-col lg:flex-row h-full overflow-hidden">
-                    {/* Left Side: Form */}
-                    <div className="w-full lg:w-5/12 overflow-y-auto border-b lg:border-b-0 lg:border-r dark:border-gray-700 p-6">
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Left Side: Form (Narrower: 33% on LG, 25% on XL) */}
+                    <div className="w-full lg:w-1/3 xl:w-1/4 overflow-y-auto border-b lg:border-b-0 lg:border-r dark:border-gray-700 p-6 bg-white dark:bg-gray-800 z-10 custom-scrollbar">
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             {step === 1 && (
                                 <>
                                     <InputField name="name" label="Nom du produit" value={formData.name} onChange={handleChange} required />
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4">
                                         <InputField name="brand" label="Marque" value={formData.brand} onChange={handleChange} required />
                                         <InputField name="category" label="Catégorie" value={formData.category} onChange={handleChange} as="select" options={uniqueCategoryNames} required />
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <InputField name="oldPrice" label="Prix Original (DT)" type="number" value={formData.oldPrice} onChange={handleChange} required />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <InputField name="oldPrice" label="Prix Original" type="number" value={formData.oldPrice} onChange={handleChange} required />
                                         <InputField name="discount" label="Remise (%)" type="number" value={formData.discount} onChange={handleChange} />
-                                        <InputField name="price" label="Prix Actuel (DT)" value={finalPrice.toFixed(3)} readOnly />
                                     </div>
-                                    <InputField name="quantity" label="Quantité en stock" type="number" value={formData.quantity} onChange={handleChange} required />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <InputField name="price" label="Prix Final" value={finalPrice.toFixed(3)} readOnly />
+                                        <InputField name="quantity" label="Stock" type="number" value={formData.quantity} onChange={handleChange} required />
+                                    </div>
                                     
                                     {/* Dimension Alert */}
-                                    <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded mb-2">
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded">
                                         <div className="flex items-start">
-                                            <InformationCircleIcon className="w-6 h-6 text-blue-500 mr-2 flex-shrink-0" />
+                                            <InformationCircleIcon className="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
                                             <div>
-                                                <p className="text-sm font-bold text-blue-700 dark:text-blue-300">Information d'affichage</p>
-                                                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                                                    Le cadre d'image sur le site est fixé à une hauteur de <strong>500px</strong> (taille réelle). 
-                                                    Vos images seront automatiquement ajustées pour remplir cet espace à 100% (largeur et hauteur) sans bordures vides.
+                                                <p className="text-xs font-bold text-blue-700 dark:text-blue-300">Cadre Fixe : 500px</p>
+                                                <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">
+                                                    L'image remplira automatiquement ce cadre.
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <ImageInput label="Galerie d'images" images={formData.images} onChange={handleImagesChange} required />
+                                    <ImageInput label="Images" images={formData.images} onChange={handleImagesChange} required />
                                     
-                                    <InputField name="description" label="Description" value={formData.description} onChange={handleChange} as="textarea" />
+                                    <InputField name="description" label="Description" value={formData.description} onChange={handleChange} as="textarea" rows={4} />
                                 </>
                             )}
                             {step === 2 && (
                                 <div>
                                     <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-lg font-semibold">Caractéristiques dynamiques</h3>
+                                        <h3 className="text-lg font-semibold">Caractéristiques</h3>
                                         <button type="button" onClick={addSpec} className="text-sm bg-green-100 text-green-700 font-semibold py-1 px-3 rounded-lg flex items-center gap-1 hover:bg-green-200">
                                             <PlusIcon className="w-4 h-4" /> Ajouter
                                         </button>
                                     </div>
-                                    <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+                                    <div className="space-y-3">
                                         {formData.specifications.map((spec, index) => (
-                                            <div key={index} className="grid grid-cols-10 gap-2 items-center">
-                                                <input type="text" placeholder="Attribut (ex: Moteur)" value={spec.name} onChange={(e) => handleSpecChange(index, 'name', e.target.value)} className="col-span-4 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500" />
-                                                <input type="text" placeholder="Valeur" value={spec.value} onChange={(e) => handleSpecChange(index, 'value', e.target.value)} className="col-span-5 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500" />
-                                                <button type="button" onClick={() => removeSpec(index)} className="col-span-1 text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 flex justify-center">
-                                                    <TrashIcon className="w-5 h-5" />
+                                            <div key={index} className="grid grid-cols-10 gap-2 items-center bg-gray-50 dark:bg-gray-700/30 p-2 rounded-md">
+                                                <input type="text" placeholder="Attribut" value={spec.name} onChange={(e) => handleSpecChange(index, 'name', e.target.value)} className="col-span-4 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-red-500" />
+                                                <input type="text" placeholder="Valeur" value={spec.value} onChange={(e) => handleSpecChange(index, 'value', e.target.value)} className="col-span-5 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-red-500" />
+                                                <button type="button" onClick={() => removeSpec(index)} className="col-span-1 text-red-500 hover:text-red-700 flex justify-center">
+                                                    <TrashIcon className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         ))}
-                                        {formData.specifications.length === 0 && <p className="text-sm text-gray-500 text-center py-4">Aucune caractéristique ajoutée.</p>}
+                                        {formData.specifications.length === 0 && <p className="text-xs text-gray-500 text-center italic">Aucune caractéristique.</p>}
                                     </div>
                                 </div>
                             )}
-                            <div className="flex justify-end pt-4 gap-3">
+                            <div className="flex justify-end pt-6 gap-3 border-t dark:border-gray-700 mt-4">
                                 {step === 1 && (
                                     <>
-                                        <button type="button" onClick={onClose} className="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Annuler</button>
-                                        <button type="button" onClick={() => setStep(2)} className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700">Suivant</button>
+                                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">Annuler</button>
+                                        <button type="button" onClick={() => setStep(2)} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Suivant</button>
                                     </>
                                 )}
                                 {step === 2 && (
                                     <>
-                                        <button type="button" onClick={() => setStep(1)} className="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Précédent</button>
-                                        <button type="submit" className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700">Sauvegarder</button>
+                                        <button type="button" onClick={() => setStep(1)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">Précédent</button>
+                                        <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Sauvegarder</button>
                                     </>
                                 )}
                             </div>
                         </form>
                     </div>
 
-                    {/* Right Side: Live Preview */}
-                    <div className="w-full lg:w-7/12 bg-gray-100 dark:bg-gray-900 p-6 overflow-y-auto">
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Aperçu en direct (Front Office)</h3>
-                            
-                            {/* Simplified Product Detail View reusing key components */}
-                            <div className="flex flex-col gap-8">
-                                {/* Gallery Preview - Uses Exact Component */}
-                                <div>
-                                    <ProductGallery 
-                                        images={formData.images.length > 0 ? formData.images : ['https://via.placeholder.com/500x500?text=Aucune+Image']} 
-                                        productName={formData.name || "Nom du produit"} 
-                                    />
+                    {/* Right Side: Live Preview (Wider: 66% on LG, 75% on XL) */}
+                    <div className="w-full lg:w-2/3 xl:w-3/4 bg-gray-100 dark:bg-gray-900 p-4 lg:p-8 overflow-y-auto custom-scrollbar">
+                        <div className="max-w-screen-2xl mx-auto h-full flex flex-col">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 lg:p-8 border border-gray-200 dark:border-gray-700 flex-grow">
+                                <div className="flex items-center justify-between mb-6 border-b pb-4 dark:border-gray-700">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Aperçu en direct (Front Office)</h3>
+                                    <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Mode Desktop</span>
                                 </div>
-
-                                {/* Info Preview */}
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 tracking-wider">{(formData.brand || "MARQUE").toUpperCase()}</p>
-                                    <h1 className="text-2xl lg:text-3xl font-extrabold text-gray-900 dark:text-white mt-1">{formData.name || "Nom du produit"}</h1>
-                                    
-                                    <div className="mt-3 flex items-center gap-2">
-                                        <div className="flex text-yellow-400">★★★★☆</div>
-                                        <span className="text-sm text-gray-500">(Avis fictifs pour aperçu)</span>
+                                
+                                {/* Using MD:grid-cols-2 to force side-by-side on typical desktop modal width */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
+                                    {/* Gallery Preview */}
+                                    <div className="w-full">
+                                        <ProductGallery 
+                                            images={formData.images} 
+                                            productName={formData.name || "Nom du produit"} 
+                                        />
                                     </div>
 
-                                    <div className="mt-6 flex items-baseline gap-3">
-                                        <p className="text-3xl font-bold text-red-600">{finalPrice.toFixed(3).replace('.',',')} DT</p>
-                                        {isPromo && (
-                                            <p className="text-xl text-gray-400 line-through">{(formData.oldPrice || 0).toFixed(3).replace('.',',')} DT</p>
-                                        )}
-                                    </div>
+                                    {/* Info Preview */}
+                                    <div className="w-full">
+                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 tracking-wider">{(formData.brand || "MARQUE").toUpperCase()}</p>
+                                        <h1 className="text-2xl lg:text-3xl font-extrabold text-gray-900 dark:text-white mt-2 leading-tight">{formData.name || "Nom du produit"}</h1>
+                                        
+                                        <div className="mt-3 flex items-center gap-2">
+                                            <div className="flex text-yellow-400 text-sm">★★★★☆</div>
+                                            <span className="text-xs text-gray-500">(3 avis)</span>
+                                        </div>
 
-                                    <div className="mt-4 flex items-center">
-                                        {formData.quantity === 0 ? (
-                                            <>
-                                                <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                                                <span className="font-semibold text-red-700 dark:text-red-400">Épuisé</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                                                <span className="font-semibold text-green-700 dark:text-green-400">En stock</span>
-                                            </>
-                                        )}
-                                    </div>
+                                        <div className="mt-6 flex items-baseline gap-3 flex-wrap">
+                                            <p className="text-4xl font-bold text-red-600">{finalPrice.toFixed(3).replace('.',',')} DT</p>
+                                            {isPromo && (
+                                                <p className="text-2xl text-gray-400 line-through font-medium">{(formData.oldPrice || 0).toFixed(3).replace('.',',')} DT</p>
+                                            )}
+                                        </div>
 
-                                    <p className="mt-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                                        {formData.description ? formData.description.substring(0, 150) + (formData.description.length > 150 ? '...' : '') : "Description du produit..."}
-                                    </p>
+                                        <div className="mt-4 flex items-center">
+                                            {formData.quantity === 0 ? (
+                                                <>
+                                                    <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                                                    <span className="font-semibold text-red-700 dark:text-red-400">Épuisé</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                                    <span className="font-semibold text-green-700 dark:text-green-400">En stock</span>
+                                                </>
+                                            )}
+                                        </div>
 
-                                    <div className="mt-8 flex items-center gap-4 opacity-70 pointer-events-none">
-                                        {/* Mock Buttons for visuals */}
-                                        <div className="flex items-center border border-gray-300 rounded-full px-4 py-2 bg-white"><span className="font-bold">1</span></div>
-                                        <button className="flex-1 bg-red-600 text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-2">
-                                            <CartIcon className="w-5 h-5" /> Ajouter
-                                        </button>
-                                        <button className="p-3 rounded-full bg-gray-100"><HeartIcon className="w-5 h-5"/></button>
+                                        <p className="mt-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                                            {formData.description ? formData.description : "Description du produit..."}
+                                        </p>
+
+                                        {/* Mock Interactive Elements */}
+                                        <div className="mt-8 pt-6 border-t dark:border-gray-700 flex items-center gap-4 opacity-75 pointer-events-none grayscale-[0.3]">
+                                            <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-700">
+                                                <button className="px-3 py-2 text-gray-500">-</button>
+                                                <span className="px-2 font-bold text-gray-800 dark:text-white">1</span>
+                                                <button className="px-3 py-2 text-gray-500">+</button>
+                                            </div>
+                                            <button className="flex-1 bg-red-600 text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-2 shadow-lg">
+                                                <CartIcon className="w-5 h-5" /> Ajouter au panier
+                                            </button>
+                                            <button className="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                                <HeartIcon className="w-6 h-6"/>
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="mt-6 grid grid-cols-3 gap-2 opacity-60 pointer-events-none">
+                                            <div className="bg-gray-50 dark:bg-gray-700/30 p-2 rounded text-center text-xs font-medium text-gray-600 dark:text-gray-400">Livraison rapide</div>
+                                            <div className="bg-gray-50 dark:bg-gray-700/30 p-2 rounded text-center text-xs font-medium text-gray-600 dark:text-gray-400">Garantie officielle</div>
+                                            <div className="bg-gray-50 dark:bg-gray-700/30 p-2 rounded text-center text-xs font-medium text-gray-600 dark:text-gray-400">Paiement sécurisé</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -312,8 +333,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
 const InputField = ({ name, label, value, onChange, type = 'text', as = 'input', options = [], required = false, readOnly = false }: any) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-        {as === 'input' && <input type={type} id={name} name={name} value={value} onChange={onChange} required={required} readOnly={readOnly} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500 read-only:bg-gray-200 dark:read-only:bg-gray-800" />}
-        {as === 'textarea' && <textarea id={name} name={name} value={value} onChange={onChange} rows={3} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500" />}
+        {as === 'input' && <input type={type} id={name} name={name} value={value} onChange={onChange} required={required} readOnly={readOnly} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500 read-only:bg-gray-200 dark:read-only:bg-gray-800 read-only:text-gray-500" />}
+        {as === 'textarea' && <textarea id={name} name={name} value={value} onChange={onChange} rows={6} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500" />}
         {as === 'select' && (
             <select id={name} name={name} value={value} onChange={onChange} required={required} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500">
                 <option value="">-- Sélectionnez --</option>
